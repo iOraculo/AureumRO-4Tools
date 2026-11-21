@@ -36,11 +36,11 @@ namespace _4RTools.Model
         public bool IncludeOtherTabsSkillKeys { get; set; } = true;
         public bool AutoRemountAfterIdle { get; set; } = false;
         public int RemountDelaySec { get; set; } = 5;
+        [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
         public List<Key> ExtraSkillKeys { get; set; } = new List<Key>();
 
         public AutoMount()
         {
-            EnsureExtraSkillSlotCount();
         }
 
         public void EnsureExtraSkillSlotCount()
