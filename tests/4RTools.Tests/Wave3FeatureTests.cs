@@ -1345,6 +1345,12 @@ namespace _4RTools.Tests
             Assert.Equal("@refresh", AutoRefreshCommand.NormalizeCommand(" @refresh \r\n"));
             Assert.Equal("/refresh", AutoRefreshCommand.NormalizeCommand("/refresh"));
 
+            // Verify Win32 SendInput INPUT struct size matches exact OS ABI (28 bytes on x86, 40 bytes on x64).
+            int expectedInputSize = IntPtr.Size == 8 ? 40 : 28;
+            Assert.Equal(expectedInputSize, System.Runtime.InteropServices.Marshal.SizeOf(typeof(Interop.INPUT)));
+            Assert.False(Interop.SendChatCommand(IntPtr.Zero, "@refresh"));
+            Assert.False(Interop.SendChatCommand((IntPtr)1, "   "));
+
             AutoRefreshCommand cmd = new AutoRefreshCommand
             {
                 Enabled = true,

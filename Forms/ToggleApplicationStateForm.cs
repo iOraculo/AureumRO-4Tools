@@ -123,16 +123,33 @@ namespace _4RTools.Forms
             }
         }
 
+        private bool chatHookSubscribed;
+
         private void RegisterChatPauseHooks()
         {
-            if (this.lastKey != Keys.Return)
+            if (!this.chatHookSubscribed)
             {
-                KeyboardHook.Add(Keys.Return, new KeyboardHook.KeyPressed(this.OnChatEnterKeyPressed));
+                // Subscribe to PhysicalKeyDown (fires once per fresh physical non-injected, non-repeat key press)
+                // so holding Enter (auto-repeat) or synthetic Enter keys can never desync the CHAT state.
+                KeyboardHook.PhysicalKeyDown += OnPhysicalKeyDownForChat;
+                this.chatHookSubscribed = true;
+            }
+        }
+
+        private void OnPhysicalKeyDownForChat(Keys key)
+        {
+            if (key == this.lastKey || AutoRefreshCommand.IsSendingCommand)
+            {
+                return;
             }
 
-            if (this.lastKey != Keys.Escape)
+            if (key == Keys.Return)
             {
-                KeyboardHook.Add(Keys.Escape, new KeyboardHook.KeyPressed(this.OnChatEscapeKeyPressed));
+                OnChatEnterKeyPressed();
+            }
+            else if (key == Keys.Escape)
+            {
+                OnChatEscapeKeyPressed();
             }
         }
 
@@ -142,7 +159,8 @@ namespace _4RTools.Forms
                 && this.cbChatPause != null
                 && this.cbChatPause.Checked
                 && !KeyboardHook.Alt
-                && !KeyboardHook.Control)
+                && !KeyboardHook.Control
+                && !AutoRefreshCommand.IsSendingCommand)
             {
                 Client client = ClientSingleton.GetClient();
                 if (client != null && client.IsGameWindowFocused())
@@ -272,6 +290,13 @@ namespace _4RTools.Forms
 
         private void btnToggleStatusHandler(object sender, EventArgs e)
         {
+            if (this.isApplicationOn && ChatPauseState.IsChatting)
+            {
+                // Clicking the orange CHAT button resumes ON immediately instead of turning 4Tools off.
+                ChatPauseState.Resume();
+                return;
+            }
+
             ToggleStatus();
         }
 
@@ -443,11 +468,14 @@ namespace _4RTools.Forms
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
+            if (this.chatHookSubscribed)
+            {
+                KeyboardHook.PhysicalKeyDown -= OnPhysicalKeyDownForChat;
+                this.chatHookSubscribed = false;
+            }
             ChatPauseState.StateChanged -= OnChatPauseStateChanged;
             ChatPauseState.Resume();
             KeyboardHook.Remove(this.lastKey);
-            KeyboardHook.Remove(Keys.Return);
-            KeyboardHook.Remove(Keys.Escape);
             if (this.soundOnPlayer != null)
             {
                 this.soundOnPlayer.Dispose();

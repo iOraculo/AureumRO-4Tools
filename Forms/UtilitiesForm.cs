@@ -510,7 +510,8 @@ namespace _4RTools.Forms
                 ? current.AutoRefreshCommand
                 : new AutoRefreshCommand();
             cmd.CommandText = AutoRefreshCommand.NormalizeCommand(this.txtRefreshCmd != null ? this.txtRefreshCmd.Text : AutoRefreshCommand.DEFAULT_COMMAND);
-            cmd.SendRefreshCommand(roClient);
+            ChatPauseState.Resume();
+            System.Threading.ThreadPool.QueueUserWorkItem(_ => cmd.SendRefreshCommand(roClient, false, true));
         }
 
         private void RefreshTooltipsAndDynamicText()

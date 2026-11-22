@@ -1109,6 +1109,12 @@ namespace _4RTools.Forms
                 return;
             }
 
+            if (ChatPauseState.IsChatting && !client.IsGameWindowFocused())
+            {
+                // Auto-clear stuck CHAT state whenever the game window loses focus (e.g. Alt+Tab or clicking 4Tools).
+                ChatPauseState.Resume();
+            }
+
             UpdateVitalsDisplay(client);
 
             if (client.HasMemorySupport)

@@ -163,13 +163,21 @@ namespace _4RTools.Model
 
         private void OnPhysicalKeyDown(Keys formsKey)
         {
-            if (!this.Enabled || ChatPauseState.IsChatting || KeyHelper.IsAltPressed())
+            if (!this.Enabled || KeyHelper.IsAltPressed())
             {
                 return;
             }
 
             Key pressedKey = KeyHelper.FromFormsKeys(formsKey);
             if (pressedKey == Key.None || pressedKey != this.Hotkey)
+            {
+                return;
+            }
+
+            // If user is chatting and bound a typing key (e.g. letter/number), do not interrupt their chat message.
+            // Non-typing function keys (F1-F24) still execute @refresh even if the chat bar is already open!
+            bool chatAlreadyOpen = ChatPauseState.IsChatting;
+            if (chatAlreadyOpen && ChatPauseState.IsTypingKey(pressedKey))
             {
                 return;
             }
@@ -187,7 +195,7 @@ namespace _4RTools.Model
             }
 
             RecordRefreshExecuted(nowMs, true);
-            ThreadPool.QueueUserWorkItem(_ => SendRefreshCommand(roClient));
+            ThreadPool.QueueUserWorkItem(_ => SendRefreshCommand(roClient, chatAlreadyOpen, false));
         }
 
         private _4RThread CreatePeriodicThread(Client client)
@@ -198,9 +206,11 @@ namespace _4RTools.Model
 
             return new _4RThread(token =>
             {
+                // Periodic @refresh requires the game window to be focused so SendInput never types into other apps.
                 if (this.Enabled
                     && this.AutoIntervalEnabled
                     && client.IsProcessAlive()
+                    && client.IsGameWindowFocused()
                     && !client.ShouldPauseAutomation()
                     && !KeyHelper.IsAltPressed()
                     && !ActionPriorityCoordinator.ShouldYield(ActionPriority.SkillAndOther))
@@ -225,7 +235,7 @@ namespace _4RTools.Model
                     if (ShouldTriggerPeriodic(nowMs, isSitting))
                     {
                         RecordRefreshExecuted(nowMs);
-                        SendRefreshCommand(client);
+                        SendRefreshCommand(client, false, false);
                     }
                 }
 
@@ -233,9 +243,14 @@ namespace _4RTools.Model
             }, ACTION_NAME);
         }
 
-        public bool SendRefreshCommand(Client client)
+        public bool SendRefreshCommand(Client client, bool chatAlreadyOpen = false, bool focusWindowIfNeeded = false)
         {
-            if (client == null || !client.IsProcessAlive() || ChatPauseState.IsChatting)
+            if (client == null || !client.IsProcessAlive())
+            {
+                return false;
+            }
+
+            if (ChatPauseState.IsChatting && !chatAlreadyOpen && !focusWindowIfNeeded)
             {
                 return false;
             }
@@ -254,7 +269,12 @@ namespace _4RTools.Model
             try
             {
                 string cmd = NormalizeCommand(this.CommandText);
-                return Interop.SendChatCommand(hWnd, cmd);
+                bool sent = Interop.SendChatCommand(hWnd, cmd, chatAlreadyOpen, focusWindowIfNeeded);
+                if (sent && ChatPauseState.IsChatting)
+                {
+                    ChatPauseState.Resume();
+                }
+                return sent;
             }
             catch (Exception ex)
             {

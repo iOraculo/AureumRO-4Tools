@@ -1,5 +1,15 @@
 # Changelogs
 
+## [v2.34.1] - 2026-11-22 — Correção do Envio de `@refresh` no Ragexe 2022 (`SendInput` Unicode) e Dessincronia do Estado `CHAT`
+### Fixed
+- **Envio real de `@refresh` no chat do Ragexe 2022 (`Utils/Interop.cs`, `Model/AutoRefreshCommand.cs`, `Forms/UtilitiesForm.cs`)**:
+  - **Causa raiz corrigida:** enviar `PostMessage(hWnd, WM_CHAR)` para a janela principal fazia a barra de chat abrir e fechar vazia no Ragexe 2022 (pois o texto vai para o campo `Edit`/IME focado).
+  - Migrado para **`SendInput(KEYEVENTF_UNICODE)`** (com struct Win32 `INPUT` exata de 28/40 bytes e fallback `WM_CHAR`), entrega direta ao campo de chat focado independente do layout ABNT2/US; botão **`Testar`** foca a janela do jogo automaticamente em background.
+  - Atalho de 1 toque em teclas de função (`F1–F24`) agora funciona **mesmo com a barra de chat já aberta** (digita `@refresh` direto e envia sem fechar a barra antes!).
+- **Fim do botão travado em `CHAT` (`Forms/ToggleApplicationStateForm.cs`, `Forms/Container.cs`)**:
+  - Detecção de `Enter`/`Esc` migrada para `KeyboardHook.PhysicalKeyDown` (ignora auto-repeat ao segurar `Enter`, teclas injetadas e `Enter` enviado pelo `@refresh`).
+  - Auto-retomada de `CHAT` para `ON` quando a janela do jogo perde foco (ex.: Alt+Tab ou clique no 4Tools) e ao clicar diretamente no botão laranja **`CHAT`**.
+
 ## [v2.34.0] - 2026-11-22 — Pausa Momentânea (Segurar Tecla / Hold-to-Pause) na aba `Spammer`
 ### Added
 - **Segurar para Pausar (*Hold-to-Pause*) dentro do card `Prioridade de Ações` na aba `Spammer` (`Forms/AHKForm.cs`, `Utils/ActionPriorityCoordinator.cs`, `Model/UserPreferences.cs`, `Model/Client.cs`, `Model/AutoEscape.cs`, `Model/AutoMount.cs`)**:
