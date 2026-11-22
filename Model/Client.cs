@@ -508,6 +508,44 @@ namespace _4RTools.Model
             return entriesRead;
         }
 
+        /// <summary>
+        /// Extracts active EFST codes from a raw status buffer while stopping after a run of
+        /// consecutive IGNORE (0xFFFFFFFF) slots. This tolerates small gaps in active buff lists
+        /// without scanning past the end of the client's status array into unrelated CSession memory
+        /// (which can contain small integers like 9 / EFST_ANGELUS).
+        /// </summary>
+        public static int ExtractActiveStatuses(uint[] statusBuffer, int count, List<uint> activeOutput)
+        {
+            if (statusBuffer == null || activeOutput == null || count <= 0)
+            {
+                return 0;
+            }
+
+            int limit = Math.Min(count, statusBuffer.Length);
+            int consecutiveIgnores = 0;
+            int added = 0;
+
+            for (int i = 0; i < limit; i++)
+            {
+                uint code = statusBuffer[i];
+                if (code == (uint)EffectStatusIDs.IGNORE || code == (uint)EffectStatusIDs.IGNORE_2)
+                {
+                    consecutiveIgnores++;
+                    if (consecutiveIgnores >= Constants.STATUS_END_CONSECUTIVE_IGNORES)
+                    {
+                        break;
+                    }
+                    continue;
+                }
+
+                consecutiveIgnores = 0;
+                activeOutput.Add(code);
+                added++;
+            }
+
+            return added;
+        }
+
         public string BuildActiveStatusReport()
         {
             if (!HasMemorySupport || !IsProcessAlive())
@@ -532,14 +570,23 @@ namespace _4RTools.Model
             sb.AppendLine(new string('-', 44));
 
             int found = 0;
+            int consecutiveIgnores = 0;
+            int stopIndex = count;
             for (int i = 0; i < count; i++)
             {
                 uint code = statusBuffer[i];
                 if (code == (uint)EffectStatusIDs.IGNORE || code == (uint)EffectStatusIDs.IGNORE_2)
                 {
+                    consecutiveIgnores++;
+                    if (consecutiveIgnores >= Constants.STATUS_END_CONSECUTIVE_IGNORES)
+                    {
+                        stopIndex = i + 1;
+                        break;
+                    }
                     continue;
                 }
 
+                consecutiveIgnores = 0;
                 string enumName = Enum.IsDefined(typeof(EffectStatusIDs), code)
                     ? ((EffectStatusIDs)code).ToString()
                     : (LocalizationManager.IsPortuguese ? "(desconhecido)" : "(unknown)");
@@ -557,6 +604,34 @@ namespace _4RTools.Model
             {
                 sb.AppendLine(new string('-', 44));
                 sb.AppendFormat(LocalizationManager.T("status_inspect.total"), found);
+                sb.AppendLine();
+            }
+
+            List<string> trailingLines = new List<string>();
+            for (int i = stopIndex; i < count; i++)
+            {
+                uint code = statusBuffer[i];
+                if (code == (uint)EffectStatusIDs.IGNORE || code == (uint)EffectStatusIDs.IGNORE_2)
+                {
+                    continue;
+                }
+
+                string enumName = Enum.IsDefined(typeof(EffectStatusIDs), code)
+                    ? ((EffectStatusIDs)code).ToString()
+                    : "-";
+                trailingLines.Add(string.Format("Slot {0:00}:  ID {1}  ({2})", i, code, enumName));
+            }
+
+            if (trailingLines.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine(LocalizationManager.IsPortuguese
+                    ? "[Ignorado — após fim do buffer de status]"
+                    : "[Ignored — past status buffer end]");
+                for (int i = 0; i < Math.Min(trailingLines.Count, 12); i++)
+                {
+                    sb.AppendLine(trailingLines[i]);
+                }
             }
 
             return sb.ToString().TrimEnd();

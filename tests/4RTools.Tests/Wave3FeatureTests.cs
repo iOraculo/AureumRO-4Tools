@@ -1024,12 +1024,39 @@ namespace _4RTools.Tests
                 Assert.True(b.IsPreRenewal);
             }
 
-            // Basilica exists in Acolyte list (for Renewal/custom icon servers) but is excluded from Pre-Renewal Mode
-            // because Pre-Renewal SC_BASILICA does not emit an EFST icon to the client status buffer.
+            // Basilica stays enabled in Pre-Renewal Mode AND has built-in anti-spam protection so it never
+            // spams/cancels itself in a loop when Pre-Renewal servers do not emit EFST_BASILICA (111).
             Buff basilica = acolyte.FirstOrDefault(x => x.effectStatusID == EffectStatusIDs.EFST_BASILICA);
             Assert.NotNull(basilica);
             Assert.NotNull(basilica.icon);
-            Assert.False(basilica.IsPreRenewal);
+            Assert.True(basilica.IsPreRenewal);
+
+            AutoBuff basilicaBuff = new AutoBuff();
+            Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 1000, false, false, 100, 100));
+            basilicaBuff.RecordBuffCast(EffectStatusIDs.EFST_BASILICA, 1000);
+            // Without an observed EFST icon, Basilica must NOT spam within 25s.
+            Assert.False(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 5000, false, false, 100, 100));
+            Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 1000 + AutoBuff.BASILICA_NO_ICON_RECAST_MS, false, false, 100, 100));
+            // Once an EFST icon is observed from the server, recast guard drops to 3s cast protection.
+            basilicaBuff.MarkStatusObserved(EffectStatusIDs.EFST_BASILICA);
+            Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 1000 + AutoBuff.BASILICA_ICON_CAST_GUARD_MS, false, false, 100, 100));
+
+            // Status buffer boundary check: ExtractActiveStatuses tolerates small gaps (< 6 IGNORE)
+            // and stops after 6 consecutive IGNORE slots so trailing memory containing 9 (ANGELUS) never blocks Angelus!
+            uint ig = (uint)EffectStatusIDs.IGNORE;
+            uint[] fakeBuffer = new uint[]
+            {
+                (uint)EffectStatusIDs.BLESSING,
+                ig,
+                (uint)EffectStatusIDs.INC_AGI,
+                ig, ig, ig, ig, ig, ig,
+                (uint)EffectStatusIDs.ANGELUS
+            };
+            List<uint> extracted = new List<uint>();
+            Client.ExtractActiveStatuses(fakeBuffer, fakeBuffer.Length, extracted);
+            Assert.Contains((uint)EffectStatusIDs.BLESSING, extracted);
+            Assert.Contains((uint)EffectStatusIDs.INC_AGI, extracted);
+            Assert.DoesNotContain((uint)EffectStatusIDs.ANGELUS, extracted);
 
             // Equivalent EFST IDs: EFST_HEALTHSTATE_ANGELUS (888) satisfies ANGELUS (9); EFST_BASILICA_BUFF (1122) satisfies EFST_BASILICA (111).
             EffectStatusIDs equivalent;

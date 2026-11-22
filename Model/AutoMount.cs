@@ -262,9 +262,11 @@ namespace _4RTools.Model
             byte[] rawBuffer = new byte[Constants.STATUS_BUFFER_BYTE_SIZE];
             uint[] statusBuffer = new uint[Constants.MAX_BUFF_LIST_INDEX_SIZE];
             int count = client.ReadBuffStatusBuffer(rawBuffer, statusBuffer);
-            for (int i = 0; i < count; i++)
+            List<uint> activeStatuses = new List<uint>(32);
+            Client.ExtractActiveStatuses(statusBuffer, count, activeStatuses);
+            for (int i = 0; i < activeStatuses.Count; i++)
             {
-                if (statusBuffer[i] == (uint)EffectStatusIDs.EFST_ALL_RIDING)
+                if (activeStatuses[i] == (uint)EffectStatusIDs.EFST_ALL_RIDING)
                 {
                     return true;
                 }
@@ -481,9 +483,11 @@ namespace _4RTools.Model
                         bool isSitting = false;
                         bool hasReuseLimit = false;
                         int count = client.ReadBuffStatusBuffer(rawBuffer, statusBuffer);
-                        for (int i = 0; i < count; i++)
+                        List<uint> activeStatuses = new List<uint>(32);
+                        Client.ExtractActiveStatuses(statusBuffer, count, activeStatuses);
+                        for (int i = 0; i < activeStatuses.Count; i++)
                         {
-                            uint st = statusBuffer[i];
+                            uint st = activeStatuses[i];
                             if (st == (uint)EffectStatusIDs.EFST_ALL_RIDING)
                             {
                                 isMounted = true;
