@@ -524,27 +524,28 @@ namespace _4RTools.Model
         /// <summary>
         /// Detects the 3-uint (12-byte) leading header present on Ragexe 2022+ (e.g. FroggoClient) when
         /// reading from the legacy +0x474 offset instead of +0x480:
-        /// [Slot 0: fixed int (e.g. 9), Slot 1: heap/code pointer (&gt;= 0x10000), Slot 2: fixed int (e.g. 1)].
-        /// Valid Ragnarok Online EFST IDs are always &lt; 65536 (except IGNORE/IGNORE_2 sentinels).
+        /// [Slot 0: fixed int (e.g. 9), Slot 1: out-of-range EFST value (&gt; 100000, e.g. 1004240168), Slot 2: fixed int (e.g. 1)].
+        /// Valid Ragnarok Online EFST IDs are always &lt;= 100000 (except IGNORE/IGNORE_2 sentinels).
         /// </summary>
-        public static int DetectLeadingHeaderSkip(uint[] statusBuffer, int count)
+        public static int DetectLeadingHeaderSkip(uint[] statusBuffer, int limit)
         {
-            if (statusBuffer == null || count < 3 || statusBuffer.Length < 3)
+            if (statusBuffer == null || limit < 4 || statusBuffer.Length < 4)
             {
                 return 0;
             }
 
             uint slot1 = statusBuffer[1];
-            bool slot1LooksLikePointer = slot1 >= 0x00010000u
+            bool slot1OutOfEfstRange = slot1 > 100000u
                 && slot1 != (uint)EffectStatusIDs.IGNORE
                 && slot1 != (uint)EffectStatusIDs.IGNORE_2;
 
-            return slot1LooksLikePointer ? 3 : 0;
+            return slot1OutOfEfstRange ? 3 : 0;
         }
 
         /// <summary>
         /// Extracts active EFST codes from a raw status buffer while skipping any Ragexe 2022+ leading
-        /// 3-slot header and stopping after a run of consecutive IGNORE (0xFFFFFFFF) slots.
+        /// 3-slot header, ignoring isolated out-of-range values (&gt; 100000), and stopping after a run
+        /// of consecutive IGNORE (0xFFFFFFFF) slots.
         /// </summary>
         public static int ExtractActiveStatuses(uint[] statusBuffer, int count, List<uint> activeOutput)
         {
@@ -572,6 +573,11 @@ namespace _4RTools.Model
                 }
 
                 consecutiveIgnores = 0;
+                if (code > 100000u)
+                {
+                    continue;
+                }
+
                 activeOutput.Add(code);
                 added++;
             }
@@ -621,6 +627,11 @@ namespace _4RTools.Model
                 }
 
                 consecutiveIgnores = 0;
+                if (code > 100000u)
+                {
+                    continue;
+                }
+
                 string enumName = Enum.IsDefined(typeof(EffectStatusIDs), code)
                     ? ((EffectStatusIDs)code).ToString()
                     : (LocalizationManager.IsPortuguese ? "(desconhecido)" : "(unknown)");

@@ -1038,20 +1038,38 @@ namespace _4RTools.Tests
             // Without an observed EFST icon, Basilica must NOT spam within 25s.
             Assert.False(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 5000, false, false, 100, 100));
             Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 1000 + AutoBuff.BASILICA_NO_ICON_RECAST_MS, false, false, 100, 100));
-            // Once an EFST icon is observed from the server, recast guard drops to 3s cast protection,
-            // and SyncActiveStatusTransitions clears Basilica's timer immediately when EFST_BASILICA expires.
+            // Once an EFST icon is observed from the server, recast guard drops to 1200ms cast protection,
+            // and SyncActiveBuffTransitions clears Basilica's timer immediately when EFST_BASILICA or EFST_BASILICA_BUFF expires.
+            Assert.Equal(1200, AutoBuff.BASILICA_ICON_CAST_GUARD_MS);
             basilicaBuff.MarkStatusObserved(EffectStatusIDs.EFST_BASILICA);
+            Assert.False(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 1000 + 1199, false, false, 100, 100));
             Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 1000 + AutoBuff.BASILICA_ICON_CAST_GUARD_MS, false, false, 100, 100));
 
             // EFST_POSTDELAY (46) must pause casting without burning cooldowns.
             Assert.Equal(46u, (uint)EffectStatusIDs.EFST_POSTDELAY);
             Assert.False(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 50000, false, false, 100, 100, false, true, true));
 
-            // Transition: Basilica active -> Basilica expired resets lastCastTimesMs immediately.
+            // Transition: Basilica active (EFST_BASILICA or EFST_BASILICA_BUFF) -> expired resets lastCastTimesMs immediately.
             basilicaBuff.RecordBuffCast(EffectStatusIDs.EFST_BASILICA, 10000);
-            basilicaBuff.SyncActiveStatusTransitions(new HashSet<EffectStatusIDs> { EffectStatusIDs.EFST_BASILICA });
-            basilicaBuff.SyncActiveStatusTransitions(new HashSet<EffectStatusIDs>());
+            basilicaBuff.SyncActiveBuffTransitions(new HashSet<EffectStatusIDs> { EffectStatusIDs.EFST_BASILICA });
+            basilicaBuff.SyncActiveBuffTransitions(new HashSet<EffectStatusIDs>());
             Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 10500, false, false, 100, 100, false, true, false));
+
+            basilicaBuff.RecordBuffCast(EffectStatusIDs.EFST_BASILICA, 20000);
+            basilicaBuff.SyncActiveBuffTransitions(new HashSet<EffectStatusIDs> { EffectStatusIDs.EFST_BASILICA_BUFF });
+            basilicaBuff.SyncActiveBuffTransitions(new HashSet<EffectStatusIDs>());
+            Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 20500, false, false, 100, 100, false, true, false));
+
+            // OrderBuffsForCast must always place EFST_BASILICA last.
+            Dictionary<EffectStatusIDs, Key> unorderedBuffs = new Dictionary<EffectStatusIDs, Key>
+            {
+                { EffectStatusIDs.EFST_BASILICA, Key.F1 },
+                { EffectStatusIDs.BLESSING, Key.F2 },
+                { EffectStatusIDs.INC_AGI, Key.F3 }
+            };
+            List<KeyValuePair<EffectStatusIDs, Key>> orderedBuffs = AutoBuff.OrderBuffsForCast(unorderedBuffs);
+            Assert.Equal(3, orderedBuffs.Count);
+            Assert.Equal(EffectStatusIDs.EFST_BASILICA, orderedBuffs[orderedBuffs.Count - 1].Key);
 
             // Ragexe 2022+ (FroggoClient) 3-slot leading header auto-skip + 0x480 offset verification!
             // Real AureumRO memory dump at +0x474: [9 (ANGELUS), 1004240168 (ptr), 1 (ENDURE), 110 (ASSUMPTIO), ...]
@@ -1069,14 +1087,42 @@ namespace _4RTools.Tests
                 ig, ig, ig, ig, ig, ig,
                 (uint)EffectStatusIDs.ANGELUS
             };
+            Assert.Equal(0, Client.DetectLeadingHeaderSkip(froggoDump, 3)); // requires limit >= 4
             Assert.Equal(3, Client.DetectLeadingHeaderSkip(froggoDump, froggoDump.Length));
             List<uint> extractedFroggo = new List<uint>();
             Client.ExtractActiveStatuses(froggoDump, froggoDump.Length, extractedFroggo);
             Assert.Equal(7, extractedFroggo.Count);
             Assert.Contains((uint)EffectStatusIDs.ASSUMPTIO, extractedFroggo);
             Assert.Contains((uint)EffectStatusIDs.BLESSING, extractedFroggo);
+            Assert.Contains((uint)EffectStatusIDs.INC_AGI, extractedFroggo);
             Assert.DoesNotContain((uint)EffectStatusIDs.ANGELUS, extractedFroggo);
             Assert.DoesNotContain((uint)EffectStatusIDs.ENDURE, extractedFroggo);
+
+            // Isolated out-of-range values (> 100000, not IGNORE/IGNORE_2) must be ignored cleanly.
+            uint[] bufferWithStrayValue = new uint[]
+            {
+                (uint)EffectStatusIDs.BLESSING,
+                500000u,
+                (uint)EffectStatusIDs.INC_AGI,
+                ig, ig, ig, ig, ig, ig
+            };
+            Assert.Equal(3, Client.DetectLeadingHeaderSkip(bufferWithStrayValue, bufferWithStrayValue.Length)); // slot 1 > 100000 triggers header skip
+            uint[] bufferWithMidStray = new uint[]
+            {
+                (uint)EffectStatusIDs.BLESSING,
+                (uint)EffectStatusIDs.INC_AGI,
+                500000u,
+                (uint)EffectStatusIDs.ASSUMPTIO,
+                ig, ig, ig, ig, ig, ig
+            };
+            Assert.Equal(0, Client.DetectLeadingHeaderSkip(bufferWithMidStray, bufferWithMidStray.Length));
+            List<uint> extractedMidStray = new List<uint>();
+            Client.ExtractActiveStatuses(bufferWithMidStray, bufferWithMidStray.Length, extractedMidStray);
+            Assert.Equal(3, extractedMidStray.Count);
+            Assert.Contains((uint)EffectStatusIDs.BLESSING, extractedMidStray);
+            Assert.Contains((uint)EffectStatusIDs.INC_AGI, extractedMidStray);
+            Assert.Contains((uint)EffectStatusIDs.ASSUMPTIO, extractedMidStray);
+            Assert.DoesNotContain(500000u, extractedMidStray);
 
             // Already-aligned +0x480 buffer must NOT skip any slots.
             uint[] alignedBuffer = new uint[]
@@ -1176,9 +1222,9 @@ namespace _4RTools.Tests
                 Assert.True(ActionPriorityCoordinator.ShouldYield(ActionPriority.SkillAndOther, 1200, false));
                 ActionPriorityCoordinator.SetYggEmergencyActive(false);
 
-                // Tier 2: Emergency actions (Yggdrasil & Panacea / Anti-debuffs) block Tier 3 & 4 for 250ms,
-                // never block each other (Tier 2), and expire cleanly.
-                ActionPriorityCoordinator.NotifyEmergencyAction(2000);
+                // Tier 2: Anti-debuff / Panacea actions (NotifyAntiDebuffAction) share Tier 2 with Yggdrasil:
+                // they block Tier 3 & 4 for 250ms, never block Tier 2, and expire cleanly.
+                ActionPriorityCoordinator.NotifyAntiDebuffAction(2000);
                 Assert.False(ActionPriorityCoordinator.ShouldYield(ActionPriority.Yggdrasil, 2100));
                 Assert.True(ActionPriorityCoordinator.ShouldYield(ActionPriority.Potion, 2100));
                 Assert.True(ActionPriorityCoordinator.ShouldYield(ActionPriority.SkillAndOther, 2100));
@@ -1267,7 +1313,14 @@ namespace _4RTools.Tests
                 Assert.Equal("A", mountForm.Controls.Find("txtExtraSkill1", true)[0].Text);
                 Assert.Empty(mountForm.Controls.Find("numPlayerYield", true));
                 Assert.Single(ahkForm.Controls.Find("numPlayerYield", true));
-                Assert.Single(ahkForm.Controls.Find("lblPriorityOrder", true));
+                System.Windows.Forms.Control lblPriority = Assert.Single(ahkForm.Controls.Find("lblPriorityOrder", true));
+                Assert.Equal(new System.Drawing.Point(10, 93), lblPriority.Location);
+                Assert.Equal(new System.Drawing.Size(538, 20), lblPriority.Size);
+                Assert.Equal(7.75F, lblPriority.Font.Size);
+                Assert.Equal("1º Input do Jogador → 2º Fruto de Yggdrasil / Panaceia → 3º Consumíveis → 4º Auto-skills", lblPriority.Text);
+                LocalizationManager.SetLanguage(LocalizationManager.LANG_EN_US);
+                Assert.Equal("1st Player Input → 2nd Yggdrasil Berry / Panacea → 3rd Consumables → 4th Auto-skills", LocalizationManager.T("mount.priority_order"));
+                LocalizationManager.SetLanguage(LocalizationManager.LANG_PT_BR);
                 Assert.Equal(150, ActionPriorityCoordinator.PlayerInputYieldMs);
             }
 

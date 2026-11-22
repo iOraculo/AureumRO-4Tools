@@ -1,5 +1,16 @@
 # Changelogs
 
+## [v2.31.1] - 2026-11-22 — Refinamentos de Detecção de Buffer (>100000), Legenda de Prioridade e Basílica por Último
+### Fixed & Changed
+- **Refinamento da detecção de cabeçalho e filtragem de lixo no buffer de status (`Model/Client.cs`)**:
+  - `DetectLeadingHeaderSkip(uint[] statusBuffer, int limit)` agora exige `limit >= 4` e `statusBuffer[1] > 100000` (exceto `IGNORE`/`IGNORE_2`), e valores isolados `> 100000` são ignorados automaticamente em `ExtractActiveStatuses` e `BuildActiveStatusReport`.
+- **Nível 2 (Fruto de Yggdrasil / Panaceia) e ajuste visual da legenda (`Utils/ActionPriorityCoordinator.cs`, `Model/StatusEffectRecoveryBase.cs`, `Utils/LocalizationManager.cs`, `Forms/GuideForm.cs`, `Forms/AHKForm.cs`)**:
+  - Adicionado `ActionPriorityCoordinator.NotifyAntiDebuffAction()` chamado em `StatusEffectRecoveryBase.SendRecoveryKey`.
+  - Atualizada a legenda de prioridade para: `1º Input do Jogador → 2º Fruto de Yggdrasil / Panaceia → 3º Consumíveis → 4º Auto-skills` (e equivalente em EN-US), com fonte `Segoe UI 7.75F Bold` e `lblPriorityOrder` em `(10, 93)` / `(538, 20)` cabendo em 1 linha.
+- **Basílica sempre conjurada por último e guarda reduzida para `1200ms` (`Model/Autobuff.cs`)**:
+  - `Auto-skill` agora ordena `EFST_BASILICA` sempre por último via `OrderBuffsForCast` e adia sua conjuração se qualquer outro buff foi conjurado no mesmo ciclo.
+  - Adicionado `SyncActiveBuffTransitions` (limpando imediatamente `lastCastTimesMs[EFST_BASILICA]` quando `EFST_BASILICA` / `EFST_BASILICA_BUFF` deixa de estar ativo) e ajustado `BASILICA_ICON_CAST_GUARD_MS = 1200`.
+
 ## [v2.31.0] - 2026-11-21 — Correção Definitiva do Offset de Status (+0x480 Ragexe 2022), Pós-Conjuração (EFST_POSTDELAY) e Basílica/Angelus/Vigor
 ### Fixed
 - **Offset real do buffer de status no Ragexe 2022 / FroggoClient (`supported_servers.json`, `assets/etc/supported_servers.txt`, `Model/Client.cs`)**:

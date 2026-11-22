@@ -88,6 +88,11 @@ namespace _4RTools.Utils
             Interlocked.Exchange(ref lastYggActionMs, timestamp);
         }
 
+        public static void NotifyAntiDebuffAction(long? nowMs = null)
+        {
+            NotifyYggAction(nowMs);
+        }
+
         public static void NotifyEmergencyAction(long? nowMs = null)
         {
             NotifyYggAction(nowMs);

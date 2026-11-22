@@ -142,7 +142,7 @@ namespace _4RTools.Model
                 Keys formsKey = KeyHelper.ToFormsKeys(key);
                 if (formsKey != Keys.None)
                 {
-                    ActionPriorityCoordinator.NotifyEmergencyAction();
+                    ActionPriorityCoordinator.NotifyAntiDebuffAction();
                     Interop.SendKeyPress(hWnd, formsKey);
                 }
             }
