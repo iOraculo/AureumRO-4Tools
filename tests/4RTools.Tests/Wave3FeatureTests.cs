@@ -1132,8 +1132,9 @@ namespace _4RTools.Tests
                 Assert.True(ActionPriorityCoordinator.ShouldYield(ActionPriority.SkillAndOther, 1200, false));
                 ActionPriorityCoordinator.SetYggEmergencyActive(false);
 
-                // Tier 2: Recent Yggdrasil cast blocks Tier 3 & 4 for 250ms, then expires.
-                ActionPriorityCoordinator.NotifyYggAction(2000);
+                // Tier 2: Emergency actions (Yggdrasil & Panacea / Anti-debuffs) block Tier 3 & 4 for 250ms,
+                // never block each other (Tier 2), and expire cleanly.
+                ActionPriorityCoordinator.NotifyEmergencyAction(2000);
                 Assert.False(ActionPriorityCoordinator.ShouldYield(ActionPriority.Yggdrasil, 2100));
                 Assert.True(ActionPriorityCoordinator.ShouldYield(ActionPriority.Potion, 2100));
                 Assert.True(ActionPriorityCoordinator.ShouldYield(ActionPriority.SkillAndOther, 2100));

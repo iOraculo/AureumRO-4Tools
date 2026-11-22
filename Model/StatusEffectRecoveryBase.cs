@@ -140,7 +140,11 @@ namespace _4RTools.Model
             if (hWnd != IntPtr.Zero)
             {
                 Keys formsKey = KeyHelper.ToFormsKeys(key);
-                Interop.SendKeyPress(hWnd, formsKey);
+                if (formsKey != Keys.None)
+                {
+                    ActionPriorityCoordinator.NotifyEmergencyAction();
+                    Interop.SendKeyPress(hWnd, formsKey);
+                }
             }
         }
 
@@ -152,8 +156,9 @@ namespace _4RTools.Model
 
             return new _4RThread(token =>
             {
+                // Anti-debuffs / Panacea shares Tier 2 priority with Yggdrasil (yields only to Tier 1 player input).
                 if (client.HasMemorySupport && client.IsProcessAlive() && !client.ShouldPauseAutomation()
-                    && !ActionPriorityCoordinator.ShouldYield(ActionPriority.SkillAndOther))
+                    && !ActionPriorityCoordinator.ShouldYield(ActionPriority.Yggdrasil))
                 {
                     Dictionary<EffectStatusIDs, Key> snapshot = GetBuffMappingSnapshot();
                     int count = client.ReadBuffStatusBuffer(rawBuffer, statusBuffer);
@@ -162,7 +167,7 @@ namespace _4RTools.Model
 
                     for (int i = 0; i < activeStatuses.Count; i++)
                     {
-                        if (token.IsCancellationRequested || ActionPriorityCoordinator.ShouldYield(ActionPriority.SkillAndOther))
+                        if (token.IsCancellationRequested || ActionPriorityCoordinator.ShouldYield(ActionPriority.Yggdrasil))
                         {
                             break;
                         }

@@ -1,5 +1,10 @@
 # Changelogs
 
+## [v2.30.1] - 2026-11-21 — Panaceia / Anti-debuffs elevada ao Nível 2 junto com Yggdrasil
+### Changed
+- **Prioridade Nível 2 compartilhada entre Yggdrasil e Anti-debuffs / Panaceia (`Model/StatusEffectRecoveryBase.cs`, `Utils/ActionPriorityCoordinator.cs`, `Utils/LocalizationManager.cs`, `Forms/GuideForm.cs`)**:
+  - Panaceia e demais curas de **Anti-debuffs** agora operam no **Nível 2** junto com o **Fruto/Semente de Yggdrasil** — cedem passagem apenas para o **1º Input do jogador** e têm prioridade imediata sobre **3º Poções comuns** e **4º Skills e demais**.
+
 ## [v2.30.0] - 2026-11-21 — Correção Definitiva de Basílica (Anti-Spam), Leitura de Buffer para Angelus e Melhorias em Anti-Debuffs
 ### Fixed
 - **Basílica de volta ao `Auto-skill` (Modo Pré-Renewal) com proteção anti-spam inteligente (`Model/Buff.cs`, `Model/Autobuff.cs`)**:
