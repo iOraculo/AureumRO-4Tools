@@ -1,5 +1,11 @@
 # Changelogs
 
+## [v2.29.2] - 2026-11-21 — Prioridade de Ações movida para a aba Spammer
+### Changed
+- **Prioridade de Ações alocada na aba `Spammer` (`Forms/AHKForm.cs`, `Forms/MountForm.cs`, `Utils/LocalizationManager.cs`, `Forms/GuideForm.cs`)**:
+  - Movido o ajuste de **Prioridade Jogador (ms)** e a legenda visual da hierarquia (**`1º Jogador → 2º Yggdrasil → 3º Poções → 4º Skills e demais`**) para o painel `Configuração do Spammer` na aba **`Spammer`**, lado a lado com `Config. Tecla` e `Atraso (Delay)`.
+  - A aba **`Montaria`** ficou limpa e dedicada exclusivamente aos controles de montaria (Rédea) e teclas de habilidade.
+
 ## [v2.29.1] - 2026-11-21 — Correções em Angelus, Basílica, Cegueira e Inspetor de Status (EFST IDs)
 ### Fixed & Added
 - **Angelus (`Model/Autobuff.cs`, `Utils/EffectStatusIDs.cs`)**: adicionado suporte ao alias `EFST_HEALTHSTATE_ANGELUS (888)` junto ao `EFST_ANGELUS (9)`, envio completo `WM_KEYDOWN + WM_KEYUP` (`SendKeyPress`) no `Auto-skill` e espaçamento de `50ms` entre buffs consecutivos para evitar colisão de teclas.

@@ -1185,13 +1185,17 @@ namespace _4RTools.Tests
             Assert.False(reloaded.AutoMount.IsTrackedSkillKey(Key.F1, prof));
             Assert.False(reloaded.AutoMount.IsTrackedSkillKey(Key.F2, prof));
 
-            // MountForm loads profile values and syncs ActionPriorityCoordinator.
+            // MountForm loads mount keys cleanly (priority controls live in AHKForm / Spammer).
             Subject subject = new Subject();
-            using (MountForm form = new MountForm(subject))
+            using (MountForm mountForm = new MountForm(subject))
+            using (AHKForm ahkForm = new AHKForm(subject))
             {
                 subject.Notify(new _4RTools.Utils.Message(MessageCode.PROFILE_CHANGED, null));
-                Assert.Equal("F9", form.Controls.Find("txtMountKey", true)[0].Text);
-                Assert.Equal("A", form.Controls.Find("txtExtraSkill1", true)[0].Text);
+                Assert.Equal("F9", mountForm.Controls.Find("txtMountKey", true)[0].Text);
+                Assert.Equal("A", mountForm.Controls.Find("txtExtraSkill1", true)[0].Text);
+                Assert.Empty(mountForm.Controls.Find("numPlayerYield", true));
+                Assert.Single(ahkForm.Controls.Find("numPlayerYield", true));
+                Assert.Single(ahkForm.Controls.Find("lblPriorityOrder", true));
                 Assert.Equal(150, ActionPriorityCoordinator.PlayerInputYieldMs);
             }
 
