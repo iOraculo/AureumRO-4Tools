@@ -14,6 +14,7 @@ namespace _4RTools.Forms
         private Button btnClearAllKeys;
         private ToolTip helpToolTip;
         private GroupBox gbPlayerPriority;
+        private Label lblPlayerYieldTitle;
         private NumericUpDown numPlayerYield;
         private Label lblPlayerYieldMs;
         private Label lblPriorityOrder;
@@ -33,40 +34,62 @@ namespace _4RTools.Forms
 
         private void InitializePriorityControls()
         {
-            // Expand AHK Configuration card neatly to host Key Config, Spammer Delay, and Player Priority side-by-side.
-            this.groupAhkConfig.Location = new Point(14, 152);
-            this.groupAhkConfig.Size = new Size(556, 122);
+            // Align Example card and Clear button flush with the bottom cards' right edge (x = 570).
+            this.groupBox3.Location = new Point(426, 10);
+            this.groupBox3.Size = new Size(144, 100);
+            if (this.btnClearAllKeys != null)
+            {
+                this.btnClearAllKeys.Location = new Point(426, 115);
+                this.btnClearAllKeys.Size = new Size(144, 26);
+            }
 
-            this.ahkCompatibility.Location = new Point(14, 28);
-            this.ahkSpeedBoost.Location = new Point(14, 54);
+            // Compact Spammer Configuration card so Action Priority sits in its own unified card right below.
+            this.groupAhkConfig.Location = new Point(14, 146);
+            this.groupAhkConfig.Size = new Size(556, 63);
 
-            this.groupBox4.Location = new Point(146, 18);
-            this.groupBox4.Size = new Size(128, 68);
-            this.chkMouseFlick.Location = new Point(156, 36);
-            this.pbUpAndDownArrow.Location = new Point(244, 36);
-            this.chkNoShift.Location = new Point(156, 60);
-            this.pictureBox1.Location = new Point(226, 59);
+            this.ahkCompatibility.Location = new Point(14, 19);
+            this.ahkSpeedBoost.Location = new Point(14, 39);
 
-            this.groupBox2.Location = new Point(284, 18);
-            this.groupBox2.Size = new Size(112, 68);
+            this.groupBox4.Location = new Point(142, 12);
+            this.groupBox4.Size = new Size(242, 44);
+            this.chkMouseFlick.Location = new Point(152, 28);
+            this.pbUpAndDownArrow.Location = new Point(238, 28);
+            this.chkNoShift.Location = new Point(268, 28);
+            this.pictureBox1.Location = new Point(344, 26);
 
+            this.groupBox2.Location = new Point(394, 12);
+            this.groupBox2.Size = new Size(150, 44);
+            this.txtSpammerDelay.Location = new Point(14, 16);
+            this.txtSpammerDelay.Size = new Size(64, 23);
+            this.label1.Location = new Point(82, 19);
+
+            // Unified Action Priority card: groups player-input pause control and priority hierarchy tightly together.
             this.gbPlayerPriority = new GroupBox
             {
-                Location = new Point(406, 18),
+                Location = new Point(14, 213),
                 Name = "gbPlayerPriority",
-                Size = new Size(138, 68),
+                Size = new Size(556, 62),
                 TabStop = false,
-                Text = "Player Priority"
+                Text = "Action Priority"
             };
+
+            this.lblPlayerYieldTitle = new Label
+            {
+                AutoSize = true,
+                Location = new Point(12, 19),
+                Name = "lblPlayerYieldTitle",
+                Text = "Player input pause:"
+            };
+            this.lblPlayerYieldTitle.SizeChanged += (s, e) => AlignPriorityControls();
 
             this.numPlayerYield = new NumericUpDown
             {
                 Increment = 10,
-                Location = new Point(14, 28),
+                Location = new Point(162, 16),
                 Maximum = ActionPriorityCoordinator.MAX_PLAYER_INPUT_YIELD_MS,
                 Minimum = ActionPriorityCoordinator.MIN_PLAYER_INPUT_YIELD_MS,
                 Name = "numPlayerYield",
-                Size = new Size(66, 20),
+                Size = new Size(58, 20),
                 Value = ActionPriorityCoordinator.DEFAULT_PLAYER_INPUT_YIELD_MS,
                 Tag = FormUtils.SKIP_RESET_TAG
             };
@@ -75,28 +98,41 @@ namespace _4RTools.Forms
             this.lblPlayerYieldMs = new Label
             {
                 AutoSize = true,
-                Font = new Font("Microsoft Sans Serif", 10F),
-                Location = new Point(84, 30),
+                Location = new Point(224, 19),
                 Name = "lblPlayerYieldMs",
                 Text = "ms"
             };
-
-            this.gbPlayerPriority.Controls.Add(this.numPlayerYield);
-            this.gbPlayerPriority.Controls.Add(this.lblPlayerYieldMs);
 
             this.lblPriorityOrder = new Label
             {
                 AutoSize = false,
                 Font = this.priorityOrderFont,
-                Location = new Point(10, 93),
+                Location = new Point(12, 38),
                 Name = "lblPriorityOrder",
-                Size = new Size(538, 20),
+                Size = new Size(534, 19),
                 Tag = ThemeManager.TAG_ACCENT_TEXT,
                 TextAlign = ContentAlignment.MiddleLeft
             };
 
-            this.groupAhkConfig.Controls.Add(this.gbPlayerPriority);
-            this.groupAhkConfig.Controls.Add(this.lblPriorityOrder);
+            this.gbPlayerPriority.Controls.Add(this.lblPlayerYieldTitle);
+            this.gbPlayerPriority.Controls.Add(this.numPlayerYield);
+            this.gbPlayerPriority.Controls.Add(this.lblPlayerYieldMs);
+            this.gbPlayerPriority.Controls.Add(this.lblPriorityOrder);
+
+            this.Controls.Add(this.gbPlayerPriority);
+            AlignPriorityControls();
+        }
+
+        private void AlignPriorityControls()
+        {
+            if (this.lblPlayerYieldTitle == null || this.numPlayerYield == null || this.lblPlayerYieldMs == null)
+            {
+                return;
+            }
+
+            int titleRight = this.lblPlayerYieldTitle.Left + Math.Max(this.lblPlayerYieldTitle.Width, this.lblPlayerYieldTitle.PreferredWidth);
+            this.numPlayerYield.Location = new Point(titleRight + 6, 16);
+            this.lblPlayerYieldMs.Location = new Point(this.numPlayerYield.Right + 4, 19);
         }
 
         private void OnPlayerYieldChanged(object sender, EventArgs e)
@@ -123,6 +159,7 @@ namespace _4RTools.Forms
             {
                 this.lblPriorityOrder.Text = LocalizationManager.T("mount.priority_order");
             }
+            AlignPriorityControls();
 
             if (this.helpToolTip == null)
             {
@@ -152,6 +189,10 @@ namespace _4RTools.Forms
             {
                 string yieldTip = LocalizationManager.T("tooltip.priority_player_yield");
                 this.helpToolTip.SetToolTip(this.gbPlayerPriority, yieldTip);
+                if (this.lblPlayerYieldTitle != null)
+                {
+                    this.helpToolTip.SetToolTip(this.lblPlayerYieldTitle, yieldTip);
+                }
                 this.helpToolTip.SetToolTip(this.numPlayerYield, yieldTip);
                 this.helpToolTip.SetToolTip(this.lblPlayerYieldMs, yieldTip);
             }

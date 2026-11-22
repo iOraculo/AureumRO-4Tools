@@ -1312,10 +1312,15 @@ namespace _4RTools.Tests
                 Assert.Equal("F9", mountForm.Controls.Find("txtMountKey", true)[0].Text);
                 Assert.Equal("A", mountForm.Controls.Find("txtExtraSkill1", true)[0].Text);
                 Assert.Empty(mountForm.Controls.Find("numPlayerYield", true));
-                Assert.Single(ahkForm.Controls.Find("numPlayerYield", true));
+                System.Windows.Forms.Control gbPriority = Assert.Single(ahkForm.Controls.Find("gbPlayerPriority", true));
+                System.Windows.Forms.Control numYield = Assert.Single(ahkForm.Controls.Find("numPlayerYield", true));
+                System.Windows.Forms.Control lblYieldTitle = Assert.Single(ahkForm.Controls.Find("lblPlayerYieldTitle", true));
                 System.Windows.Forms.Control lblPriority = Assert.Single(ahkForm.Controls.Find("lblPriorityOrder", true));
-                Assert.Equal(new System.Drawing.Point(10, 93), lblPriority.Location);
-                Assert.Equal(new System.Drawing.Size(538, 20), lblPriority.Size);
+                Assert.Same(gbPriority, numYield.Parent);
+                Assert.Same(gbPriority, lblYieldTitle.Parent);
+                Assert.Same(gbPriority, lblPriority.Parent);
+                Assert.Equal(new System.Drawing.Point(12, 38), lblPriority.Location);
+                Assert.Equal(new System.Drawing.Size(534, 19), lblPriority.Size);
                 Assert.Equal(7.75F, lblPriority.Font.Size);
                 Assert.Equal("1º Input do Jogador → 2º Fruto de Yggdrasil / Panaceia → 3º Consumíveis → 4º Auto-skills", lblPriority.Text);
                 LocalizationManager.SetLanguage(LocalizationManager.LANG_EN_US);

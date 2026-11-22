@@ -1,5 +1,10 @@
 # Changelogs
 
+## [v2.31.2] - 2026-11-22 — Layout Unificado de Prioridade de Ações na aba Spammer
+### Changed
+- **Cartão dedicado e compacto de `Prioridade de Ações` na aba `Spammer` (`Forms/AHKForm.cs`, `Utils/LocalizationManager.cs`, `Forms/GuideForm.cs`)**:
+  - `Configuração do Spammer` compactada (`Compatibilidade/Velocidade Máx.`, `Config. Tecla` lado a lado e `Atraso (Delay)`), com o quadro **`Prioridade de Ações`** logo abaixo agrupando juntos **`Pausa p/ input do jogador: [120] ms`** e a linha de hierarquia **`1º Input do Jogador → 2º Fruto de Yggdrasil / Panaceia → 3º Consumíveis → 4º Auto-skills`** sem espaçamento excessivo entre os elementos.
+
 ## [v2.31.1] - 2026-11-22 — Refinamentos de Detecção de Buffer (>100000), Legenda de Prioridade e Basílica por Último
 ### Fixed & Changed
 - **Refinamento da detecção de cabeçalho e filtragem de lixo no buffer de status (`Model/Client.cs`)**:

@@ -195,6 +195,7 @@ namespace _4RTools.Utils
             { "Extra skill keys:", "Teclas extras:" },
             { "Action Priority", "Prioridade de Ações" },
             { "Player Priority", "Prioridade Jogador" },
+            { "Player input pause:", "Pausa p/ input do jogador:" },
             { "Pause 4RTools on player key (ms):", "Pausa ao input do jogador (ms):" },
 
             // ProfileForm & EditProfileName
