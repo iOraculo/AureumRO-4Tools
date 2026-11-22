@@ -329,6 +329,7 @@
     <Compile Include="Model\Autopot.cs" />
     <Compile Include="Model\Autobuff.cs" />
     <Compile Include="Model\AutoMount.cs" />
+    <Compile Include="Model\AutoRefreshCommand.cs" />
     <Compile Include="Model\AutoRefreshSpammer.cs" />
     <Compile Include="Model\Buff.cs" />
     <Compile Include="Model\BuffContainer.cs" />

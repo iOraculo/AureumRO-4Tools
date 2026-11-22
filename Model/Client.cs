@@ -412,7 +412,7 @@ namespace _4RTools.Model
 
         public bool ShouldPauseAutomation()
         {
-            return ShouldPauseForFocus() || ChatPauseState.IsChatting || ShouldPauseForTown();
+            return ShouldPauseForFocus() || ChatPauseState.IsChatting || AutoRefreshCommand.IsSendingCommand || ShouldPauseForTown();
         }
 
         public bool ShouldPauseAutopotKey(System.Windows.Input.Key key)
@@ -422,7 +422,7 @@ namespace _4RTools.Model
                 return true;
             }
 
-            if (ChatPauseState.IsChatting && ChatPauseState.IsTypingKey(key))
+            if ((ChatPauseState.IsChatting || AutoRefreshCommand.IsSendingCommand) && ChatPauseState.IsTypingKey(key))
             {
                 return true;
             }

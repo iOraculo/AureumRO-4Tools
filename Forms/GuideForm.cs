@@ -268,16 +268,16 @@ namespace _4RTools.Forms
                 new GuideSectionData
                 {
                     Key = "timers",
-                    TitlePt = "7. Temporizadores",
+                    TitlePt = "7. Temporizadores e Anti-Bug Position (@refresh)",
                     BodyPt =
-                        "• Pressiona uma tecla automaticamente em intervalos fixos de tempo (em segundos), independente de ícone de status.\n" +
-                        "• Ideal para habilidades sem ícone na tela, armadilhas, itens sem status visível ou ações periódicas.\n" +
-                        "• Começa limpo com o Timer 1; clique em '+ Adicionar timer' para expandir até 6 timers independentes.",
-                    TitleEn = "7. Skill Timers",
+                        "• Anti-Bug Position (@refresh): envie @refresh direto no chat (Enter → @refresh → Enter) sem precisar digitar! Configure um Atalho de 1 toque para corrigir position bug na hora durante WoE/PvP/MVP e/ou ative o modo 'Auto a cada X seg' para ressincronizar periodicamente (pausa automaticamente no chat, em cidade e sentado).\n" +
+                        "• Temporizadores de Skill (1 a 6): pressiona uma tecla automaticamente em intervalos fixos de tempo (em segundos), independente de ícone de status.\n" +
+                        "• Ideal para habilidades sem ícone na tela, armadilhas, itens sem status visível ou ações periódicas.",
+                    TitleEn = "7. Skill Timers and Anti-Position Bug (@refresh)",
                     BodyEn =
-                        "• Presses a hotkey automatically on a fixed second interval, regardless of status icons.\n" +
-                        "• Ideal for skills without a status icon, traps, or periodic utility actions.\n" +
-                        "• Starts cleanly with Timer 1; click '+ Add Timer' to expand up to 6 independent timers."
+                        "• Anti-Position Bug (@refresh): sends @refresh directly in chat (Enter → @refresh → Enter) without typing! Bind a 1-tap Hotkey to fix position desync instantly during WoE/PvP/MVP and/or enable 'Auto every X sec' for periodic resync (automatically pauses while chatting, in town, or sitting).\n" +
+                        "• Skill Timers (1 to 6): presses a hotkey automatically on a fixed second interval, regardless of status icons.\n" +
+                        "• Ideal for skills without a status icon, traps, or periodic utility actions."
                 },
                 new GuideSectionData
                 {

@@ -144,6 +144,11 @@ namespace _4RTools.Utils
                 AddUsage(usagesByKey, profile.AutoMount.MountKey, LocalizationManager.T("usage.mount_key"));
             }
 
+            if (profile.AutoRefreshCommand != null && profile.AutoRefreshCommand.Enabled)
+            {
+                AddUsage(usagesByKey, profile.AutoRefreshCommand.Hotkey, LocalizationManager.T("usage.refresh_hotkey"));
+            }
+
             foreach (KeyValuePair<Key, List<string>> pair in usagesByKey.OrderBy(p => p.Key.ToString(), StringComparer.OrdinalIgnoreCase))
             {
                 if (pair.Value.Count > 1)

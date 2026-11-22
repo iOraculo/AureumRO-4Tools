@@ -1,5 +1,13 @@
 # Changelogs
 
+## [v2.32.0] - 2026-11-22 — Anti-Bug Position (`@refresh`) com Atalho 1-Toque e Intervalo Automático
+### Added
+- **Anti-Bug Position (`@refresh`) na aba `Temporizadores` (`Model/AutoRefreshCommand.cs`, `Forms/SkillTimerForm.cs`, `Utils/Interop.cs`, `Model/Profile.cs`)**:
+  - Envio direto do comando no chat (`Enter` → `WM_CHAR` independente de layout de teclado → `Enter`) com bloqueio atômico contra corrupção por outras teclas de letra durante o envio (mantendo Autopot/Yggdrasil em `F1–F24` ativos) e proteção para nunca disparar enquanto o jogador estiver digitando no chat.
+  - **Atalho de 1 toque (`Hotkey`)**: corrige position bug instantaneamente no meio do combate (WoE/PvP/MVP) com debounce anti-duplo-toque de `1500ms`.
+  - **Intervalo automático opcional (`Auto a cada X seg`)**: ressincroniza periodicamente (mín. `3s`, padrão `30s`), pausando automaticamente em cidade, no chat e ao sentar (`Pausar sentado`), além de resetar o contador quando o atalho manual é acionado.
+  - **Comando editável** (padrão `@refresh`), botão **`Testar`**, persistência completa por perfil, exclusão do desmontar automático em `AutoMount` e detecção de conflitos em `Verificar Conflitos`.
+
 ## [v2.31.2] - 2026-11-22 — Layout Unificado de Prioridade de Ações na aba Spammer
 ### Changed
 - **Cartão dedicado e compacto de `Prioridade de Ações` na aba `Spammer` (`Forms/AHKForm.cs`, `Utils/LocalizationManager.cs`, `Forms/GuideForm.cs`)**:

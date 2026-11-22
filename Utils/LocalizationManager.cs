@@ -198,6 +198,13 @@ namespace _4RTools.Utils
             { "Player input pause:", "Pausa p/ input do jogador:" },
             { "Pause 4RTools on player key (ms):", "Pausa ao input do jogador (ms):" },
 
+            // Anti-Position Bug (@refresh)
+            { "Anti-Position Bug (@refresh)", "Anti-Bug Position (@refresh)" },
+            { "Enable @refresh", "Ativar @refresh" },
+            { "Command:", "Comando:" },
+            { "Hotkey (1-tap):", "Atalho (1 toque):" },
+            { "Auto every:", "Auto a cada:" },
+
             // ProfileForm & EditProfileName
             { "Create a new profile", "Criar um novo perfil" },
             { "Create", "Criar" },
@@ -284,7 +291,7 @@ namespace _4RTools.Utils
             { "section.buff_stuffs.title", "Consumíveis" },
             { "section.buff_stuffs.subtitle", "Renove poções, comidas, conversores elementais e caixas automaticamente." },
             { "section.timers.title", "Temporizadores" },
-            { "section.timers.subtitle", "Dispare até 6 habilidades em intervalos fixos de tempo (em segundos)." },
+            { "section.timers.subtitle", "Dispare @refresh (Anti-Bug Position) e até 6 habilidades em intervalos fixos (segundos)." },
             { "section.macro_switch.title", "Macro Troca de Equipamentos" },
             { "section.macro_switch.subtitle", "Crie sequências rápidas de troca de equipamentos com atrasos personalizados." },
             { "section.macro_songs.title", "Macro Músicas" },
@@ -521,6 +528,7 @@ namespace _4RTools.Utils
             { "usage.macro_dagger", "{0} (Adaga)" },
             { "usage.macro_slot", "{0} (Linha {1} Slot)" },
             { "usage.mount_key", "Montaria (Tecla da Rédea)" },
+            { "usage.refresh_hotkey", "Anti-Bug Position (@refresh)" },
 
             // MountForm & Action Priority
             { "mount.priority_order", "1º Input do Jogador → 2º Fruto de Yggdrasil / Panaceia → 3º Consumíveis → 4º Auto-skills" },
@@ -535,7 +543,18 @@ namespace _4RTools.Utils
             { "tooltip.mount_extra_skill", "Tecla extra de habilidade usada manualmente no jogo: ao apertar montado, o 4Tools desce da montaria e dispara a habilidade." },
             { "tooltip.mount_clear_extra", "Limpa as 6 teclas extras de habilidade." },
             { "tooltip.priority_player_yield", "Tempo em milissegundos (ms) que o 4Tools aguarda sempre que você aperta uma tecla no jogo, garantindo prioridade total às suas ações (padrão: 120ms; 0 = desativado)." },
-            { "tooltip.priority_order", "Hierarquia fixa de prioridade: 1º Input do Jogador → 2º Fruto de Yggdrasil / Panaceia → 3º Consumíveis → 4º Auto-skills." }
+            { "tooltip.priority_order", "Hierarquia fixa de prioridade: 1º Input do Jogador → 2º Fruto de Yggdrasil / Panaceia → 3º Consumíveis → 4º Auto-skills." },
+
+            // Anti-Position Bug (@refresh)
+            { "refresh.hint", "Dica: envia Enter → @refresh → Enter direto no chat (não dispara enquanto você digita)." },
+            { "tooltip.refresh_enabled", "Ativa o recurso Anti-Bug Position (@refresh) enquanto o 4Tools estiver ligado (ON)." },
+            { "tooltip.refresh_cmd", "Comando enviado no chat do jogo para ressincronizar sua posição (padrão: @refresh)." },
+            { "tooltip.refresh_pause_sit", "Se marcado, o @refresh automático periódico não dispara enquanto o personagem estiver sentado." },
+            { "tooltip.refresh_hotkey", "Tecla de atalho de 1 toque: ao apertar no jogo, envia @refresh na hora para corrigir bug de posição." },
+            { "tooltip.refresh_clear", "Limpa a tecla de atalho do @refresh." },
+            { "tooltip.refresh_auto", "Opcional: dispara @refresh automaticamente de tempos em tempos (pausa em cidade e no chat)." },
+            { "tooltip.refresh_interval", "Intervalo em segundos entre cada @refresh automático (mínimo: 3s, padrão: 30s)." },
+            { "tooltip.refresh_test", "Envia o comando @refresh agora para testar na janela do jogo conectada." }
         };
 
         private static readonly Dictionary<string, string> MessagesEn = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -578,7 +597,7 @@ namespace _4RTools.Utils
             { "section.buff_stuffs.title", "Consumables" },
             { "section.buff_stuffs.subtitle", "Automatically renew potions, foods, elemental converters, and buff items." },
             { "section.timers.title", "Skill Timers" },
-            { "section.timers.subtitle", "Trigger up to 6 skills automatically on fixed intervals (in seconds)." },
+            { "section.timers.subtitle", "Trigger @refresh (Anti-Position Bug) and up to 6 skills on fixed intervals (seconds)." },
             { "section.macro_switch.title", "Equipment Switch Macro" },
             { "section.macro_switch.subtitle", "Build fast equipment switch chains with customizable per-step delays." },
             { "section.macro_songs.title", "Song Macros" },
@@ -805,6 +824,7 @@ namespace _4RTools.Utils
             { "usage.macro_dagger", "{0} (Dagger)" },
             { "usage.macro_slot", "{0} (Lane {1} Slot)" },
             { "usage.mount_key", "Mount (Halter Lead Key)" },
+            { "usage.refresh_hotkey", "Anti-Position Bug (@refresh)" },
 
             { "mount.priority_order", "1st Player Input → 2nd Yggdrasil Berry / Panacea → 3rd Consumables → 4th Auto-skills" },
             { "tooltip.mount_enabled", "Enables automatic Mount (Halter Lead — EFST_ALL_RIDING) management while 4Tools is ON." },
@@ -818,7 +838,18 @@ namespace _4RTools.Utils
             { "tooltip.mount_extra_skill", "Extra manual skill hotkey: pressing it while mounted automatically dismounts and fires the skill." },
             { "tooltip.mount_clear_extra", "Clears all 6 extra skill hotkeys." },
             { "tooltip.priority_player_yield", "Duration in milliseconds (ms) that 4Tools yields whenever you press a key in-game, giving your actions top priority (default: 120ms; 0 = disabled)." },
-            { "tooltip.priority_order", "Fixed priority hierarchy: 1st Player Input → 2nd Yggdrasil Berry / Panacea → 3rd Consumables → 4th Auto-skills." }
+            { "tooltip.priority_order", "Fixed priority hierarchy: 1st Player Input → 2nd Yggdrasil Berry / Panacea → 3rd Consumables → 4th Auto-skills." },
+
+            // Anti-Position Bug (@refresh)
+            { "refresh.hint", "Tip: sends Enter → @refresh → Enter directly in chat (never triggers while you are typing)." },
+            { "tooltip.refresh_enabled", "Enables the Anti-Position Bug (@refresh) helper while 4Tools is ON." },
+            { "tooltip.refresh_cmd", "Chat command sent to resync your character position (default: @refresh)." },
+            { "tooltip.refresh_pause_sit", "When checked, periodic auto @refresh pauses while your character is sitting." },
+            { "tooltip.refresh_hotkey", "1-tap hotkey: press it in-game to immediately send @refresh and fix position desync." },
+            { "tooltip.refresh_clear", "Clears the @refresh hotkey." },
+            { "tooltip.refresh_auto", "Optional: sends @refresh periodically on a fixed interval (pauses in town and while chatting)." },
+            { "tooltip.refresh_interval", "Interval in seconds between automatic @refresh commands (minimum: 3s, default: 30s)." },
+            { "tooltip.refresh_test", "Sends the @refresh command once right now to test on the connected game window." }
         };
 
         public static string CurrentLanguage

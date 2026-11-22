@@ -159,6 +159,11 @@ namespace _4RTools.Model
                 {
                     return false;
                 }
+
+                if (profile.AutoRefreshCommand != null && key == profile.AutoRefreshCommand.Hotkey)
+                {
+                    return false;
+                }
             }
 
             lock (this.stateLock)

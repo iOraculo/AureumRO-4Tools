@@ -1331,5 +1331,86 @@ namespace _4RTools.Tests
 
             ActionPriorityCoordinator.Reset();
         }
+
+        [Fact]
+        public void AutoRefreshCommand_NormalizesDebouncesPersistsDetectsConflictsAndRendersInSkillTimerForm()
+        {
+            // Command normalization & interval clamping.
+            Assert.Equal("@refresh", AutoRefreshCommand.NormalizeCommand(null));
+            Assert.Equal("@refresh", AutoRefreshCommand.NormalizeCommand("   "));
+            Assert.Equal("@refresh", AutoRefreshCommand.NormalizeCommand(" @refresh \r\n"));
+            Assert.Equal("/refresh", AutoRefreshCommand.NormalizeCommand("/refresh"));
+
+            AutoRefreshCommand cmd = new AutoRefreshCommand
+            {
+                Enabled = true,
+                Hotkey = Key.F10,
+                AutoIntervalEnabled = true,
+                IntervalSeconds = 1, // below minimum -> clamps to 3s
+                PauseWhenSitting = true
+            };
+            Assert.Equal(AutoRefreshCommand.MIN_INTERVAL_SECONDS, cmd.GetEffectiveIntervalSeconds());
+            cmd.IntervalSeconds = 99999;
+            Assert.Equal(AutoRefreshCommand.MAX_INTERVAL_SECONDS, cmd.GetEffectiveIntervalSeconds());
+            cmd.IntervalSeconds = 20;
+
+            // Manual hotkey debounce (1500ms) + periodic timer reset after manual trigger.
+            Assert.True(cmd.CanTriggerManual(1000));
+            cmd.RecordRefreshExecuted(1000, true);
+            Assert.False(cmd.CanTriggerManual(1000 + AutoRefreshCommand.MANUAL_DEBOUNCE_MS - 1));
+            Assert.True(cmd.CanTriggerManual(1000 + AutoRefreshCommand.MANUAL_DEBOUNCE_MS));
+
+            // Periodic trigger respects interval (20s) and PauseWhenSitting.
+            Assert.False(cmd.ShouldTriggerPeriodic(1000 + 19999, false));
+            Assert.False(cmd.ShouldTriggerPeriodic(1000 + 25000, true));
+            Assert.True(cmd.ShouldTriggerPeriodic(1000 + 20000, false));
+            cmd.PauseWhenSitting = false;
+            Assert.True(cmd.ShouldTriggerPeriodic(1000 + 20000, true));
+
+            // Profile persistence, legacy JSON fallback, AutoMount exclusion, and KeybindConflictDetector integration.
+            ProfileSingleton.Create("RefreshCmdTest");
+            ProfileSingleton.Load("RefreshCmdTest");
+            Profile prof = ProfileSingleton.GetCurrent();
+            prof.AutoRefreshCommand.Enabled = true;
+            prof.AutoRefreshCommand.Hotkey = Key.F10;
+            prof.AutoRefreshCommand.AutoIntervalEnabled = true;
+            prof.AutoRefreshCommand.IntervalSeconds = 45;
+            prof.AutoRefreshCommand.CommandText = "@refresh";
+            prof.AutoRefreshCommand.PauseWhenSitting = false;
+            ProfileSingleton.SetConfiguration(prof.AutoRefreshCommand);
+
+            ProfileSingleton.Load("RefreshCmdTest");
+            Profile reloaded = ProfileSingleton.GetCurrent();
+            Assert.True(reloaded.AutoRefreshCommand.Enabled);
+            Assert.Equal(Key.F10, reloaded.AutoRefreshCommand.Hotkey);
+            Assert.True(reloaded.AutoRefreshCommand.AutoIntervalEnabled);
+            Assert.Equal(45, reloaded.AutoRefreshCommand.IntervalSeconds);
+            Assert.Equal("@refresh", reloaded.AutoRefreshCommand.CommandText);
+            Assert.False(reloaded.AutoRefreshCommand.PauseWhenSitting);
+
+            // AutoMount must NOT treat the @refresh hotkey as a skill key requiring dismount.
+            reloaded.AutoMount.Enabled = true;
+            reloaded.AutoMount.MountKey = Key.F9;
+            Assert.False(reloaded.AutoMount.IsTrackedSkillKey(Key.F10, reloaded));
+
+            // Conflict detector flags duplicate binding with @refresh hotkey when enabled.
+            reloaded.AutoRefreshSpammer1.RefreshKey = Key.F10;
+            List<KeybindConflict> conflicts = KeybindConflictDetector.DetectConflicts(reloaded);
+            Assert.Contains(conflicts, c => c.Key == Key.F10);
+
+            // SkillTimerForm renders the dedicated Anti-Position Bug card and syncs from profile.
+            Subject subject = new Subject();
+            using (SkillTimerForm form = new SkillTimerForm(subject))
+            {
+                subject.Notify(new _4RTools.Utils.Message(MessageCode.PROFILE_CHANGED, null));
+                Assert.Single(form.Controls.Find("gbAntiPositionBug", true));
+                Assert.Equal("F10", form.Controls.Find("txtRefreshHotkey", true)[0].Text);
+                Assert.Equal("@refresh", form.Controls.Find("txtRefreshCmd", true)[0].Text);
+                Assert.True(((System.Windows.Forms.CheckBox)form.Controls.Find("chkRefreshEnabled", true)[0]).Checked);
+                Assert.True(((System.Windows.Forms.CheckBox)form.Controls.Find("chkRefreshAutoInterval", true)[0]).Checked);
+                Assert.Equal(45m, ((System.Windows.Forms.NumericUpDown)form.Controls.Find("numRefreshInterval", true)[0]).Value);
+                Assert.Single(form.Controls.Find("btnTestRefresh", true));
+            }
+        }
     }
 }

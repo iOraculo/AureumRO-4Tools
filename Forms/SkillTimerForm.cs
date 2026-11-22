@@ -15,7 +15,7 @@ namespace _4RTools.Forms
         private const int CARD_HEIGHT = 122;
         private const int COLS_PER_ROW = 3;
         private const int GRID_START_X = 12;
-        private const int GRID_START_Y = 10;
+        private const int GRID_START_Y = 118;
         private const int COL_STEP_X = 184;
         private const int ROW_STEP_Y = 132;
 
@@ -31,10 +31,24 @@ namespace _4RTools.Forms
         }
 
         private readonly TimerSlotUi[] slots = new TimerSlotUi[TOTAL_TIMER_SLOTS];
+        private GroupBox gbAntiPositionBug;
+        private CheckBox chkRefreshEnabled;
+        private Label lblRefreshCmd;
+        private TextBox txtRefreshCmd;
+        private CheckBox chkRefreshPauseSit;
+        private Label lblRefreshHotkey;
+        private TextBox txtRefreshHotkey;
+        private Button btnClearRefreshHotkey;
+        private CheckBox chkRefreshAutoInterval;
+        private NumericUpDown numRefreshInterval;
+        private Label lblRefreshIntervalSec;
+        private Button btnTestRefresh;
+        private Label lblRefreshHint;
         private Button btnAddTimer;
         private ToolTip timerToolTip;
         private Font labelFont;
         private Font inputFont;
+        private Font hintFont;
         private bool isUpdatingUi;
 
         public SkillTimerForm(Subject subject)
@@ -55,6 +69,9 @@ namespace _4RTools.Forms
                 this.timerToolTip = FormUtils.CreateHelpToolTip(this.components);
                 this.labelFont = new Font("Microsoft Sans Serif", 8.5F);
                 this.inputFont = new Font("Microsoft Sans Serif", 10F);
+                this.hintFont = new Font("Segoe UI", 7.75F, FontStyle.Regular);
+
+                BuildAntiPositionBugCard();
 
                 for (int i = 0; i < TOTAL_TIMER_SLOTS; i++)
                 {
@@ -85,11 +102,304 @@ namespace _4RTools.Forms
             }
         }
 
+        private void BuildAntiPositionBugCard()
+        {
+            this.gbAntiPositionBug = new GroupBox
+            {
+                Location = new Point(12, 8),
+                Name = "gbAntiPositionBug",
+                Size = new Size(544, 102),
+                TabStop = false,
+                Text = "Anti-Position Bug (@refresh)"
+            };
+
+            this.chkRefreshEnabled = new CheckBox
+            {
+                AutoSize = true,
+                Cursor = System.Windows.Forms.Cursors.Hand,
+                Font = this.labelFont,
+                Location = new Point(12, 20),
+                Name = "chkRefreshEnabled",
+                Text = "Enable @refresh",
+                UseVisualStyleBackColor = true
+            };
+            this.chkRefreshEnabled.CheckedChanged += OnRefreshSettingsChanged;
+
+            this.lblRefreshCmd = new Label
+            {
+                AutoSize = true,
+                Font = this.labelFont,
+                Location = new Point(146, 21),
+                Name = "lblRefreshCmd",
+                Text = "Command:"
+            };
+
+            this.txtRefreshCmd = new TextBox
+            {
+                Font = this.labelFont,
+                Location = new Point(214, 18),
+                MaxLength = 40,
+                Name = "txtRefreshCmd",
+                Size = new Size(106, 20),
+                Tag = FormUtils.SKIP_RESET_TAG,
+                Text = AutoRefreshCommand.DEFAULT_COMMAND
+            };
+            this.txtRefreshCmd.Leave += OnRefreshCommandLeave;
+            this.txtRefreshCmd.TextChanged += OnRefreshSettingsChanged;
+
+            this.chkRefreshPauseSit = new CheckBox
+            {
+                AutoSize = true,
+                Checked = true,
+                Cursor = System.Windows.Forms.Cursors.Hand,
+                Font = this.labelFont,
+                Location = new Point(336, 20),
+                Name = "chkRefreshPauseSit",
+                Text = "Pause when sitting",
+                UseVisualStyleBackColor = true
+            };
+            this.chkRefreshPauseSit.CheckedChanged += OnRefreshSettingsChanged;
+
+            this.lblRefreshHotkey = new Label
+            {
+                AutoSize = true,
+                Font = this.labelFont,
+                Location = new Point(12, 50),
+                Name = "lblRefreshHotkey",
+                Text = "Hotkey (1-tap):"
+            };
+
+            this.txtRefreshHotkey = new TextBox
+            {
+                Font = this.labelFont,
+                Location = new Point(114, 47),
+                Name = "txtRefreshHotkey",
+                Size = new Size(58, 20),
+                Text = Key.None.ToString()
+            };
+            this.txtRefreshHotkey.KeyDown += new System.Windows.Forms.KeyEventHandler(FormUtils.OnKeyDown);
+            this.txtRefreshHotkey.KeyPress += new KeyPressEventHandler(FormUtils.OnKeyPress);
+            this.txtRefreshHotkey.TextChanged += OnRefreshHotkeyChanged;
+
+            this.btnClearRefreshHotkey = new Button
+            {
+                Cursor = System.Windows.Forms.Cursors.Hand,
+                Location = new Point(176, 46),
+                Name = "btnClearRefreshHotkey",
+                Size = new Size(52, 22),
+                Text = "Clear",
+                UseVisualStyleBackColor = true
+            };
+            this.btnClearRefreshHotkey.Click += (s, e) =>
+            {
+                this.txtRefreshHotkey.Text = Key.None.ToString();
+            };
+
+            this.chkRefreshAutoInterval = new CheckBox
+            {
+                AutoSize = true,
+                Cursor = System.Windows.Forms.Cursors.Hand,
+                Font = this.labelFont,
+                Location = new Point(246, 50),
+                Name = "chkRefreshAutoInterval",
+                Text = "Auto every:",
+                UseVisualStyleBackColor = true
+            };
+            this.chkRefreshAutoInterval.CheckedChanged += OnRefreshSettingsChanged;
+
+            this.numRefreshInterval = new NumericUpDown
+            {
+                Font = this.labelFont,
+                Location = new Point(344, 47),
+                Maximum = AutoRefreshCommand.MAX_INTERVAL_SECONDS,
+                Minimum = AutoRefreshCommand.MIN_INTERVAL_SECONDS,
+                Name = "numRefreshInterval",
+                Size = new Size(58, 20),
+                Tag = FormUtils.SKIP_RESET_TAG,
+                Value = AutoRefreshCommand.DEFAULT_INTERVAL_SECONDS
+            };
+            this.numRefreshInterval.ValueChanged += OnRefreshSettingsChanged;
+
+            this.lblRefreshIntervalSec = new Label
+            {
+                AutoSize = true,
+                Font = this.labelFont,
+                Location = new Point(406, 50),
+                Name = "lblRefreshIntervalSec",
+                Text = "sec"
+            };
+
+            this.btnTestRefresh = new Button
+            {
+                Cursor = System.Windows.Forms.Cursors.Hand,
+                Location = new Point(464, 45),
+                Name = "btnTestRefresh",
+                Size = new Size(68, 24),
+                Text = "Test",
+                UseVisualStyleBackColor = true
+            };
+            this.btnTestRefresh.Click += OnTestRefreshClick;
+
+            this.lblRefreshHint = new Label
+            {
+                AutoSize = false,
+                Font = this.hintFont,
+                Location = new Point(12, 77),
+                Name = "lblRefreshHint",
+                Size = new Size(520, 18),
+                Tag = ThemeManager.TAG_MUTED_TEXT,
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            this.gbAntiPositionBug.Controls.Add(this.chkRefreshEnabled);
+            this.gbAntiPositionBug.Controls.Add(this.lblRefreshCmd);
+            this.gbAntiPositionBug.Controls.Add(this.txtRefreshCmd);
+            this.gbAntiPositionBug.Controls.Add(this.chkRefreshPauseSit);
+            this.gbAntiPositionBug.Controls.Add(this.lblRefreshHotkey);
+            this.gbAntiPositionBug.Controls.Add(this.txtRefreshHotkey);
+            this.gbAntiPositionBug.Controls.Add(this.btnClearRefreshHotkey);
+            this.gbAntiPositionBug.Controls.Add(this.chkRefreshAutoInterval);
+            this.gbAntiPositionBug.Controls.Add(this.numRefreshInterval);
+            this.gbAntiPositionBug.Controls.Add(this.lblRefreshIntervalSec);
+            this.gbAntiPositionBug.Controls.Add(this.btnTestRefresh);
+            this.gbAntiPositionBug.Controls.Add(this.lblRefreshHint);
+
+            this.Controls.Add(this.gbAntiPositionBug);
+        }
+
+        private void OnRefreshSettingsChanged(object sender, EventArgs e)
+        {
+            if (this.numRefreshInterval != null && this.chkRefreshAutoInterval != null)
+            {
+                this.numRefreshInterval.Enabled = this.chkRefreshAutoInterval.Checked;
+            }
+
+            if (this.isUpdatingUi || ProfileSingleton.IsSaveSuppressed)
+            {
+                return;
+            }
+
+            Profile current = ProfileSingleton.GetCurrent();
+            if (current == null || current.AutoRefreshCommand == null)
+            {
+                return;
+            }
+
+            current.AutoRefreshCommand.Enabled = this.chkRefreshEnabled.Checked;
+            current.AutoRefreshCommand.AutoIntervalEnabled = this.chkRefreshAutoInterval.Checked;
+            current.AutoRefreshCommand.IntervalSeconds = decimal.ToInt32(this.numRefreshInterval.Value);
+            current.AutoRefreshCommand.PauseWhenSitting = this.chkRefreshPauseSit.Checked;
+            current.AutoRefreshCommand.CommandText = AutoRefreshCommand.NormalizeCommand(this.txtRefreshCmd.Text);
+            ProfileSingleton.SetConfiguration(current.AutoRefreshCommand);
+        }
+
+        private void OnRefreshCommandLeave(object sender, EventArgs e)
+        {
+            if (this.isUpdatingUi || this.txtRefreshCmd == null)
+            {
+                return;
+            }
+
+            string normalized = AutoRefreshCommand.NormalizeCommand(this.txtRefreshCmd.Text);
+            if (!string.Equals(this.txtRefreshCmd.Text, normalized, StringComparison.Ordinal))
+            {
+                this.isUpdatingUi = true;
+                try
+                {
+                    this.txtRefreshCmd.Text = normalized;
+                }
+                finally
+                {
+                    this.isUpdatingUi = false;
+                }
+            }
+        }
+
+        private void OnRefreshHotkeyChanged(object sender, EventArgs e)
+        {
+            if (this.isUpdatingUi || ProfileSingleton.IsSaveSuppressed)
+            {
+                return;
+            }
+
+            Profile current = ProfileSingleton.GetCurrent();
+            if (current == null || current.AutoRefreshCommand == null)
+            {
+                return;
+            }
+
+            Key key;
+            if (KeyHelper.TryParseKey(this.txtRefreshHotkey.Text, out key))
+            {
+                current.AutoRefreshCommand.Hotkey = key;
+                ProfileSingleton.SetConfiguration(current.AutoRefreshCommand);
+            }
+        }
+
+        private void OnTestRefreshClick(object sender, EventArgs e)
+        {
+            Client roClient = ClientSingleton.GetClient();
+            if (roClient == null || !roClient.IsProcessAlive())
+            {
+                MessageBox.Show(
+                    LocalizationManager.T("msg.select_client_first"),
+                    LocalizationManager.T("title.warning"),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            Profile current = ProfileSingleton.GetCurrent();
+            AutoRefreshCommand cmd = current != null && current.AutoRefreshCommand != null
+                ? current.AutoRefreshCommand
+                : new AutoRefreshCommand();
+            cmd.CommandText = AutoRefreshCommand.NormalizeCommand(this.txtRefreshCmd != null ? this.txtRefreshCmd.Text : AutoRefreshCommand.DEFAULT_COMMAND);
+            cmd.SendRefreshCommand(roClient);
+        }
+
         private void RefreshTooltips()
         {
+            if (this.lblRefreshHint != null)
+            {
+                this.lblRefreshHint.Text = LocalizationManager.T("refresh.hint");
+            }
+
             if (this.timerToolTip == null)
             {
                 return;
+            }
+
+            if (this.chkRefreshEnabled != null)
+            {
+                this.timerToolTip.SetToolTip(this.chkRefreshEnabled, LocalizationManager.T("tooltip.refresh_enabled"));
+            }
+            if (this.txtRefreshCmd != null)
+            {
+                this.timerToolTip.SetToolTip(this.txtRefreshCmd, LocalizationManager.T("tooltip.refresh_cmd"));
+            }
+            if (this.chkRefreshPauseSit != null)
+            {
+                this.timerToolTip.SetToolTip(this.chkRefreshPauseSit, LocalizationManager.T("tooltip.refresh_pause_sit"));
+            }
+            if (this.txtRefreshHotkey != null)
+            {
+                this.timerToolTip.SetToolTip(this.txtRefreshHotkey, LocalizationManager.T("tooltip.refresh_hotkey"));
+            }
+            if (this.btnClearRefreshHotkey != null)
+            {
+                this.timerToolTip.SetToolTip(this.btnClearRefreshHotkey, LocalizationManager.T("tooltip.refresh_clear"));
+            }
+            if (this.chkRefreshAutoInterval != null)
+            {
+                this.timerToolTip.SetToolTip(this.chkRefreshAutoInterval, LocalizationManager.T("tooltip.refresh_auto"));
+            }
+            if (this.numRefreshInterval != null)
+            {
+                this.timerToolTip.SetToolTip(this.numRefreshInterval, LocalizationManager.T("tooltip.refresh_interval"));
+            }
+            if (this.btnTestRefresh != null)
+            {
+                this.timerToolTip.SetToolTip(this.btnTestRefresh, LocalizationManager.T("tooltip.refresh_test"));
             }
 
             string delayTip = LocalizationManager.T("tooltip.timer_delay");
@@ -360,6 +670,19 @@ namespace _4RTools.Forms
             this.isUpdatingUi = true;
             try
             {
+                Profile current = ProfileSingleton.GetCurrent();
+                if (current != null && current.AutoRefreshCommand != null && this.chkRefreshEnabled != null)
+                {
+                    AutoRefreshCommand refresh = current.AutoRefreshCommand;
+                    this.chkRefreshEnabled.Checked = refresh.Enabled;
+                    this.txtRefreshCmd.Text = AutoRefreshCommand.NormalizeCommand(refresh.CommandText);
+                    this.chkRefreshPauseSit.Checked = refresh.PauseWhenSitting;
+                    this.txtRefreshHotkey.Text = refresh.Hotkey.ToString();
+                    this.chkRefreshAutoInterval.Checked = refresh.AutoIntervalEnabled;
+                    FormUtils.SetNumericValue(this.numRefreshInterval, refresh.GetEffectiveIntervalSeconds());
+                    this.numRefreshInterval.Enabled = refresh.AutoIntervalEnabled;
+                }
+
                 for (int i = 0; i < TOTAL_TIMER_SLOTS; i++)
                 {
                     int slotNum = i + 1;
@@ -404,6 +727,10 @@ namespace _4RTools.Forms
                     currentOn.AutoRefreshSpammer4.Start();
                     currentOn.AutoRefreshSpammer5.Start();
                     currentOn.AutoRefreshSpammer6.Start();
+                    if (currentOn.AutoRefreshCommand != null)
+                    {
+                        currentOn.AutoRefreshCommand.Start();
+                    }
                     break;
                 case MessageCode.TURN_OFF:
                     Profile currentOff = ProfileSingleton.GetCurrent();
@@ -413,6 +740,10 @@ namespace _4RTools.Forms
                     currentOff.AutoRefreshSpammer4.Stop();
                     currentOff.AutoRefreshSpammer5.Stop();
                     currentOff.AutoRefreshSpammer6.Stop();
+                    if (currentOff.AutoRefreshCommand != null)
+                    {
+                        currentOff.AutoRefreshCommand.Stop();
+                    }
                     break;
                 case MessageCode.LANGUAGE_CHANGED:
                     RefreshTooltips();
@@ -457,6 +788,11 @@ namespace _4RTools.Forms
             {
                 this.inputFont.Dispose();
                 this.inputFont = null;
+            }
+            if (this.hintFont != null)
+            {
+                this.hintFont.Dispose();
+                this.hintFont = null;
             }
             base.OnFormClosed(e);
         }
