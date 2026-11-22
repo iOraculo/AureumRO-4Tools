@@ -268,16 +268,16 @@ namespace _4RTools.Forms
                 new GuideSectionData
                 {
                     Key = "timers",
-                    TitlePt = "7. Temporizadores e Anti-Bug Position (@refresh)",
+                    TitlePt = "7. Temporizadores",
                     BodyPt =
-                        "• Anti-Bug Position (@refresh): envie @refresh direto no chat (Enter → @refresh → Enter) sem precisar digitar! Configure um Atalho de 1 toque para corrigir position bug na hora durante WoE/PvP/MVP e/ou ative o modo 'Auto a cada X seg' para ressincronizar periodicamente (pausa automaticamente no chat, em cidade e sentado).\n" +
-                        "• Temporizadores de Skill (1 a 6): pressiona uma tecla automaticamente em intervalos fixos de tempo (em segundos), independente de ícone de status.\n" +
-                        "• Ideal para habilidades sem ícone na tela, armadilhas, itens sem status visível ou ações periódicas.",
-                    TitleEn = "7. Skill Timers and Anti-Position Bug (@refresh)",
+                        "• Pressiona uma tecla automaticamente em intervalos fixos de tempo (em segundos), independente de ícone de status.\n" +
+                        "• Ideal para habilidades sem ícone na tela, armadilhas, itens sem status visível ou ações periódicas.\n" +
+                        "• Começa limpo com o Timer 1; clique em '+ Adicionar timer' para expandir até 6 timers independentes.",
+                    TitleEn = "7. Skill Timers",
                     BodyEn =
-                        "• Anti-Position Bug (@refresh): sends @refresh directly in chat (Enter → @refresh → Enter) without typing! Bind a 1-tap Hotkey to fix position desync instantly during WoE/PvP/MVP and/or enable 'Auto every X sec' for periodic resync (automatically pauses while chatting, in town, or sitting).\n" +
-                        "• Skill Timers (1 to 6): presses a hotkey automatically on a fixed second interval, regardless of status icons.\n" +
-                        "• Ideal for skills without a status icon, traps, or periodic utility actions."
+                        "• Presses a hotkey automatically on a fixed second interval, regardless of status icons.\n" +
+                        "• Ideal for skills without a status icon, traps, or periodic utility actions.\n" +
+                        "• Starts cleanly with Timer 1; click '+ Add Timer' to expand up to 6 independent timers."
                 },
                 new GuideSectionData
                 {
@@ -309,14 +309,28 @@ namespace _4RTools.Forms
                 },
                 new GuideSectionData
                 {
+                    Key = "utilities",
+                    TitlePt = "10. Utilidades (Anti-Bug Position / @refresh)",
+                    BodyPt =
+                        "• Anti-Bug Position (@refresh): envia Enter → @refresh → Enter direto no chat do jogo sem precisar digitar manualmente!\n" +
+                        "• Atalho de 1 toque: configure uma tecla para ressincronizar sua posição na hora durante WoE, PvP ou MVP (com proteção anti-duplo-toque de 1,5s).\n" +
+                        "• Auto periódico: opcionalmente dispara @refresh a cada X segundos (pausando no chat, em cidade e quando sentado), além do botão 'Testar' para validar na hora.",
+                    TitleEn = "10. Utilities (Anti-Position Bug / @refresh)",
+                    BodyEn =
+                        "• Anti-Position Bug (@refresh): sends Enter → @refresh → Enter directly into game chat without manual typing!\n" +
+                        "• 1-tap Hotkey: bind a key to resync your position immediately during WoE, PvP, or MVP fights (with a 1.5s anti-double-tap debounce).\n" +
+                        "• Periodic Auto: optionally fires @refresh every X seconds (automatically pausing while chatting, in town, or sitting), plus a 'Test' button to verify immediately."
+                },
+                new GuideSectionData
+                {
                     Key = "profiles",
-                    TitlePt = "10. Perfis, Backup, Conflitos e Dicas Rápidas",
+                    TitlePt = "11. Perfis, Backup, Conflitos e Dicas Rápidas",
                     BodyPt =
                         "• Perfis por personagem/build: crie perfis separados (ex.: PvM, MVP, WoE), copie ou renomeie com 1 clique.\n" +
                         "• Troca automática por personagem: vincule um perfil ao nome do seu personagem ('Usar Personagem Ativo' → 'Salvar') e marque 'Ativar Troca Automática' para carregar o perfil sozinho ao trocar de char (enquanto em OFF).\n" +
                         "• Verificar Conflitos e Backup .zip: use 'Verificar Conflitos' para descobrir teclas duplicadas entre abas, e 'Backup Geral (.zip)' para salvar todos os seus perfis com segurança.\n" +
                         "• Popups em todo o app: sempre que tiver dúvida em qualquer botão, caixa ou opção, basta parar o mouse em cima por um instante para ver a explicação detalhada!",
-                    TitleEn = "10. Profiles, Backup, Conflicts, and Quick Tips",
+                    TitleEn = "11. Profiles, Backup, Conflicts, and Quick Tips",
                     BodyEn =
                         "• Per-character/build profiles: create separate profiles (e.g., PvM, MVP, WoE), copy, or rename in 1 click.\n" +
                         "• Auto-Switch by Character: bind a profile to your character name ('Use Active Character' → 'Save') and enable 'Enable Auto-Switch' to auto-load when switching characters (while OFF).\n" +

@@ -198,7 +198,9 @@ namespace _4RTools.Utils
             { "Player input pause:", "Pausa p/ input do jogador:" },
             { "Pause 4RTools on player key (ms):", "Pausa ao input do jogador (ms):" },
 
-            // Anti-Position Bug (@refresh)
+            // Anti-Position Bug (@refresh) & Utilities
+            { "Utilities", "Utilidades" },
+            { "How it works", "Como funciona" },
             { "Anti-Position Bug (@refresh)", "Anti-Bug Position (@refresh)" },
             { "Enable @refresh", "Ativar @refresh" },
             { "Command:", "Comando:" },
@@ -291,7 +293,7 @@ namespace _4RTools.Utils
             { "section.buff_stuffs.title", "Consumíveis" },
             { "section.buff_stuffs.subtitle", "Renove poções, comidas, conversores elementais e caixas automaticamente." },
             { "section.timers.title", "Temporizadores" },
-            { "section.timers.subtitle", "Dispare @refresh (Anti-Bug Position) e até 6 habilidades em intervalos fixos (segundos)." },
+            { "section.timers.subtitle", "Dispare até 6 habilidades em intervalos fixos de tempo (em segundos)." },
             { "section.macro_switch.title", "Macro Troca de Equipamentos" },
             { "section.macro_switch.subtitle", "Crie sequências rápidas de troca de equipamentos com atrasos personalizados." },
             { "section.macro_songs.title", "Macro Músicas" },
@@ -302,6 +304,8 @@ namespace _4RTools.Utils
             { "section.macros.subtitle", "Gerencie Macro Troca, Macro Músicas e Macro ATK x DEF em um só lugar." },
             { "section.mount.title", "Montaria" },
             { "section.mount.subtitle", "Desça automaticamente da montaria (Rédea) ao usar habilidades e configure teclas extras." },
+            { "section.utilities.title", "Utilidades" },
+            { "section.utilities.subtitle", "Ferramentas de qualidade de vida, incluindo Anti-Bug Position (@refresh) por atalho ou intervalo." },
             { "section.profiles.title", "Perfis, Backup e Diagnóstico" },
             { "section.profiles.subtitle", "Gerencie perfis, vínculo automático por personagem, backup .zip e conflitos de tecla." },
             { "section.guide.title", "Guia Completo do AureumRO 4Tools" },
@@ -325,6 +329,7 @@ namespace _4RTools.Utils
             { "tooltip.nav_timers", "Temporizadores: aperta até 6 teclas automaticamente em intervalos fixos de tempo (em segundos)." },
             { "tooltip.nav_macros", "Macros: reúne Macro Troca (sequência de equips), Macro Músicas (Bardo/Odalisca) e Macro ATK x DEF (troca + spammer)." },
             { "tooltip.nav_mount", "Montaria: desce automaticamente da montaria (Rédea) ao usar habilidades manuais ou automatizadas." },
+            { "tooltip.nav_utilities", "Utilidades: Anti-Bug Position (@refresh) com atalho de 1 toque e intervalo automático opcional." },
             { "tooltip.nav_profiles", "Perfis & Backup: crie, renomeie, copie, faça backup .zip, verifique conflitos de teclas e vincule perfis ao personagem." },
             { "tooltip.nav_guide", "Guia / Ajuda: manual completo e pesquisável explicando todas as funcionalidades do AureumRO 4Tools." },
             { "tooltip.autopot_hp_key", "Tecla da poção de HP (ex.: Poção Branca, Mastela, Compacta). Aperte Backspace/Esc para limpar." },
@@ -547,6 +552,7 @@ namespace _4RTools.Utils
 
             // Anti-Position Bug (@refresh)
             { "refresh.hint", "Dica: envia Enter → @refresh → Enter direto no chat (não dispara enquanto você digita)." },
+            { "utilities.info_body", "• Atalho (1 toque): corrige position bug na hora durante WoE/PvP/MVP (funciona mesmo em cidade ou sentado, com debounce de 1,5s).\n• Auto periódico: ressincroniza automaticamente no intervalo definido, pausando no chat, em cidade e ao sentar.\n• Segurança no chat: pausa teclas de letra do 4Tools durante o envio (~80ms) para não corromper @refresh, mantendo Autopot/Ygg (F1–F24) ativos." },
             { "tooltip.refresh_enabled", "Ativa o recurso Anti-Bug Position (@refresh) enquanto o 4Tools estiver ligado (ON)." },
             { "tooltip.refresh_cmd", "Comando enviado no chat do jogo para ressincronizar sua posição (padrão: @refresh)." },
             { "tooltip.refresh_pause_sit", "Se marcado, o @refresh automático periódico não dispara enquanto o personagem estiver sentado." },
@@ -597,7 +603,7 @@ namespace _4RTools.Utils
             { "section.buff_stuffs.title", "Consumables" },
             { "section.buff_stuffs.subtitle", "Automatically renew potions, foods, elemental converters, and buff items." },
             { "section.timers.title", "Skill Timers" },
-            { "section.timers.subtitle", "Trigger @refresh (Anti-Position Bug) and up to 6 skills on fixed intervals (seconds)." },
+            { "section.timers.subtitle", "Trigger up to 6 skills automatically on fixed intervals (in seconds)." },
             { "section.macro_switch.title", "Equipment Switch Macro" },
             { "section.macro_switch.subtitle", "Build fast equipment switch chains with customizable per-step delays." },
             { "section.macro_songs.title", "Song Macros" },
@@ -608,6 +614,8 @@ namespace _4RTools.Utils
             { "section.macros.subtitle", "Manage Switch Macro, Song Macro, and ATK x DEF Macro in one unified tab." },
             { "section.mount.title", "Mount" },
             { "section.mount.subtitle", "Automatically dismount Halter Lead mounts when casting skills and manage extra skill keys." },
+            { "section.utilities.title", "Utilities" },
+            { "section.utilities.subtitle", "Quality-of-life tools, including Anti-Position Bug (@refresh) via 1-tap hotkey or interval." },
             { "section.profiles.title", "Profiles, Backup & Diagnostics" },
             { "section.profiles.subtitle", "Manage profiles, auto-switch by character, full .zip backups, and keybind conflicts." },
             { "section.guide.title", "Complete AureumRO 4Tools Guide" },
@@ -631,6 +639,7 @@ namespace _4RTools.Utils
             { "tooltip.nav_timers", "Skill Timers: presses up to 6 keys automatically on fixed second intervals." },
             { "tooltip.nav_macros", "Macros: combines Switch Macro (gear chains), Song Macro (Bard/Dancer), and ATK x DEF Macro (swap + spammer)." },
             { "tooltip.nav_mount", "Mount: automatically dismounts Halter Lead mounts when casting manual or automated skills." },
+            { "tooltip.nav_utilities", "Utilities: Anti-Position Bug (@refresh) with 1-tap hotkey and optional periodic interval." },
             { "tooltip.nav_profiles", "Profiles & Backup: create, rename, copy, export .zip backups, detect key conflicts, and auto-switch by character." },
             { "tooltip.nav_guide", "Guide / Help: complete searchable handbook explaining every feature in AureumRO 4Tools." },
             { "tooltip.autopot_hp_key", "HP potion hotkey (e.g., White Potion, Mastela, Slim White). Press Backspace/Esc to clear." },
@@ -842,6 +851,7 @@ namespace _4RTools.Utils
 
             // Anti-Position Bug (@refresh)
             { "refresh.hint", "Tip: sends Enter → @refresh → Enter directly in chat (never triggers while you are typing)." },
+            { "utilities.info_body", "• 1-tap Hotkey: fixes position desync instantly in WoE/PvP/MVP (works in town or sitting, with a 1.5s debounce).\n• Periodic Auto: automatically resyncs on your chosen interval, pausing while chatting, in town, or sitting.\n• Chat Safety: pauses 4Tools letter keys during the ~80ms send so @refresh is never corrupted, while keeping F1–F24 Autopot/Ygg active." },
             { "tooltip.refresh_enabled", "Enables the Anti-Position Bug (@refresh) helper while 4Tools is ON." },
             { "tooltip.refresh_cmd", "Chat command sent to resync your character position (default: @refresh)." },
             { "tooltip.refresh_pause_sit", "When checked, periodic auto @refresh pauses while your character is sitting." },

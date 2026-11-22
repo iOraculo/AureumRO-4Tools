@@ -1,5 +1,11 @@
 # Changelogs
 
+## [v2.32.1] - 2026-11-22 — Nova Aba Dedicada `Utilidades` (Anti-Bug Position / `@refresh`)
+### Changed
+- **Nova aba `Utilidades` na barra lateral (`Forms/UtilitiesForm.cs`, `Forms/Container.cs`, `Utils/ModernControls.cs`)**:
+  - Movido o recurso **Anti-Bug Position (`@refresh`)** da aba `Temporizadores` para sua própria aba dedicada **`Utilidades`** (`Utilities`) com ícone vetorial próprio, layout espaçoso e quadro explicativo **"Como funciona"**.
+  - A aba **`Temporizadores`** voltou a ficar 100% limpa e focada nos 6 timers de skills.
+
 ## [v2.32.0] - 2026-11-22 — Anti-Bug Position (`@refresh`) com Atalho 1-Toque e Intervalo Automático
 ### Added
 - **Anti-Bug Position (`@refresh`) na aba `Temporizadores` (`Model/AutoRefreshCommand.cs`, `Forms/SkillTimerForm.cs`, `Utils/Interop.cs`, `Model/Profile.cs`)**:

@@ -272,6 +272,9 @@
     <Compile Include="Forms\MountForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\UtilitiesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\GuideForm.cs">
       <SubType>Form</SubType>
     </Compile>

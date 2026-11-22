@@ -368,7 +368,7 @@ namespace _4RTools.Tests
             string[] sectionKeys = new string[]
             {
                 "spammer", "debuff", "buff_skills", "buff_stuffs", "timers",
-                "macros", "macro_switch", "macro_songs", "atkdef", "profiles", "servers"
+                "macros", "macro_switch", "macro_songs", "atkdef", "mount", "utilities", "profiles", "servers"
             };
 
             string[] langs = new string[] { LocalizationManager.LANG_PT_BR, LocalizationManager.LANG_EN_US };
@@ -961,8 +961,8 @@ namespace _4RTools.Tests
             Subject subject = new Subject();
             using (GuideForm guide = new GuideForm(subject))
             {
-                Assert.Equal(10, guide.TotalSectionCount);
-                Assert.Equal(10, guide.VisibleSectionCount);
+                Assert.Equal(11, guide.TotalSectionCount);
+                Assert.Equal(11, guide.VisibleSectionCount);
 
                 // Accent-insensitive Portuguese search for ATK x DEF / Macros
                 guide.ApplySearchFilter("musicas");
@@ -973,13 +973,17 @@ namespace _4RTools.Tests
                 guide.ApplySearchFilter("montaria");
                 Assert.True(guide.VisibleSectionCount >= 1);
 
+                // Search for @refresh / Utilities topic
+                guide.ApplySearchFilter("refresh");
+                Assert.True(guide.VisibleSectionCount >= 1);
+
                 // Nonsense search shows 0 cards
                 guide.ApplySearchFilter("zzzz_nao_existe_12345");
                 Assert.Equal(0, guide.VisibleSectionCount);
 
-                // Clearing filter restores all 10 cards
+                // Clearing filter restores all 11 cards
                 guide.ApplySearchFilter(string.Empty);
-                Assert.Equal(10, guide.VisibleSectionCount);
+                Assert.Equal(11, guide.VisibleSectionCount);
 
                 // Live language switch updates titles to English
                 LocalizationManager.SetLanguage(LocalizationManager.LANG_EN_US);
@@ -1398,18 +1402,22 @@ namespace _4RTools.Tests
             List<KeybindConflict> conflicts = KeybindConflictDetector.DetectConflicts(reloaded);
             Assert.Contains(conflicts, c => c.Key == Key.F10);
 
-            // SkillTimerForm renders the dedicated Anti-Position Bug card and syncs from profile.
+            // UtilitiesForm renders the dedicated Anti-Position Bug card and syncs from profile,
+            // while SkillTimerForm stays clean for timers only.
             Subject subject = new Subject();
-            using (SkillTimerForm form = new SkillTimerForm(subject))
+            using (UtilitiesForm utilitiesForm = new UtilitiesForm(subject))
+            using (SkillTimerForm timerForm = new SkillTimerForm(subject))
             {
                 subject.Notify(new _4RTools.Utils.Message(MessageCode.PROFILE_CHANGED, null));
-                Assert.Single(form.Controls.Find("gbAntiPositionBug", true));
-                Assert.Equal("F10", form.Controls.Find("txtRefreshHotkey", true)[0].Text);
-                Assert.Equal("@refresh", form.Controls.Find("txtRefreshCmd", true)[0].Text);
-                Assert.True(((System.Windows.Forms.CheckBox)form.Controls.Find("chkRefreshEnabled", true)[0]).Checked);
-                Assert.True(((System.Windows.Forms.CheckBox)form.Controls.Find("chkRefreshAutoInterval", true)[0]).Checked);
-                Assert.Equal(45m, ((System.Windows.Forms.NumericUpDown)form.Controls.Find("numRefreshInterval", true)[0]).Value);
-                Assert.Single(form.Controls.Find("btnTestRefresh", true));
+                Assert.Single(utilitiesForm.Controls.Find("gbAntiPositionBug", true));
+                Assert.Single(utilitiesForm.Controls.Find("gbUtilitiesInfo", true));
+                Assert.Empty(timerForm.Controls.Find("gbAntiPositionBug", true));
+                Assert.Equal("F10", utilitiesForm.Controls.Find("txtRefreshHotkey", true)[0].Text);
+                Assert.Equal("@refresh", utilitiesForm.Controls.Find("txtRefreshCmd", true)[0].Text);
+                Assert.True(((System.Windows.Forms.CheckBox)utilitiesForm.Controls.Find("chkRefreshEnabled", true)[0]).Checked);
+                Assert.True(((System.Windows.Forms.CheckBox)utilitiesForm.Controls.Find("chkRefreshAutoInterval", true)[0]).Checked);
+                Assert.Equal(45m, ((System.Windows.Forms.NumericUpDown)utilitiesForm.Controls.Find("numRefreshInterval", true)[0]).Value);
+                Assert.Single(utilitiesForm.Controls.Find("btnTestRefresh", true));
             }
         }
     }
