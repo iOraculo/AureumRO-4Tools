@@ -1402,7 +1402,7 @@ namespace _4RTools.Tests
             List<KeybindConflict> conflicts = KeybindConflictDetector.DetectConflicts(reloaded);
             Assert.Contains(conflicts, c => c.Key == Key.F10);
 
-            // UtilitiesForm renders the dedicated Anti-Position Bug card and syncs from profile,
+            // UtilitiesForm renders the dedicated Anti-Position Bug and Auto-Escape cards and syncs from profile,
             // while SkillTimerForm stays clean for timers only.
             Subject subject = new Subject();
             using (UtilitiesForm utilitiesForm = new UtilitiesForm(subject))
@@ -1410,7 +1410,7 @@ namespace _4RTools.Tests
             {
                 subject.Notify(new _4RTools.Utils.Message(MessageCode.PROFILE_CHANGED, null));
                 Assert.Single(utilitiesForm.Controls.Find("gbAntiPositionBug", true));
-                Assert.Single(utilitiesForm.Controls.Find("gbUtilitiesInfo", true));
+                Assert.Single(utilitiesForm.Controls.Find("gbAutoEscape", true));
                 Assert.Empty(timerForm.Controls.Find("gbAntiPositionBug", true));
                 Assert.Equal("F10", utilitiesForm.Controls.Find("txtRefreshHotkey", true)[0].Text);
                 Assert.Equal("@refresh", utilitiesForm.Controls.Find("txtRefreshCmd", true)[0].Text);
@@ -1418,6 +1418,88 @@ namespace _4RTools.Tests
                 Assert.True(((System.Windows.Forms.CheckBox)utilitiesForm.Controls.Find("chkRefreshAutoInterval", true)[0]).Checked);
                 Assert.Equal(45m, ((System.Windows.Forms.NumericUpDown)utilitiesForm.Controls.Find("numRefreshInterval", true)[0]).Value);
                 Assert.Single(utilitiesForm.Controls.Find("btnTestRefresh", true));
+            }
+        }
+
+        [Fact]
+        public void AutoEscape_EnforcesHpThresholdDeadGuardTownGuardCooldownPersistsAndRendersInUtilitiesForm()
+        {
+            AutoEscape escape = new AutoEscape
+            {
+                Enabled = true,
+                EscapeKey = Key.F8,
+                HpPercent = 0, // below min -> clamps to 1
+                CooldownMs = 100, // below min -> clamps to 500
+                ConfirmWithEnter = true,
+                PauseInTown = true
+            };
+            Assert.Equal(AutoEscape.MIN_HP_PERCENT, escape.GetEffectiveHpPercent());
+            Assert.Equal(AutoEscape.MIN_COOLDOWN_MS, escape.GetEffectiveCooldownMs());
+            escape.HpPercent = 200;
+            escape.CooldownMs = 999999;
+            Assert.Equal(AutoEscape.MAX_HP_PERCENT, escape.GetEffectiveHpPercent());
+            Assert.Equal(AutoEscape.MAX_COOLDOWN_MS, escape.GetEffectiveCooldownMs());
+
+            escape.HpPercent = 20;
+            escape.CooldownMs = 2000;
+
+            // Never triggers when dead (HP == 0) or at/above threshold (20%) or in town when PauseInTown is true.
+            Assert.False(escape.ShouldTriggerEscape(0, 10000, 1000, false));
+            Assert.False(escape.ShouldTriggerEscape(2000, 10000, 1000, false));
+            Assert.False(escape.ShouldTriggerEscape(1500, 10000, 1000, true));
+            Assert.True(escape.ShouldTriggerEscape(1999, 10000, 1000, false));
+
+            // Cooldown blocks repeat triggers until elapsed.
+            escape.RecordEscapeTriggered(1000);
+            Assert.False(escape.ShouldTriggerEscape(1500, 10000, 2999, false));
+            Assert.True(escape.ShouldTriggerEscape(1500, 10000, 3000, false));
+
+            // Disabling PauseInTown permits escaping in town.
+            escape.PauseInTown = false;
+            Assert.True(escape.ShouldTriggerEscape(1500, 10000, 3000, true));
+
+            // Profile persistence, AutoMount exclusion, KeybindConflictDetector, and UtilitiesForm sync.
+            ProfileSingleton.Create("AutoEscapeTest");
+            ProfileSingleton.Load("AutoEscapeTest");
+            Profile prof = ProfileSingleton.GetCurrent();
+            prof.AutoEscape.Enabled = true;
+            prof.AutoEscape.EscapeKey = Key.F8;
+            prof.AutoEscape.HpPercent = 25;
+            prof.AutoEscape.CooldownMs = 2500;
+            prof.AutoEscape.ConfirmWithEnter = true;
+            prof.AutoEscape.PauseInTown = false;
+            ProfileSingleton.SetConfiguration(prof.AutoEscape);
+
+            ProfileSingleton.Load("AutoEscapeTest");
+            Profile reloaded = ProfileSingleton.GetCurrent();
+            Assert.True(reloaded.AutoEscape.Enabled);
+            Assert.Equal(Key.F8, reloaded.AutoEscape.EscapeKey);
+            Assert.Equal(25, reloaded.AutoEscape.HpPercent);
+            Assert.Equal(2500, reloaded.AutoEscape.CooldownMs);
+            Assert.True(reloaded.AutoEscape.ConfirmWithEnter);
+            Assert.False(reloaded.AutoEscape.PauseInTown);
+
+            // AutoMount must never treat the EscapeKey as a skill key requiring dismount.
+            reloaded.AutoMount.Enabled = true;
+            reloaded.AutoMount.MountKey = Key.F9;
+            Assert.False(reloaded.AutoMount.IsTrackedSkillKey(Key.F8, reloaded));
+
+            // Conflict detector catches duplicate binding with EscapeKey when enabled.
+            reloaded.Autopot.hpKey = Key.F8;
+            List<KeybindConflict> conflicts = KeybindConflictDetector.DetectConflicts(reloaded);
+            Assert.Contains(conflicts, c => c.Key == Key.F8);
+
+            // UtilitiesForm syncs all Auto-Escape controls from profile.
+            Subject subject = new Subject();
+            using (UtilitiesForm form = new UtilitiesForm(subject))
+            {
+                subject.Notify(new _4RTools.Utils.Message(MessageCode.PROFILE_CHANGED, null));
+                Assert.True(((System.Windows.Forms.CheckBox)form.Controls.Find("chkEscapeEnabled", true)[0]).Checked);
+                Assert.Equal("F8", form.Controls.Find("txtEscapeKey", true)[0].Text);
+                Assert.Equal(25m, ((System.Windows.Forms.NumericUpDown)form.Controls.Find("numEscapeHp", true)[0]).Value);
+                Assert.Equal(2500m, ((System.Windows.Forms.NumericUpDown)form.Controls.Find("numEscapeCooldown", true)[0]).Value);
+                Assert.True(((System.Windows.Forms.CheckBox)form.Controls.Find("chkEscapeConfirmEnter", true)[0]).Checked);
+                Assert.False(((System.Windows.Forms.CheckBox)form.Controls.Find("chkEscapePauseTown", true)[0]).Checked);
             }
         }
     }

@@ -331,6 +331,7 @@
     <Compile Include="Model\ATKDEFMode.cs" />
     <Compile Include="Model\Autopot.cs" />
     <Compile Include="Model\Autobuff.cs" />
+    <Compile Include="Model\AutoEscape.cs" />
     <Compile Include="Model\AutoMount.cs" />
     <Compile Include="Model\AutoRefreshCommand.cs" />
     <Compile Include="Model\AutoRefreshSpammer.cs" />

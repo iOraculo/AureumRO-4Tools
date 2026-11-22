@@ -11,10 +11,10 @@ namespace _4RTools.Forms
     {
         private readonly ToolTip helpToolTip;
         private readonly Font hintFont;
-        private readonly Font infoFont;
 
         private bool isUpdatingUi;
 
+        // Card 1: Anti-Position Bug (@refresh)
         private GroupBox gbAntiPositionBug;
         private CheckBox chkRefreshEnabled;
         private Label lblRefreshCmd;
@@ -29,8 +29,20 @@ namespace _4RTools.Forms
         private CheckBox chkRefreshPauseSit;
         private Label lblRefreshHint;
 
-        private GroupBox gbUtilitiesInfo;
-        private Label lblUtilitiesInfoBody;
+        // Card 2: Emergency Auto-Escape (Fly Wing / Teleport)
+        private GroupBox gbAutoEscape;
+        private CheckBox chkEscapeEnabled;
+        private Label lblEscapeKey;
+        private TextBox txtEscapeKey;
+        private Button btnClearEscapeKey;
+        private Label lblEscapeHp;
+        private NumericUpDown numEscapeHp;
+        private Label lblEscapeHpPct;
+        private Label lblEscapeCooldown;
+        private NumericUpDown numEscapeCooldown;
+        private CheckBox chkEscapeConfirmEnter;
+        private CheckBox chkEscapePauseTown;
+        private Label lblEscapeHint;
 
         public UtilitiesForm(Subject subject)
         {
@@ -39,8 +51,7 @@ namespace _4RTools.Forms
             this.Text = "Utilities";
             this.Size = new Size(584, 281);
             this.helpToolTip = FormUtils.CreateHelpToolTip();
-            this.hintFont = new Font("Segoe UI", 8F, FontStyle.Regular);
-            this.infoFont = new Font("Segoe UI", 8.25F, FontStyle.Regular);
+            this.hintFont = new Font("Segoe UI", 7.75F, FontStyle.Regular);
 
             BuildUi();
             RefreshTooltipsAndDynamicText();
@@ -57,12 +68,12 @@ namespace _4RTools.Forms
             this.SuspendLayout();
             try
             {
-                // Card 1: Anti-Position Bug (@refresh)
+                // Card 1: Anti-Position Bug (@refresh) (y = 4..136)
                 this.gbAntiPositionBug = new GroupBox
                 {
-                    Location = new Point(8, 6),
+                    Location = new Point(8, 4),
                     Name = "gbAntiPositionBug",
-                    Size = new Size(568, 146),
+                    Size = new Size(568, 132),
                     TabStop = false,
                     Text = "Anti-Position Bug (@refresh)"
                 };
@@ -71,7 +82,7 @@ namespace _4RTools.Forms
                 {
                     AutoSize = true,
                     Cursor = System.Windows.Forms.Cursors.Hand,
-                    Location = new Point(14, 24),
+                    Location = new Point(12, 21),
                     Name = "chkRefreshEnabled",
                     Text = "Enable @refresh",
                     UseVisualStyleBackColor = true
@@ -81,17 +92,17 @@ namespace _4RTools.Forms
                 this.lblRefreshCmd = new Label
                 {
                     AutoSize = true,
-                    Location = new Point(160, 25),
+                    Location = new Point(156, 22),
                     Name = "lblRefreshCmd",
                     Text = "Command:"
                 };
 
                 this.txtRefreshCmd = new TextBox
                 {
-                    Location = new Point(232, 22),
+                    Location = new Point(226, 19),
                     MaxLength = 40,
                     Name = "txtRefreshCmd",
-                    Size = new Size(120, 20),
+                    Size = new Size(116, 20),
                     Tag = FormUtils.SKIP_RESET_TAG,
                     Text = AutoRefreshCommand.DEFAULT_COMMAND
                 };
@@ -101,9 +112,9 @@ namespace _4RTools.Forms
                 this.btnTestRefresh = new Button
                 {
                     Cursor = System.Windows.Forms.Cursors.Hand,
-                    Location = new Point(468, 20),
+                    Location = new Point(472, 18),
                     Name = "btnTestRefresh",
-                    Size = new Size(84, 24),
+                    Size = new Size(82, 23),
                     Text = "Test",
                     UseVisualStyleBackColor = true
                 };
@@ -112,16 +123,16 @@ namespace _4RTools.Forms
                 this.lblRefreshHotkey = new Label
                 {
                     AutoSize = true,
-                    Location = new Point(14, 59),
+                    Location = new Point(12, 52),
                     Name = "lblRefreshHotkey",
                     Text = "Hotkey (1-tap):"
                 };
 
                 this.txtRefreshHotkey = new TextBox
                 {
-                    Location = new Point(128, 56),
+                    Location = new Point(124, 49),
                     Name = "txtRefreshHotkey",
-                    Size = new Size(72, 20),
+                    Size = new Size(68, 20),
                     Text = Key.None.ToString(),
                     TextAlign = HorizontalAlignment.Center
                 };
@@ -132,9 +143,9 @@ namespace _4RTools.Forms
                 this.btnClearRefreshHotkey = new Button
                 {
                     Cursor = System.Windows.Forms.Cursors.Hand,
-                    Location = new Point(206, 55),
+                    Location = new Point(198, 48),
                     Name = "btnClearRefreshHotkey",
-                    Size = new Size(64, 23),
+                    Size = new Size(62, 22),
                     Text = "Clear",
                     UseVisualStyleBackColor = true
                 };
@@ -147,7 +158,7 @@ namespace _4RTools.Forms
                 {
                     AutoSize = true,
                     Cursor = System.Windows.Forms.Cursors.Hand,
-                    Location = new Point(14, 92),
+                    Location = new Point(12, 81),
                     Name = "chkRefreshAutoInterval",
                     Text = "Auto every:",
                     UseVisualStyleBackColor = true
@@ -156,11 +167,11 @@ namespace _4RTools.Forms
 
                 this.numRefreshInterval = new NumericUpDown
                 {
-                    Location = new Point(128, 90),
+                    Location = new Point(124, 79),
                     Maximum = AutoRefreshCommand.MAX_INTERVAL_SECONDS,
                     Minimum = AutoRefreshCommand.MIN_INTERVAL_SECONDS,
                     Name = "numRefreshInterval",
-                    Size = new Size(72, 20),
+                    Size = new Size(68, 20),
                     Tag = FormUtils.SKIP_RESET_TAG,
                     Value = AutoRefreshCommand.DEFAULT_INTERVAL_SECONDS
                 };
@@ -169,7 +180,7 @@ namespace _4RTools.Forms
                 this.lblRefreshIntervalSec = new Label
                 {
                     AutoSize = true,
-                    Location = new Point(206, 93),
+                    Location = new Point(198, 82),
                     Name = "lblRefreshIntervalSec",
                     Text = "sec"
                 };
@@ -179,7 +190,7 @@ namespace _4RTools.Forms
                     AutoSize = true,
                     Checked = true,
                     Cursor = System.Windows.Forms.Cursors.Hand,
-                    Location = new Point(268, 92),
+                    Location = new Point(256, 81),
                     Name = "chkRefreshPauseSit",
                     Text = "Pause when sitting",
                     UseVisualStyleBackColor = true
@@ -190,9 +201,9 @@ namespace _4RTools.Forms
                 {
                     AutoSize = false,
                     Font = this.hintFont,
-                    Location = new Point(14, 120),
+                    Location = new Point(12, 107),
                     Name = "lblRefreshHint",
-                    Size = new Size(540, 18),
+                    Size = new Size(544, 18),
                     Tag = ThemeManager.TAG_ACCENT_TEXT,
                     TextAlign = ContentAlignment.MiddleLeft
                 };
@@ -210,30 +221,159 @@ namespace _4RTools.Forms
                 this.gbAntiPositionBug.Controls.Add(this.chkRefreshPauseSit);
                 this.gbAntiPositionBug.Controls.Add(this.lblRefreshHint);
 
-                // Card 2: How it works
-                this.gbUtilitiesInfo = new GroupBox
+                // Card 2: Emergency Auto-Escape (Fly Wing / Teleport) (y = 142..274)
+                this.gbAutoEscape = new GroupBox
                 {
-                    Location = new Point(8, 160),
-                    Name = "gbUtilitiesInfo",
-                    Size = new Size(568, 108),
+                    Location = new Point(8, 142),
+                    Name = "gbAutoEscape",
+                    Size = new Size(568, 132),
                     TabStop = false,
-                    Text = "How it works"
+                    Text = "Emergency Auto-Escape (Fly Wing / Teleport)"
                 };
 
-                this.lblUtilitiesInfoBody = new Label
+                this.chkEscapeEnabled = new CheckBox
+                {
+                    AutoSize = true,
+                    Cursor = System.Windows.Forms.Cursors.Hand,
+                    Location = new Point(12, 21),
+                    Name = "chkEscapeEnabled",
+                    Text = "Enable Auto-Escape",
+                    UseVisualStyleBackColor = true
+                };
+                this.chkEscapeEnabled.CheckedChanged += OnEscapeSettingsChanged;
+
+                this.lblEscapeKey = new Label
+                {
+                    AutoSize = true,
+                    Location = new Point(164, 22),
+                    Name = "lblEscapeKey",
+                    Text = "Escape Key:"
+                };
+
+                this.txtEscapeKey = new TextBox
+                {
+                    Location = new Point(242, 19),
+                    Name = "txtEscapeKey",
+                    Size = new Size(68, 20),
+                    Text = Key.None.ToString(),
+                    TextAlign = HorizontalAlignment.Center
+                };
+                this.txtEscapeKey.KeyDown += FormUtils.OnKeyDown;
+                this.txtEscapeKey.KeyPress += FormUtils.OnKeyPress;
+                this.txtEscapeKey.TextChanged += OnEscapeKeyChanged;
+
+                this.btnClearEscapeKey = new Button
+                {
+                    Cursor = System.Windows.Forms.Cursors.Hand,
+                    Location = new Point(316, 18),
+                    Name = "btnClearEscapeKey",
+                    Size = new Size(62, 22),
+                    Text = "Clear",
+                    UseVisualStyleBackColor = true
+                };
+                this.btnClearEscapeKey.Click += (s, e) =>
+                {
+                    this.txtEscapeKey.Text = Key.None.ToString();
+                };
+
+                this.lblEscapeHp = new Label
+                {
+                    AutoSize = true,
+                    Location = new Point(12, 53),
+                    Name = "lblEscapeHp",
+                    Text = "Trigger HP <"
+                };
+
+                this.numEscapeHp = new NumericUpDown
+                {
+                    Location = new Point(104, 50),
+                    Maximum = AutoEscape.MAX_HP_PERCENT,
+                    Minimum = AutoEscape.MIN_HP_PERCENT,
+                    Name = "numEscapeHp",
+                    Size = new Size(54, 20),
+                    Tag = FormUtils.SKIP_RESET_TAG,
+                    Value = AutoEscape.DEFAULT_HP_PERCENT
+                };
+                this.numEscapeHp.ValueChanged += OnEscapeSettingsChanged;
+
+                this.lblEscapeHpPct = new Label
+                {
+                    AutoSize = true,
+                    Location = new Point(162, 53),
+                    Name = "lblEscapeHpPct",
+                    Text = "%"
+                };
+
+                this.lblEscapeCooldown = new Label
+                {
+                    AutoSize = true,
+                    Location = new Point(206, 53),
+                    Name = "lblEscapeCooldown",
+                    Text = "Cooldown (ms):"
+                };
+
+                this.numEscapeCooldown = new NumericUpDown
+                {
+                    Increment = 250,
+                    Location = new Point(302, 50),
+                    Maximum = AutoEscape.MAX_COOLDOWN_MS,
+                    Minimum = AutoEscape.MIN_COOLDOWN_MS,
+                    Name = "numEscapeCooldown",
+                    Size = new Size(70, 20),
+                    Tag = FormUtils.SKIP_RESET_TAG,
+                    Value = AutoEscape.DEFAULT_COOLDOWN_MS
+                };
+                this.numEscapeCooldown.ValueChanged += OnEscapeSettingsChanged;
+
+                this.chkEscapeConfirmEnter = new CheckBox
+                {
+                    AutoSize = true,
+                    Cursor = System.Windows.Forms.Cursors.Hand,
+                    Location = new Point(12, 81),
+                    Name = "chkEscapeConfirmEnter",
+                    Text = "Press Enter after key (Teleport skill)",
+                    UseVisualStyleBackColor = true
+                };
+                this.chkEscapeConfirmEnter.CheckedChanged += OnEscapeSettingsChanged;
+
+                this.chkEscapePauseTown = new CheckBox
+                {
+                    AutoSize = true,
+                    Checked = true,
+                    Cursor = System.Windows.Forms.Cursors.Hand,
+                    Location = new Point(302, 81),
+                    Name = "chkEscapePauseTown",
+                    Text = "Disable in towns",
+                    UseVisualStyleBackColor = true
+                };
+                this.chkEscapePauseTown.CheckedChanged += OnEscapeSettingsChanged;
+
+                this.lblEscapeHint = new Label
                 {
                     AutoSize = false,
-                    Font = this.infoFont,
-                    Location = new Point(14, 20),
-                    Name = "lblUtilitiesInfoBody",
-                    Size = new Size(540, 80),
-                    Tag = ThemeManager.TAG_MUTED_TEXT
+                    Font = this.hintFont,
+                    Location = new Point(12, 107),
+                    Name = "lblEscapeHint",
+                    Size = new Size(544, 18),
+                    Tag = ThemeManager.TAG_ACCENT_TEXT,
+                    TextAlign = ContentAlignment.MiddleLeft
                 };
 
-                this.gbUtilitiesInfo.Controls.Add(this.lblUtilitiesInfoBody);
+                this.gbAutoEscape.Controls.Add(this.chkEscapeEnabled);
+                this.gbAutoEscape.Controls.Add(this.lblEscapeKey);
+                this.gbAutoEscape.Controls.Add(this.txtEscapeKey);
+                this.gbAutoEscape.Controls.Add(this.btnClearEscapeKey);
+                this.gbAutoEscape.Controls.Add(this.lblEscapeHp);
+                this.gbAutoEscape.Controls.Add(this.numEscapeHp);
+                this.gbAutoEscape.Controls.Add(this.lblEscapeHpPct);
+                this.gbAutoEscape.Controls.Add(this.lblEscapeCooldown);
+                this.gbAutoEscape.Controls.Add(this.numEscapeCooldown);
+                this.gbAutoEscape.Controls.Add(this.chkEscapeConfirmEnter);
+                this.gbAutoEscape.Controls.Add(this.chkEscapePauseTown);
+                this.gbAutoEscape.Controls.Add(this.lblEscapeHint);
 
                 this.Controls.Add(this.gbAntiPositionBug);
-                this.Controls.Add(this.gbUtilitiesInfo);
+                this.Controls.Add(this.gbAutoEscape);
             }
             finally
             {
@@ -310,6 +450,48 @@ namespace _4RTools.Forms
             }
         }
 
+        private void OnEscapeSettingsChanged(object sender, EventArgs e)
+        {
+            if (this.isUpdatingUi || ProfileSingleton.IsSaveSuppressed)
+            {
+                return;
+            }
+
+            Profile current = ProfileSingleton.GetCurrent();
+            if (current == null || current.AutoEscape == null)
+            {
+                return;
+            }
+
+            current.AutoEscape.Enabled = this.chkEscapeEnabled.Checked;
+            current.AutoEscape.HpPercent = decimal.ToInt32(this.numEscapeHp.Value);
+            current.AutoEscape.CooldownMs = decimal.ToInt32(this.numEscapeCooldown.Value);
+            current.AutoEscape.ConfirmWithEnter = this.chkEscapeConfirmEnter.Checked;
+            current.AutoEscape.PauseInTown = this.chkEscapePauseTown.Checked;
+            ProfileSingleton.SetConfiguration(current.AutoEscape);
+        }
+
+        private void OnEscapeKeyChanged(object sender, EventArgs e)
+        {
+            if (this.isUpdatingUi || ProfileSingleton.IsSaveSuppressed)
+            {
+                return;
+            }
+
+            Profile current = ProfileSingleton.GetCurrent();
+            if (current == null || current.AutoEscape == null)
+            {
+                return;
+            }
+
+            Key key;
+            if (KeyHelper.TryParseKey(this.txtEscapeKey.Text, out key))
+            {
+                current.AutoEscape.EscapeKey = key;
+                ProfileSingleton.SetConfiguration(current.AutoEscape);
+            }
+        }
+
         private void OnTestRefreshClick(object sender, EventArgs e)
         {
             Client roClient = ClientSingleton.GetClient();
@@ -338,9 +520,9 @@ namespace _4RTools.Forms
                 this.lblRefreshHint.Text = LocalizationManager.T("refresh.hint");
             }
 
-            if (this.lblUtilitiesInfoBody != null)
+            if (this.lblEscapeHint != null)
             {
-                this.lblUtilitiesInfoBody.Text = LocalizationManager.T("utilities.info_body");
+                this.lblEscapeHint.Text = LocalizationManager.T("escape.hint");
             }
 
             if (this.helpToolTip == null)
@@ -356,6 +538,14 @@ namespace _4RTools.Forms
             this.helpToolTip.SetToolTip(this.chkRefreshAutoInterval, LocalizationManager.T("tooltip.refresh_auto"));
             this.helpToolTip.SetToolTip(this.numRefreshInterval, LocalizationManager.T("tooltip.refresh_interval"));
             this.helpToolTip.SetToolTip(this.btnTestRefresh, LocalizationManager.T("tooltip.refresh_test"));
+
+            this.helpToolTip.SetToolTip(this.chkEscapeEnabled, LocalizationManager.T("tooltip.escape_enabled"));
+            this.helpToolTip.SetToolTip(this.txtEscapeKey, LocalizationManager.T("tooltip.escape_key"));
+            this.helpToolTip.SetToolTip(this.btnClearEscapeKey, LocalizationManager.T("tooltip.escape_clear"));
+            this.helpToolTip.SetToolTip(this.numEscapeHp, LocalizationManager.T("tooltip.escape_hp"));
+            this.helpToolTip.SetToolTip(this.numEscapeCooldown, LocalizationManager.T("tooltip.escape_cooldown"));
+            this.helpToolTip.SetToolTip(this.chkEscapeConfirmEnter, LocalizationManager.T("tooltip.escape_confirm_enter"));
+            this.helpToolTip.SetToolTip(this.chkEscapePauseTown, LocalizationManager.T("tooltip.escape_pause_town"));
         }
 
         private void SyncFromProfile()
@@ -374,6 +564,17 @@ namespace _4RTools.Forms
                     this.chkRefreshAutoInterval.Checked = refresh.AutoIntervalEnabled;
                     FormUtils.SetNumericValue(this.numRefreshInterval, refresh.GetEffectiveIntervalSeconds());
                     this.numRefreshInterval.Enabled = refresh.AutoIntervalEnabled;
+                }
+
+                if (current != null && current.AutoEscape != null)
+                {
+                    AutoEscape escape = current.AutoEscape;
+                    this.chkEscapeEnabled.Checked = escape.Enabled;
+                    this.txtEscapeKey.Text = escape.EscapeKey.ToString();
+                    FormUtils.SetNumericValue(this.numEscapeHp, escape.GetEffectiveHpPercent());
+                    FormUtils.SetNumericValue(this.numEscapeCooldown, escape.GetEffectiveCooldownMs());
+                    this.chkEscapeConfirmEnter.Checked = escape.ConfirmWithEnter;
+                    this.chkEscapePauseTown.Checked = escape.PauseInTown;
                 }
             }
             finally
@@ -397,16 +598,30 @@ namespace _4RTools.Forms
                     break;
                 case MessageCode.TURN_ON:
                     Profile currentOn = ProfileSingleton.GetCurrent();
-                    if (currentOn != null && currentOn.AutoRefreshCommand != null)
+                    if (currentOn != null)
                     {
-                        currentOn.AutoRefreshCommand.Start();
+                        if (currentOn.AutoRefreshCommand != null)
+                        {
+                            currentOn.AutoRefreshCommand.Start();
+                        }
+                        if (currentOn.AutoEscape != null)
+                        {
+                            currentOn.AutoEscape.Start();
+                        }
                     }
                     break;
                 case MessageCode.TURN_OFF:
                     Profile currentOff = ProfileSingleton.GetCurrent();
-                    if (currentOff != null && currentOff.AutoRefreshCommand != null)
+                    if (currentOff != null)
                     {
-                        currentOff.AutoRefreshCommand.Stop();
+                        if (currentOff.AutoRefreshCommand != null)
+                        {
+                            currentOff.AutoRefreshCommand.Stop();
+                        }
+                        if (currentOff.AutoEscape != null)
+                        {
+                            currentOff.AutoEscape.Stop();
+                        }
                     }
                     break;
                 case MessageCode.LANGUAGE_CHANGED:
@@ -426,10 +641,6 @@ namespace _4RTools.Forms
                 if (this.hintFont != null)
                 {
                     this.hintFont.Dispose();
-                }
-                if (this.infoFont != null)
-                {
-                    this.infoFont.Dispose();
                 }
             }
 

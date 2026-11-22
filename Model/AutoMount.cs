@@ -164,6 +164,11 @@ namespace _4RTools.Model
                 {
                     return false;
                 }
+
+                if (profile.AutoEscape != null && key == profile.AutoEscape.EscapeKey)
+                {
+                    return false;
+                }
             }
 
             lock (this.stateLock)

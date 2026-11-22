@@ -1,5 +1,12 @@
 # Changelogs
 
+## [v2.33.0] - 2026-11-22 — Auto-Fuga de Emergência (Asa de Mosca / Teleporte) na aba `Utilidades`
+### Added
+- **Auto-Fuga de Emergência (`Model/AutoEscape.cs`, `Forms/UtilitiesForm.cs`, `Model/Profile.cs`)**:
+  - Dispara automaticamente a tecla configurada (**Asa de Mosca**, **Asa de Borboleta** ou **skill Teleporte**) quando o HP cair abaixo da `%` crítica escolhida (padrão `20%`, monitoramento a cada `40ms` em prioridade de emergência Nível 2).
+  - **Confirmar com Enter (`skill Teleporte`)**: opcionalmente pressiona `Enter` 80ms após a tecla para confirmar automaticamente o menu de Teleporte (Noviço/Sacerdote/Carta Creamy).
+  - **Proteções integradas**: desligado por padrão, recarga configurável (`500ms` a `30000ms`, padrão `2000ms`) para não desperdiçar várias asas, nunca dispara morto (`HP = 0`), opção **`Desativar em cidades`** (ligada por padrão), funciona mesmo com chat aberto se a tecla estiver em `F1–F24`, excluído do desmontar automático em `AutoMount` e checado em `Verificar Conflitos`.
+
 ## [v2.32.1] - 2026-11-22 — Nova Aba Dedicada `Utilidades` (Anti-Bug Position / `@refresh`)
 ### Changed
 - **Nova aba `Utilidades` na barra lateral (`Forms/UtilitiesForm.cs`, `Forms/Container.cs`, `Utils/ModernControls.cs`)**:

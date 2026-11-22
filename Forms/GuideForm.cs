@@ -310,16 +310,16 @@ namespace _4RTools.Forms
                 new GuideSectionData
                 {
                     Key = "utilities",
-                    TitlePt = "10. Utilidades (Anti-Bug Position / @refresh)",
+                    TitlePt = "10. Utilidades (@refresh e Auto-Fuga de Emergência)",
                     BodyPt =
-                        "• Anti-Bug Position (@refresh): envia Enter → @refresh → Enter direto no chat do jogo sem precisar digitar manualmente!\n" +
-                        "• Atalho de 1 toque: configure uma tecla para ressincronizar sua posição na hora durante WoE, PvP ou MVP (com proteção anti-duplo-toque de 1,5s).\n" +
-                        "• Auto periódico: opcionalmente dispara @refresh a cada X segundos (pausando no chat, em cidade e quando sentado), além do botão 'Testar' para validar na hora.",
-                    TitleEn = "10. Utilities (Anti-Position Bug / @refresh)",
+                        "• Anti-Bug Position (@refresh): envia Enter → @refresh → Enter direto no chat sem precisar digitar! Configure um Atalho de 1 toque para ressincronizar na hora (debounce de 1,5s) e/ou ative o modo 'Auto a cada X seg' (pausa no chat, em cidade e sentado).\n" +
+                        "• Auto-Fuga de Emergência (Asa de Mosca / Teleporte): se o HP cair abaixo da % crítica configurada (ex.: < 20%), dispara automaticamente a tecla de fuga em prioridade de emergência (Nível 2), com recarga configurável (padrão 2000ms) para não gastar várias asas.\n" +
+                        "• Skill Teleporte e segurança: marque 'Confirmar com Enter' caso use a skill Teleporte (Noviço/Sacerdote/Carta Creamy); nunca dispara morto (HP = 0) nem em cidades quando marcado.",
+                    TitleEn = "10. Utilities (@refresh and Emergency Auto-Escape)",
                     BodyEn =
-                        "• Anti-Position Bug (@refresh): sends Enter → @refresh → Enter directly into game chat without manual typing!\n" +
-                        "• 1-tap Hotkey: bind a key to resync your position immediately during WoE, PvP, or MVP fights (with a 1.5s anti-double-tap debounce).\n" +
-                        "• Periodic Auto: optionally fires @refresh every X seconds (automatically pausing while chatting, in town, or sitting), plus a 'Test' button to verify immediately."
+                        "• Anti-Position Bug (@refresh): sends Enter → @refresh → Enter directly into game chat without manual typing! Bind a 1-tap Hotkey to resync instantly (1.5s debounce) and/or enable 'Auto every X sec' (pauses while chatting, in town, or sitting).\n" +
+                        "• Emergency Auto-Escape (Fly Wing / Teleport): whenever HP drops below your critical % threshold (e.g., < 20%), automatically fires your escape key at emergency priority (Tier 2), with a configurable cooldown (default 2000ms) to avoid wasting multiple wings.\n" +
+                        "• Teleport skill and safety: enable 'Press Enter after key' for Teleport skill (Acolyte/Priest/Creamy Card); never triggers when dead (HP = 0) or in towns when disabled."
                 },
                 new GuideSectionData
                 {
