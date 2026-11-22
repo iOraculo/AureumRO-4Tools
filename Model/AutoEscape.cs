@@ -127,6 +127,7 @@ namespace _4RTools.Model
                     && client.HasMemorySupport
                     && client.IsProcessAlive()
                     && !client.ShouldPauseForFocus()
+                    && !ActionPriorityCoordinator.IsHoldPauseBlockingAutopot()
                     && !KeyHelper.IsAltPressed()
                     && !ActionPriorityCoordinator.ShouldYield(ActionPriority.Yggdrasil))
                 {

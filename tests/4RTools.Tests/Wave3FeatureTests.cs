@@ -1547,5 +1547,82 @@ namespace _4RTools.Tests
                 KeyHelper.VirtualKeyDownOverride = null;
             }
         }
+
+        [Fact]
+        public void HoldToPause_PausesAutomationOptionallyProtectsAutopotPersistsAndRendersInAHKForm()
+        {
+            // Generic WinForms modifier KeyCodes map cleanly for Hold-to-Pause binding.
+            Assert.Equal(Key.LeftCtrl, KeyHelper.FromFormsKeys(System.Windows.Forms.Keys.ControlKey));
+            Assert.Equal(Key.LeftShift, KeyHelper.FromFormsKeys(System.Windows.Forms.Keys.ShiftKey));
+            Assert.Equal(Key.LeftAlt, KeyHelper.FromFormsKeys(System.Windows.Forms.Keys.Menu));
+
+            HashSet<int> pressed = new HashSet<int>();
+            KeyHelper.VirtualKeyDownOverride = vk => pressed.Contains(vk);
+            ActionPriorityCoordinator.Reset();
+            try
+            {
+                ActionPriorityCoordinator.HoldPauseKey = Key.LeftCtrl;
+                ActionPriorityCoordinator.HoldPauseIncludeAutopot = false;
+
+                Assert.False(ActionPriorityCoordinator.IsHoldPauseActive());
+                Assert.False(ActionPriorityCoordinator.IsHoldPauseBlockingAutopot());
+
+                // Pressing EITHER LeftCtrl or RightCtrl activates Hold-to-Pause.
+                pressed.Add(KeyHelper.VK_RCONTROL);
+                Assert.True(ActionPriorityCoordinator.IsHoldPauseActive());
+                // By default, Autopot / Yggdrasil / Auto-Escape remain active while holding pause key.
+                Assert.False(ActionPriorityCoordinator.IsHoldPauseBlockingAutopot());
+
+                // Enabling HoldPauseIncludeAutopot blocks Autopot / Yggdrasil / Auto-Escape too.
+                ActionPriorityCoordinator.HoldPauseIncludeAutopot = true;
+                Assert.True(ActionPriorityCoordinator.IsHoldPauseBlockingAutopot());
+
+                // Releasing immediately resumes everything with zero stuck state.
+                pressed.Remove(KeyHelper.VK_RCONTROL);
+                Assert.False(ActionPriorityCoordinator.IsHoldPauseActive());
+                Assert.False(ActionPriorityCoordinator.IsHoldPauseBlockingAutopot());
+
+                // Profile persistence, AutoMount exclusion, KeybindConflictDetector, and AHKForm UI sync.
+                ProfileSingleton.Create("HoldPauseTest");
+                ProfileSingleton.Load("HoldPauseTest");
+                Profile prof = ProfileSingleton.GetCurrent();
+                prof.UserPreferences.holdPauseKey = Key.Tab;
+                prof.UserPreferences.holdPauseIncludeAutopot = true;
+                ProfileSingleton.SetConfiguration(prof.UserPreferences);
+
+                ProfileSingleton.Load("HoldPauseTest");
+                Profile reloaded = ProfileSingleton.GetCurrent();
+                Assert.Equal(Key.Tab, reloaded.UserPreferences.holdPauseKey);
+                Assert.True(reloaded.UserPreferences.holdPauseIncludeAutopot);
+
+                reloaded.AutoMount.Enabled = true;
+                reloaded.AutoMount.MountKey = Key.F9;
+                Assert.False(reloaded.AutoMount.IsTrackedSkillKey(Key.Tab, reloaded));
+
+                reloaded.AutoRefreshSpammer1.RefreshKey = Key.Tab;
+                List<KeybindConflict> conflicts = KeybindConflictDetector.DetectConflicts(reloaded);
+                Assert.Contains(conflicts, c => c.Key == Key.Tab);
+
+                Subject subject = new Subject();
+                using (AHKForm ahkForm = new AHKForm(subject))
+                {
+                    subject.Notify(new _4RTools.Utils.Message(MessageCode.PROFILE_CHANGED, null));
+                    System.Windows.Forms.Control gbPriority = Assert.Single(ahkForm.Controls.Find("gbPlayerPriority", true));
+                    System.Windows.Forms.Control txtHold = Assert.Single(ahkForm.Controls.Find("txtHoldPauseKey", true));
+                    System.Windows.Forms.CheckBox chkHoldPot = (System.Windows.Forms.CheckBox)Assert.Single(ahkForm.Controls.Find("chkHoldPauseAutopot", true));
+                    Assert.Same(gbPriority, txtHold.Parent);
+                    Assert.Same(gbPriority, chkHoldPot.Parent);
+                    Assert.Equal("Tab", txtHold.Text);
+                    Assert.True(chkHoldPot.Checked);
+                    Assert.Equal(Key.Tab, ActionPriorityCoordinator.HoldPauseKey);
+                    Assert.True(ActionPriorityCoordinator.HoldPauseIncludeAutopot);
+                }
+            }
+            finally
+            {
+                KeyHelper.VirtualKeyDownOverride = null;
+                ActionPriorityCoordinator.Reset();
+            }
+        }
     }
 }

@@ -1,5 +1,12 @@
 # Changelogs
 
+## [v2.34.0] - 2026-11-22 — Pausa Momentânea (Segurar Tecla / Hold-to-Pause) na aba `Spammer`
+### Added
+- **Segurar para Pausar (*Hold-to-Pause*) dentro do card `Prioridade de Ações` na aba `Spammer` (`Forms/AHKForm.cs`, `Utils/ActionPriorityCoordinator.cs`, `Model/UserPreferences.cs`, `Model/Client.cs`, `Model/AutoEscape.cs`, `Model/AutoMount.cs`)**:
+  - Permite definir qualquer tecla (incluindo **`Ctrl`**, **`Shift`**, **`Alt`**, **`Tab`**, **`CapsLock`** ou teclas comuns) em **`Segurar pausa:`** — enquanto você segura a tecla, o 4Tools pausa instantaneamente via `GetAsyncKeyState` e retoma no milissegundo em que solta (sem risco de travar).
+  - Por padrão, **Autopot**, **Yggdrasil** e **Auto-Fuga** continuam protegendo você enquanto segura a tecla; basta marcar **`Pausar Autopot`** ao lado caso queira pausar 100% de tudo.
+  - Persistido por perfil, excluído do desmontar automático em `AutoMount` e verificado em `Verificar Conflitos`.
+
 ## [v2.33.1] - 2026-11-22 — Correção Definitiva de Travamento ao Apertar `Alt` / `Alt+Tab`
 ### Fixed
 - **Fim do travamento após apertar `Alt` (`Utils/KeyHelper.cs`, `Utils/KeyboardHook.cs`, `Model/AHK.cs`, `Model/ATKDEFMode.cs`, `Model/Macro.cs`, `Forms/Container.cs`)**:

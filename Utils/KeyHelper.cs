@@ -49,6 +49,20 @@ namespace _4RTools.Utils
                 return Key.None;
             }
 
+            // Generic WinForms modifier KeyCodes do not map via KeyInterop.KeyFromVirtualKey, so normalize them.
+            if (keyCode == Keys.ControlKey)
+            {
+                return Key.LeftCtrl;
+            }
+            if (keyCode == Keys.ShiftKey)
+            {
+                return Key.LeftShift;
+            }
+            if (keyCode == Keys.Menu)
+            {
+                return Key.LeftAlt;
+            }
+
             Key wpfKey = KeyInterop.KeyFromVirtualKey((int)keyCode);
             if (wpfKey != Key.None)
             {
@@ -176,6 +190,30 @@ namespace _4RTools.Utils
         public static bool IsWinPressed()
         {
             return IsVirtualKeyDown(VK_LWIN) || IsVirtualKeyDown(VK_RWIN);
+        }
+
+        public static bool IsHoldPauseKeyDown(Key key)
+        {
+            if (key == Key.None)
+            {
+                return false;
+            }
+
+            // Treat Left/Right modifier bindings symmetrically so either Ctrl, Shift, or Alt pauses smoothly.
+            if (key == Key.LeftCtrl || key == Key.RightCtrl)
+            {
+                return IsControlPressed();
+            }
+            if (key == Key.LeftShift || key == Key.RightShift)
+            {
+                return IsShiftPressed();
+            }
+            if (key == Key.LeftAlt || key == Key.RightAlt)
+            {
+                return IsAltPressed();
+            }
+
+            return IsKeyDown(key);
         }
     }
 }

@@ -195,6 +195,9 @@ namespace _4RTools.Utils
             { "Extra skill keys:", "Teclas extras:" },
             { "Action Priority", "Prioridade de Ações" },
             { "Player Priority", "Prioridade Jogador" },
+            { "Player pause:", "Pausa jogador:" },
+            { "Hold pause:", "Segurar pausa:" },
+            { "Pause Autopot", "Pausar Autopot" },
             { "Player input pause:", "Pausa p/ input do jogador:" },
             { "Pause 4RTools on player key (ms):", "Pausa ao input do jogador (ms):" },
 
@@ -520,6 +523,7 @@ namespace _4RTools.Utils
             { "conflicts.none", "Nenhum conflito de tecla detectado no perfil '{0}'!" },
             { "conflicts.header", "Encontrado(s) {0} conflito(s) de tecla no perfil '{1}':" },
             { "usage.toggle", "Tecla Ligar/Desligar" },
+            { "usage.hold_pause", "Segurar para Pausar (Hold-to-Pause)" },
             { "usage.autopot_hp", "Autopot (HP)" },
             { "usage.autopot_sp", "Autopot (SP)" },
             { "usage.ygg_hp", "Autopot Yggdrasil (HP)" },
@@ -556,6 +560,8 @@ namespace _4RTools.Utils
             { "tooltip.mount_extra_skill", "Tecla extra de habilidade usada manualmente no jogo: ao apertar montado, o 4Tools desce da montaria e dispara a habilidade." },
             { "tooltip.mount_clear_extra", "Limpa as 6 teclas extras de habilidade." },
             { "tooltip.priority_player_yield", "Tempo em milissegundos (ms) que o 4Tools aguarda sempre que você aperta uma tecla no jogo, garantindo prioridade total às suas ações (padrão: 120ms; 0 = desativado)." },
+            { "tooltip.hold_pause_key", "Tecla de pausa momentânea (Hold-to-Pause): enquanto você SEGURAR esta tecla (ex.: Ctrl, Shift, Alt, Tab, CapsLock), o 4Tools pausa na hora e retoma ao soltar. Aperte Esc/Backspace para limpar." },
+            { "tooltip.hold_pause_autopot", "Por padrão, Autopot, Yggdrasil e Auto-Fuga continuam protegendo você enquanto segura a tecla de pausa. Marque esta opção para pausar 100% de tudo." },
             { "tooltip.priority_order", "Hierarquia fixa de prioridade: 1º Input do Jogador → 2º Fruto de Yggdrasil / Panaceia → 3º Consumíveis → 4º Auto-skills." },
 
             // Anti-Position Bug (@refresh)
@@ -831,6 +837,7 @@ namespace _4RTools.Utils
             { "conflicts.none", "No keybind conflicts detected in profile '{0}'!" },
             { "conflicts.header", "Found {0} keybind conflict(s) in profile '{1}':" },
             { "usage.toggle", "ON/OFF Toggle Hotkey" },
+            { "usage.hold_pause", "Hold-to-Pause Key" },
             { "usage.autopot_hp", "Autopot (HP)" },
             { "usage.autopot_sp", "Autopot (SP)" },
             { "usage.ygg_hp", "Yggdrasil Autopot (HP)" },
@@ -866,6 +873,8 @@ namespace _4RTools.Utils
             { "tooltip.mount_extra_skill", "Extra manual skill hotkey: pressing it while mounted automatically dismounts and fires the skill." },
             { "tooltip.mount_clear_extra", "Clears all 6 extra skill hotkeys." },
             { "tooltip.priority_player_yield", "Duration in milliseconds (ms) that 4Tools yields whenever you press a key in-game, giving your actions top priority (default: 120ms; 0 = disabled)." },
+            { "tooltip.hold_pause_key", "Hold-to-Pause key: while HELD (e.g., Ctrl, Shift, Alt, Tab, CapsLock), 4Tools pauses immediately and resumes the moment you release it. Press Esc/Backspace to clear." },
+            { "tooltip.hold_pause_autopot", "By default, Autopot, Yggdrasil, and Auto-Escape keep protecting you while holding the pause key. Check this to pause 100% of automations." },
             { "tooltip.priority_order", "Fixed priority hierarchy: 1st Player Input → 2nd Yggdrasil Berry / Panacea → 3rd Consumables → 4th Auto-skills." },
 
             // Anti-Position Bug (@refresh)

@@ -412,12 +412,16 @@ namespace _4RTools.Model
 
         public bool ShouldPauseAutomation()
         {
-            return ShouldPauseForFocus() || ChatPauseState.IsChatting || AutoRefreshCommand.IsSendingCommand || ShouldPauseForTown();
+            return ShouldPauseForFocus()
+                || ChatPauseState.IsChatting
+                || AutoRefreshCommand.IsSendingCommand
+                || ActionPriorityCoordinator.IsHoldPauseActive()
+                || ShouldPauseForTown();
         }
 
         public bool ShouldPauseAutopotKey(System.Windows.Input.Key key)
         {
-            if (ShouldPauseForFocus() || ShouldPauseForTown())
+            if (ShouldPauseForFocus() || ShouldPauseForTown() || ActionPriorityCoordinator.IsHoldPauseBlockingAutopot())
             {
                 return true;
             }
