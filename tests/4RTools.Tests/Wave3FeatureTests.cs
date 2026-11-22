@@ -1754,6 +1754,7 @@ namespace _4RTools.Tests
 
             using (MultiAccountShellForm shell = new MultiAccountShellForm())
             {
+                shell.Show();
                 Assert.Equal(3, shell.AccountCount);
                 Assert.Equal(0, shell.ActiveAccountIndex);
 
