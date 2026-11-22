@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Windows.Input;
+using Newtonsoft.Json;
 using _4RTools.Forms;
 using _4RTools.Model;
 using _4RTools.Utils;
@@ -1037,14 +1038,48 @@ namespace _4RTools.Tests
             // Without an observed EFST icon, Basilica must NOT spam within 25s.
             Assert.False(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 5000, false, false, 100, 100));
             Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 1000 + AutoBuff.BASILICA_NO_ICON_RECAST_MS, false, false, 100, 100));
-            // Once an EFST icon is observed from the server, recast guard drops to 3s cast protection.
+            // Once an EFST icon is observed from the server, recast guard drops to 3s cast protection,
+            // and SyncActiveStatusTransitions clears Basilica's timer immediately when EFST_BASILICA expires.
             basilicaBuff.MarkStatusObserved(EffectStatusIDs.EFST_BASILICA);
             Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 1000 + AutoBuff.BASILICA_ICON_CAST_GUARD_MS, false, false, 100, 100));
 
-            // Status buffer boundary check: ExtractActiveStatuses tolerates small gaps (< 6 IGNORE)
-            // and stops after 6 consecutive IGNORE slots so trailing memory containing 9 (ANGELUS) never blocks Angelus!
+            // EFST_POSTDELAY (46) must pause casting without burning cooldowns.
+            Assert.Equal(46u, (uint)EffectStatusIDs.EFST_POSTDELAY);
+            Assert.False(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 50000, false, false, 100, 100, false, true, true));
+
+            // Transition: Basilica active -> Basilica expired resets lastCastTimesMs immediately.
+            basilicaBuff.RecordBuffCast(EffectStatusIDs.EFST_BASILICA, 10000);
+            basilicaBuff.SyncActiveStatusTransitions(new HashSet<EffectStatusIDs> { EffectStatusIDs.EFST_BASILICA });
+            basilicaBuff.SyncActiveStatusTransitions(new HashSet<EffectStatusIDs>());
+            Assert.True(basilicaBuff.ShouldCastBuff(EffectStatusIDs.EFST_BASILICA, 10500, false, false, 100, 100, false, true, false));
+
+            // Ragexe 2022+ (FroggoClient) 3-slot leading header auto-skip + 0x480 offset verification!
+            // Real AureumRO memory dump at +0x474: [9 (ANGELUS), 1004240168 (ptr), 1 (ENDURE), 110 (ASSUMPTIO), ...]
             uint ig = (uint)EffectStatusIDs.IGNORE;
-            uint[] fakeBuffer = new uint[]
+            uint[] froggoDump = new uint[]
+            {
+                9u, 1004240168u, 1u,
+                (uint)EffectStatusIDs.ASSUMPTIO,
+                (uint)EffectStatusIDs.IMPOSITIO,
+                (uint)EffectStatusIDs.ASPERSIO,
+                (uint)EffectStatusIDs.BLESSING,
+                (uint)EffectStatusIDs.INC_AGI,
+                (uint)EffectStatusIDs.GLORIA,
+                (uint)EffectStatusIDs.MAGNIFICAT,
+                ig, ig, ig, ig, ig, ig,
+                (uint)EffectStatusIDs.ANGELUS
+            };
+            Assert.Equal(3, Client.DetectLeadingHeaderSkip(froggoDump, froggoDump.Length));
+            List<uint> extractedFroggo = new List<uint>();
+            Client.ExtractActiveStatuses(froggoDump, froggoDump.Length, extractedFroggo);
+            Assert.Equal(7, extractedFroggo.Count);
+            Assert.Contains((uint)EffectStatusIDs.ASSUMPTIO, extractedFroggo);
+            Assert.Contains((uint)EffectStatusIDs.BLESSING, extractedFroggo);
+            Assert.DoesNotContain((uint)EffectStatusIDs.ANGELUS, extractedFroggo);
+            Assert.DoesNotContain((uint)EffectStatusIDs.ENDURE, extractedFroggo);
+
+            // Already-aligned +0x480 buffer must NOT skip any slots.
+            uint[] alignedBuffer = new uint[]
             {
                 (uint)EffectStatusIDs.BLESSING,
                 ig,
@@ -1052,11 +1087,20 @@ namespace _4RTools.Tests
                 ig, ig, ig, ig, ig, ig,
                 (uint)EffectStatusIDs.ANGELUS
             };
+            Assert.Equal(0, Client.DetectLeadingHeaderSkip(alignedBuffer, alignedBuffer.Length));
             List<uint> extracted = new List<uint>();
-            Client.ExtractActiveStatuses(fakeBuffer, fakeBuffer.Length, extracted);
+            Client.ExtractActiveStatuses(alignedBuffer, alignedBuffer.Length, extracted);
             Assert.Contains((uint)EffectStatusIDs.BLESSING, extracted);
             Assert.Contains((uint)EffectStatusIDs.INC_AGI, extracted);
             Assert.DoesNotContain((uint)EffectStatusIDs.ANGELUS, extracted);
+
+            // Embedded AureumRO server config uses statusOffset 0x480.
+            List<ClientDTO> embeddedServers = JsonConvert.DeserializeObject<List<ClientDTO>>(ClientUpdaterForm.LoadResourceServerFile());
+            ClientDTO aureumDto = embeddedServers.FirstOrDefault(s => string.Equals(s.name, "AureumRO", StringComparison.OrdinalIgnoreCase));
+            Assert.NotNull(aureumDto);
+            Assert.Equal("0x480", aureumDto.statusOffset);
+            Client aureumClient = new Client(aureumDto);
+            Assert.Equal(Convert.ToInt32(aureumDto.hpAddress, 16) + 0x480, aureumClient.StatusBufferAddress);
 
             // Equivalent EFST IDs: EFST_HEALTHSTATE_ANGELUS (888) satisfies ANGELUS (9); EFST_BASILICA_BUFF (1122) satisfies EFST_BASILICA (111).
             EffectStatusIDs equivalent;

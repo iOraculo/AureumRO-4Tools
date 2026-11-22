@@ -15,24 +15,28 @@ namespace _4RTools.Model
         public string hpAddress { get; set; }
         public string nameAddress { get; set; }
         public string mapAddress { get; set; }
+        public string statusOffset { get; set; }
 
         public int hpAddressPointer { get; set; }
         public int nameAddressPointer { get; set; }
         public int mapAddressPointer { get; set; }
+        public int statusOffsetValue { get; set; }
 
         public ClientDTO() { }
 
-        public ClientDTO(string name, string description, string hpAddress, string nameAddress, string mapAddress = null)
+        public ClientDTO(string name, string description, string hpAddress, string nameAddress, string mapAddress = null, string statusOffset = null)
         {
             this.name = name;
             this.description = description;
             this.hpAddress = hpAddress;
             this.nameAddress = nameAddress;
             this.mapAddress = mapAddress;
+            this.statusOffset = statusOffset;
 
             this.hpAddressPointer = Convert.ToInt32(hpAddress, 16);
             this.nameAddressPointer = Convert.ToInt32(nameAddress, 16);
             this.mapAddressPointer = TryParseOptionalHex(mapAddress);
+            this.statusOffsetValue = TryParseOptionalHex(statusOffset);
         }
 
         internal static int TryParseOptionalHex(string hex)
@@ -176,6 +180,9 @@ namespace _4RTools.Model
             "ecl_in01", "lasagna_in"
         };
 
+        public const int DEFAULT_STATUS_BUFFER_OFFSET = 0x474;
+        public const int RAGEXE_2022_STATUS_BUFFER_OFFSET = 0x480;
+
         public Process process { get; private set; }
         public string processName { get; private set; }
         private ProcessMemoryReader PMR { get; set; }
@@ -183,6 +190,7 @@ namespace _4RTools.Model
         public int currentHPBaseAddress { get; set; }
         public int currentMapAddress { get; set; }
         private int statusBufferAddress { get; set; }
+        public int StatusBufferAddress { get { return this.statusBufferAddress; } }
         private readonly Stopwatch mapCacheClock = Stopwatch.StartNew();
         private long lastMapReadMs = -10000;
         private string cachedMapName = string.Empty;
@@ -200,12 +208,13 @@ namespace _4RTools.Model
             }
         }
 
-        public Client(string processName, int currentHPBaseAddress, int currentNameAddress)
+        public Client(string processName, int currentHPBaseAddress, int currentNameAddress, int statusOffset = DEFAULT_STATUS_BUFFER_OFFSET)
         {
             this.currentNameAddress = currentNameAddress;
             this.currentHPBaseAddress = currentHPBaseAddress;
             this.processName = processName;
-            this.statusBufferAddress = currentHPBaseAddress + 0x474;
+            int resolvedOffset = statusOffset > 0 ? statusOffset : DEFAULT_STATUS_BUFFER_OFFSET;
+            this.statusBufferAddress = currentHPBaseAddress + resolvedOffset;
             this.IsSupported = currentHPBaseAddress != 0;
         }
 
@@ -215,7 +224,11 @@ namespace _4RTools.Model
             this.currentHPBaseAddress = Convert.ToInt32(dto.hpAddress, 16);
             this.currentNameAddress = Convert.ToInt32(dto.nameAddress, 16);
             this.currentMapAddress = ClientDTO.TryParseOptionalHex(dto.mapAddress);
-            this.statusBufferAddress = this.currentHPBaseAddress + 0x474;
+            int parsedStatusOffset = dto.statusOffsetValue > 0
+                ? dto.statusOffsetValue
+                : ClientDTO.TryParseOptionalHex(dto.statusOffset);
+            int resolvedOffset = parsedStatusOffset > 0 ? parsedStatusOffset : DEFAULT_STATUS_BUFFER_OFFSET;
+            this.statusBufferAddress = this.currentHPBaseAddress + resolvedOffset;
             this.IsSupported = this.currentHPBaseAddress != 0;
         }
 
@@ -509,10 +522,29 @@ namespace _4RTools.Model
         }
 
         /// <summary>
-        /// Extracts active EFST codes from a raw status buffer while stopping after a run of
-        /// consecutive IGNORE (0xFFFFFFFF) slots. This tolerates small gaps in active buff lists
-        /// without scanning past the end of the client's status array into unrelated CSession memory
-        /// (which can contain small integers like 9 / EFST_ANGELUS).
+        /// Detects the 3-uint (12-byte) leading header present on Ragexe 2022+ (e.g. FroggoClient) when
+        /// reading from the legacy +0x474 offset instead of +0x480:
+        /// [Slot 0: fixed int (e.g. 9), Slot 1: heap/code pointer (&gt;= 0x10000), Slot 2: fixed int (e.g. 1)].
+        /// Valid Ragnarok Online EFST IDs are always &lt; 65536 (except IGNORE/IGNORE_2 sentinels).
+        /// </summary>
+        public static int DetectLeadingHeaderSkip(uint[] statusBuffer, int count)
+        {
+            if (statusBuffer == null || count < 3 || statusBuffer.Length < 3)
+            {
+                return 0;
+            }
+
+            uint slot1 = statusBuffer[1];
+            bool slot1LooksLikePointer = slot1 >= 0x00010000u
+                && slot1 != (uint)EffectStatusIDs.IGNORE
+                && slot1 != (uint)EffectStatusIDs.IGNORE_2;
+
+            return slot1LooksLikePointer ? 3 : 0;
+        }
+
+        /// <summary>
+        /// Extracts active EFST codes from a raw status buffer while skipping any Ragexe 2022+ leading
+        /// 3-slot header and stopping after a run of consecutive IGNORE (0xFFFFFFFF) slots.
         /// </summary>
         public static int ExtractActiveStatuses(uint[] statusBuffer, int count, List<uint> activeOutput)
         {
@@ -522,10 +554,11 @@ namespace _4RTools.Model
             }
 
             int limit = Math.Min(count, statusBuffer.Length);
+            int startIndex = DetectLeadingHeaderSkip(statusBuffer, limit);
             int consecutiveIgnores = 0;
             int added = 0;
 
-            for (int i = 0; i < limit; i++)
+            for (int i = startIndex; i < limit; i++)
             {
                 uint code = statusBuffer[i];
                 if (code == (uint)EffectStatusIDs.IGNORE || code == (uint)EffectStatusIDs.IGNORE_2)
@@ -556,6 +589,7 @@ namespace _4RTools.Model
             byte[] rawBuffer = new byte[Constants.STATUS_BUFFER_BYTE_SIZE];
             uint[] statusBuffer = new uint[Constants.MAX_BUFF_LIST_INDEX_SIZE];
             int count = ReadBuffStatusBuffer(rawBuffer, statusBuffer);
+            int startIndex = DetectLeadingHeaderSkip(statusBuffer, count);
 
             StringBuilder sb = new StringBuilder();
             string charName = ReadCharacterName();
@@ -572,7 +606,7 @@ namespace _4RTools.Model
             int found = 0;
             int consecutiveIgnores = 0;
             int stopIndex = count;
-            for (int i = 0; i < count; i++)
+            for (int i = startIndex; i < count; i++)
             {
                 uint code = statusBuffer[i];
                 if (code == (uint)EffectStatusIDs.IGNORE || code == (uint)EffectStatusIDs.IGNORE_2)
@@ -591,7 +625,7 @@ namespace _4RTools.Model
                     ? ((EffectStatusIDs)code).ToString()
                     : (LocalizationManager.IsPortuguese ? "(desconhecido)" : "(unknown)");
 
-                sb.AppendFormat("Slot {0:00}:  ID {1}  —  {2}", i, code, enumName);
+                sb.AppendFormat("Slot {0:00}:  ID {1}  —  {2}", i - startIndex, code, enumName);
                 sb.AppendLine();
                 found++;
             }
@@ -816,20 +850,15 @@ namespace _4RTools.Model
                     }
 
                     byte[] statusRaw = new byte[Constants.STATUS_BUFFER_BYTE_SIZE];
-                    if (reader.ReadProcessMemory((IntPtr)(hpAddress + 0x474), statusRaw, statusRaw.Length, out bytesRead)
+                    if (reader.ReadProcessMemory((IntPtr)(hpAddress + DEFAULT_STATUS_BUFFER_OFFSET), statusRaw, statusRaw.Length, out bytesRead)
                         && bytesRead >= sizeof(uint))
                     {
                         int entries = bytesRead / sizeof(uint);
-                        int activeCount = 0;
-                        for (int i = 0; i < entries; i++)
-                        {
-                            uint code = BitConverter.ToUInt32(statusRaw, i * sizeof(uint));
-                            if (code != 0 && code != (uint)EffectStatusIDs.IGNORE && code != (uint)EffectStatusIDs.IGNORE_2)
-                            {
-                                activeCount++;
-                            }
-                        }
-                        result.ActiveBuffCount = activeCount;
+                        uint[] parsedStatuses = new uint[entries];
+                        Buffer.BlockCopy(statusRaw, 0, parsedStatuses, 0, entries * sizeof(uint));
+                        List<uint> activeStatuses = new List<uint>(32);
+                        ExtractActiveStatuses(parsedStatuses, entries, activeStatuses);
+                        result.ActiveBuffCount = activeStatuses.Count;
                     }
                 }
             }

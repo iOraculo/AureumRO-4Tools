@@ -78,6 +78,7 @@ namespace _4RTools.Utils
         EFST_SUFFRAGIUM = 16,
         ANGELUS = 9,
         EFST_HIDING = 4,
+        EFST_POSTDELAY = 46,
         WINDWALK = 116,
         OVERTHRUST = 25,
         OVERTHRUSTMAX = 188,

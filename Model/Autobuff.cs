@@ -63,6 +63,7 @@ namespace _4RTools.Model
         private readonly object mappingLock = new object();
         private readonly Dictionary<EffectStatusIDs, long> lastCastTimesMs = new Dictionary<EffectStatusIDs, long>();
         private readonly HashSet<EffectStatusIDs> observedStatusIcons = new HashSet<EffectStatusIDs>();
+        private readonly HashSet<EffectStatusIDs> previouslyActiveStatuses = new HashSet<EffectStatusIDs>();
         private readonly Stopwatch clock = Stopwatch.StartNew();
         private _4RThread thread;
 
@@ -117,6 +118,7 @@ namespace _4RTools.Model
                     bool foundBlockingDebuff = false;
                     bool isSitting = false;
                     bool isMounted = false;
+                    bool isInPostDelay = false;
                     Dictionary<EffectStatusIDs, Key> missingBuffs = GetBuffMappingSnapshot();
 
                     if (missingBuffs.Count > 0)
@@ -155,16 +157,23 @@ namespace _4RTools.Model
                             {
                                 isMounted = true;
                             }
+                            else if (status == EffectStatusIDs.EFST_POSTDELAY)
+                            {
+                                isInPostDelay = true;
+                            }
                             else if (IncapacitatingDebuffs.Contains(status))
                             {
                                 foundBlockingDebuff = true;
                             }
                         }
 
+                        // Clear cached recast timers for buffs whose status icon just expired (e.g. Basilica).
+                        SyncActiveStatusTransitions(activeStatuses);
+
                         AutoMount autoMount = ProfileSingleton.GetCurrent() != null ? ProfileSingleton.GetCurrent().AutoMount : null;
                         bool pauseForMount = isMounted && autoMount != null && autoMount.Enabled && autoMount.PauseAutobuffWhileMounted;
 
-                        if (missingBuffs.Count > 0 && !(this.pauseWhenSitting && isSitting) && !pauseForMount)
+                        if (missingBuffs.Count > 0 && !isInPostDelay && !(this.pauseWhenSitting && isSitting) && !pauseForMount)
                         {
                             uint currentHp;
                             uint maxHp;
@@ -185,7 +194,7 @@ namespace _4RTools.Model
                                     bool prerequisiteSatisfied = !TryGetPrerequisite(item.Key, out prerequisite)
                                         || activeStatuses.Contains(prerequisite);
 
-                                    if (!ShouldCastBuff(item.Key, nowMs, foundQuag, foundBlockingDebuff, currentSp, maxSp, isSitting, prerequisiteSatisfied))
+                                    if (!ShouldCastBuff(item.Key, nowMs, foundQuag, foundBlockingDebuff, currentSp, maxSp, isSitting, prerequisiteSatisfied, isInPostDelay))
                                     {
                                         continue;
                                     }
@@ -212,7 +221,7 @@ namespace _4RTools.Model
                     }
                 }
 
-                _4RThread.Sleep(300, token);
+                _4RThread.Sleep(150, token);
             }, ACTION_NAME_AUTOBUFF);
         }
 
@@ -224,9 +233,10 @@ namespace _4RTools.Model
             uint currentSp,
             uint maxSp,
             bool isSitting = false,
-            bool prerequisiteSatisfied = true)
+            bool prerequisiteSatisfied = true,
+            bool isInPostDelay = false)
         {
-            if (!prerequisiteSatisfied)
+            if (isInPostDelay || !prerequisiteSatisfied)
             {
                 return false;
             }
@@ -293,6 +303,29 @@ namespace _4RTools.Model
             }
         }
 
+        public void SyncActiveStatusTransitions(HashSet<EffectStatusIDs> currentActiveStatuses)
+        {
+            lock (this.mappingLock)
+            {
+                foreach (EffectStatusIDs prev in this.previouslyActiveStatuses)
+                {
+                    if (currentActiveStatuses == null || !currentActiveStatuses.Contains(prev))
+                    {
+                        this.lastCastTimesMs.Remove(prev);
+                    }
+                }
+
+                this.previouslyActiveStatuses.Clear();
+                if (currentActiveStatuses != null)
+                {
+                    foreach (EffectStatusIDs active in currentActiveStatuses)
+                    {
+                        this.previouslyActiveStatuses.Add(active);
+                    }
+                }
+            }
+        }
+
         public void RecordBuffCast(EffectStatusIDs status, long nowMs)
         {
             lock (this.mappingLock)
@@ -307,6 +340,7 @@ namespace _4RTools.Model
             {
                 this.lastCastTimesMs.Clear();
                 this.observedStatusIcons.Clear();
+                this.previouslyActiveStatuses.Clear();
             }
         }
 

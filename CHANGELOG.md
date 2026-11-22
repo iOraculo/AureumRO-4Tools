@@ -1,5 +1,15 @@
 # Changelogs
 
+## [v2.31.0] - 2026-11-21 — Correção Definitiva do Offset de Status (+0x480 Ragexe 2022), Pós-Conjuração (EFST_POSTDELAY) e Basílica/Angelus/Vigor
+### Fixed
+- **Offset real do buffer de status no Ragexe 2022 / FroggoClient (`supported_servers.json`, `assets/etc/supported_servers.txt`, `Model/Client.cs`)**:
+  - Adicionado `"statusOffset": "0x480"` para o **AureumRO** (corrigindo os 3 slots fixos de cabeçalho em `+0x474`: `[9, ponteiro, 1]`, que mascaravam permanentemente **`ANGELUS = 9`** e **`ENDURE / Vigor = 1`**!).
+  - Adicionada auto-detecção `Client.DetectLeadingHeaderSkip` em `ExtractActiveStatuses` e `BuildActiveStatusReport` para pular automaticamente o cabeçalho de 3 slots mesmo em perfis locais antigos ou outros clientes Ragexe 2022+.
+- **Aguardo de Pós-Conjuração (`EFST_POSTDELAY = 46`) e renovação imediata de Basílica (`Utils/EffectStatusIDs.cs`, `Model/Autobuff.cs`)**:
+  - `Auto-skill` agora aguarda `EFST_POSTDELAY (46)` terminar antes de tentar disparar buffs (sem desperdiçar cooldown durante a pós-conjuração).
+  - Ao detectar que um buff expirou (ex.: `EFST_BASILICA = 111` saiu do buffer), o cooldown em cache é limpo imediatamente via `SyncActiveStatusTransitions`, renovando no instante exato em que a pós-conjuração acaba.
+  - Frequência de leitura do `Auto-skill` reduzida de `300ms` para **`150ms`** para resposta mais rápida.
+
 ## [v2.30.1] - 2026-11-21 — Panaceia / Anti-debuffs elevada ao Nível 2 junto com Yggdrasil
 ### Changed
 - **Prioridade Nível 2 compartilhada entre Yggdrasil e Anti-debuffs / Panaceia (`Model/StatusEffectRecoveryBase.cs`, `Utils/ActionPriorityCoordinator.cs`, `Utils/LocalizationManager.cs`, `Forms/GuideForm.cs`)**:
