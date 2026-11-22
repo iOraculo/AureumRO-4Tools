@@ -1708,6 +1708,19 @@ namespace _4RTools.Forms
             RegisterSectionForm("guide", new GuideForm(this.subject));
         }
 
+        protected override void WndProc(ref System.Windows.Forms.Message m)
+        {
+            const int WM_SYSCOMMAND = 0x0112;
+            const int SC_KEYMENU = 0xF100;
+            // Ignore standalone Alt key menu activation on this borderless/menu-free WinForms window so tapping Alt never traps focus.
+            if (m.Msg == WM_SYSCOMMAND && ((int)m.WParam & 0xFFF0) == SC_KEYMENU && m.LParam == IntPtr.Zero)
+            {
+                return;
+            }
+
+            base.WndProc(ref m);
+        }
+
         private void OnPhysicalPlayerKeyDown(Keys key)
         {
             if (!this.isAutomationOn || KeyboardHook.Alt || KeyboardHook.Control)

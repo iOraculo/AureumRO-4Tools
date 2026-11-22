@@ -1502,5 +1502,50 @@ namespace _4RTools.Tests
                 Assert.False(((System.Windows.Forms.CheckBox)form.Controls.Find("chkEscapePauseTown", true)[0]).Checked);
             }
         }
+
+        [Fact]
+        public void KeyHelperAndKeyboardHook_ReadLiveAsyncModifierAndKeyStatesWithoutSticking()
+        {
+            HashSet<int> pressed = new HashSet<int>();
+            KeyHelper.VirtualKeyDownOverride = vk => pressed.Contains(vk);
+            try
+            {
+                Assert.False(KeyHelper.IsAltPressed());
+                Assert.False(KeyboardHook.Alt);
+                Assert.False(KeyHelper.IsControlPressed());
+                Assert.False(KeyboardHook.Control);
+                Assert.False(KeyHelper.IsKeyDown(Key.None));
+                Assert.False(KeyHelper.IsKeyDown(Key.F1));
+
+                // Left Alt pressed -> immediately detected by both KeyHelper and KeyboardHook.
+                pressed.Add(KeyHelper.VK_LMENU);
+                Assert.True(KeyHelper.IsAltPressed());
+                Assert.True(KeyboardHook.Alt);
+
+                // Released (e.g. after Alt+Tab without WM_KEYUP delivered to background thread) -> immediately false!
+                pressed.Remove(KeyHelper.VK_LMENU);
+                Assert.False(KeyHelper.IsAltPressed());
+                Assert.False(KeyboardHook.Alt);
+
+                // Right Alt / AltGr -> immediately tracked & released.
+                pressed.Add(KeyHelper.VK_RMENU);
+                Assert.True(KeyHelper.IsAltPressed());
+                Assert.True(KeyboardHook.Alt);
+                pressed.Remove(KeyHelper.VK_RMENU);
+                Assert.False(KeyHelper.IsAltPressed());
+                Assert.False(KeyboardHook.Alt);
+
+                // Regular key (F1) read via KeyHelper.IsKeyDown using live VK state.
+                int f1Vk = KeyInterop.VirtualKeyFromKey(Key.F1);
+                pressed.Add(f1Vk);
+                Assert.True(KeyHelper.IsKeyDown(Key.F1));
+                pressed.Remove(f1Vk);
+                Assert.False(KeyHelper.IsKeyDown(Key.F1));
+            }
+            finally
+            {
+                KeyHelper.VirtualKeyDownOverride = null;
+            }
+        }
     }
 }

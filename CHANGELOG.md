@@ -1,5 +1,11 @@
 # Changelogs
 
+## [v2.33.1] - 2026-11-22 — Correção Definitiva de Travamento ao Apertar `Alt` / `Alt+Tab`
+### Fixed
+- **Fim do travamento após apertar `Alt` (`Utils/KeyHelper.cs`, `Utils/KeyboardHook.cs`, `Model/AHK.cs`, `Model/ATKDEFMode.cs`, `Model/Macro.cs`, `Forms/Container.cs`)**:
+  - **Causa raiz corrigida:** `KeyHelper.IsAltPressed()` e `Keyboard.IsKeyDown()` (WPF / `GetKeyState`) liam o estado de teclado em cache da fila de mensagens — em threads de automação em background (sem *message pump*), após `Alt+Tab`, `Alt+E/Q/M` ou perda de foco, o estado de `Alt` ficava preso em `true` congelando todo o 4Tools (`Autopot`, `Auto-skill`, `Spammer`, `Anti-debuffs`, `Montaria`, `Timers`, `@refresh`, `Auto-Fuga` e até a tecla `End` de ON/OFF).
+  - Substituído por consulta em tempo real ao hardware via `GetAsyncKeyState` (`KeyHelper.IsVirtualKeyDown`, `KeyHelper.IsKeyDown`, `KeyHelper.IsAltPressed/IsControlPressed/IsShiftPressed/IsWinPressed`), além de `KeyboardHook.Alt/Control/Shift/Win` sincronizados ao vivo com o hardware, auto-limpeza de teclas presas em `heldPhysicalKeys` e supressão de `SC_KEYMENU` no `Container.WndProc` para um toque solto no `Alt` nunca prender o foco da janela WinForms.
+
 ## [v2.33.0] - 2026-11-22 — Auto-Fuga de Emergência (Asa de Mosca / Teleporte) na aba `Utilidades`
 ### Added
 - **Auto-Fuga de Emergência (`Model/AutoEscape.cs`, `Forms/UtilitiesForm.cs`, `Model/Profile.cs`)**:
