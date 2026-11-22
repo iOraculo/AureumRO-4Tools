@@ -1156,7 +1156,7 @@ namespace _4RTools.Tests
             prof.AutoMount.PauseAutobuffWhileMounted = true;
             prof.AutoMount.IncludeOtherTabsSkillKeys = true;
             prof.AutoMount.AutoRemountAfterIdle = true;
-            prof.AutoMount.RemountDelaySec = 7;
+            prof.AutoMount.RemountDelayMs = 600;
             prof.AutoMount.SetExtraSkillKey(0, Key.A);
 
             prof.UserPreferences.playerInputYieldMs = 150;
@@ -1171,7 +1171,7 @@ namespace _4RTools.Tests
             Assert.Equal(90, reloaded.AutoMount.DismountDelayMs);
             Assert.True(reloaded.AutoMount.PauseAutobuffWhileMounted);
             Assert.True(reloaded.AutoMount.AutoRemountAfterIdle);
-            Assert.Equal(7, reloaded.AutoMount.RemountDelaySec);
+            Assert.Equal(600, reloaded.AutoMount.GetEffectiveRemountDelayMs());
             Assert.Equal(Key.A, reloaded.AutoMount.GetExtraSkillKey(0));
             Assert.Equal(150, reloaded.UserPreferences.playerInputYieldMs);
 

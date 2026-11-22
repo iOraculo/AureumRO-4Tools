@@ -1,5 +1,11 @@
 # Changelogs
 
+## [v2.29.3] - 2026-11-21 — Contador de Remontar em Milissegundos (ms)
+### Changed & Fixed
+- **Remontar em milissegundos (`Model/AutoMount.cs`, `Forms/MountForm.cs`, `Utils/LocalizationManager.cs`)**:
+  - Alterado o campo **`Após(s)`** (que tinha mínimo travado em `2s`) para **`Após(ms)`** (`100ms` a `120000ms`, incremento de `100ms`, padrão `1000ms`) com precisão de verificação a cada `50ms`.
+  - Adicionado respeito ao cooldown da Rédea no servidor (`EFST_ALL_RIDING_REUSE_LIMIT = 614`) para que o auto-remontar aguarde o fim do cooldown sem desistir caso o delay configurado seja curto.
+
 ## [v2.29.2] - 2026-11-21 — Prioridade de Ações movida para a aba Spammer
 ### Changed
 - **Prioridade de Ações alocada na aba `Spammer` (`Forms/AHKForm.cs`, `Forms/MountForm.cs`, `Utils/LocalizationManager.cs`, `Forms/GuideForm.cs`)**:
