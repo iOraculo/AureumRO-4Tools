@@ -508,6 +508,60 @@ namespace _4RTools.Model
             return entriesRead;
         }
 
+        public string BuildActiveStatusReport()
+        {
+            if (!HasMemorySupport || !IsProcessAlive())
+            {
+                return LocalizationManager.T("msg.select_client_first");
+            }
+
+            byte[] rawBuffer = new byte[Constants.STATUS_BUFFER_BYTE_SIZE];
+            uint[] statusBuffer = new uint[Constants.MAX_BUFF_LIST_INDEX_SIZE];
+            int count = ReadBuffStatusBuffer(rawBuffer, statusBuffer);
+
+            StringBuilder sb = new StringBuilder();
+            string charName = ReadCharacterName();
+            string mapName = ReadCurrentMap();
+            sb.AppendFormat(
+                LocalizationManager.IsPortuguese
+                    ? "Personagem: {0}  |  Mapa: {1}"
+                    : "Character: {0}  |  Map: {1}",
+                string.IsNullOrWhiteSpace(charName) ? "-" : charName.Trim(),
+                string.IsNullOrWhiteSpace(mapName) ? "-" : mapName);
+            sb.AppendLine();
+            sb.AppendLine(new string('-', 44));
+
+            int found = 0;
+            for (int i = 0; i < count; i++)
+            {
+                uint code = statusBuffer[i];
+                if (code == (uint)EffectStatusIDs.IGNORE || code == (uint)EffectStatusIDs.IGNORE_2)
+                {
+                    continue;
+                }
+
+                string enumName = Enum.IsDefined(typeof(EffectStatusIDs), code)
+                    ? ((EffectStatusIDs)code).ToString()
+                    : (LocalizationManager.IsPortuguese ? "(desconhecido)" : "(unknown)");
+
+                sb.AppendFormat("Slot {0:00}:  ID {1}  —  {2}", i, code, enumName);
+                sb.AppendLine();
+                found++;
+            }
+
+            if (found == 0)
+            {
+                sb.AppendLine(LocalizationManager.T("status_inspect.empty"));
+            }
+            else
+            {
+                sb.AppendLine(new string('-', 44));
+                sb.AppendFormat(LocalizationManager.T("status_inspect.total"), found);
+            }
+
+            return sb.ToString().TrimEnd();
+        }
+
         public static bool IsBelowPercent(uint current, uint max, int percent)
         {
             if (max == 0 || percent <= 0)

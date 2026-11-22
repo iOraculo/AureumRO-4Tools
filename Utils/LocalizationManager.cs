@@ -208,6 +208,7 @@ namespace _4RTools.Utils
             { "Backup All (.zip)", "Backup (.zip)" },
             { "Restore (.zip)", "Restaurar (.zip)" },
             { "Check Key Conflicts", "Verificar Conflitos" },
+            { "Inspect Status IDs", "Ver Status (IDs)" },
             { "Auto-Switch by Character", "Troca por Personagem" },
             { "Enable Auto-Switch", "Ativar Troca Automática" },
             { "Use Active Character", "Usar Personagem Ativo" },
@@ -373,6 +374,7 @@ namespace _4RTools.Utils
             { "tooltip.profile_backup", "Compacta TODOS os seus perfis e configurações em um único arquivo .zip de backup." },
             { "tooltip.profile_restore", "Restaura perfis e configurações a partir de um arquivo .zip de backup." },
             { "tooltip.profile_conflicts", "Verifica se a mesma tecla foi configurada em duas funções diferentes no perfil atual (ex.: Autopot + Spammer)." },
+            { "tooltip.profile_inspect_status", "Mostra ao vivo todos os IDs de buffs e debuffs (EFST) lidos da memória do AureumRO.exe neste momento — útil para diagnosticar qualquer skill ou status." },
             { "tooltip.profile_autoswitch", "Carrega automaticamente o perfil vinculado ao detectar o nome do personagem logado no jogo (quando em OFF)." },
             { "tooltip.profile_use_char", "Lê automaticamente o nome do personagem logado na janela selecionada do AureumRO." },
             { "tooltip.profile_save_char", "Vincula o nome do personagem digitado ao perfil selecionado na lista." },
@@ -466,6 +468,9 @@ namespace _4RTools.Utils
             { "msg.restore_summary", "Backup restaurado!\nPerfis restaurados: {0}\nServidores customizados restaurados: {1}\nConfigurações restauradas: {2}" },
             { "msg.restore_error", "Falha ao restaurar backup: {0}" },
             { "title.key_conflicts", "Inspetor de Conflito de Teclas" },
+            { "title.status_inspect", "Status Ativos na Memória (EFST IDs)" },
+            { "status_inspect.empty", "Nenhum status/buff ativo encontrado no buffer de memória agora." },
+            { "status_inspect.total", "Total de status ativos detectados: {0}" },
 
             // ServersForm & AddServerForm
             { "msg.server_delete_confirm", "Tem certeza que deseja excluir este servidor?" },
@@ -663,6 +668,7 @@ namespace _4RTools.Utils
             { "tooltip.profile_backup", "Bundles ALL profiles and settings into a single .zip backup archive." },
             { "tooltip.profile_restore", "Restores profiles and settings from a .zip backup archive." },
             { "tooltip.profile_conflicts", "Checks whether the same key is assigned to multiple actions in the current profile (e.g., Autopot + Spammer)." },
+            { "tooltip.profile_inspect_status", "Displays live buff and debuff EFST IDs read from AureumRO.exe memory right now — useful for diagnosing any skill or debuff." },
             { "tooltip.profile_autoswitch", "Automatically loads the bound profile when the logged-in character name is detected (while OFF)." },
             { "tooltip.profile_use_char", "Automatically reads the logged-in character name from the selected AureumRO window." },
             { "tooltip.profile_save_char", "Binds the entered character name to the profile selected in the list." },
@@ -749,6 +755,9 @@ namespace _4RTools.Utils
             { "msg.restore_summary", "Backup restored!\nProfiles restored: {0}\nCustom servers restored: {1}\nApp settings restored: {2}" },
             { "msg.restore_error", "Failed to restore backup: {0}" },
             { "title.key_conflicts", "Keybind Conflict Inspector" },
+            { "title.status_inspect", "Active Status IDs in Memory (EFST)" },
+            { "status_inspect.empty", "No active statuses/buffs found in the client memory buffer right now." },
+            { "status_inspect.total", "Total active statuses detected: {0}" },
 
             { "msg.server_delete_confirm", "Are you sure want to delete this Server?" },
             { "msg.server_deleted", "Server {0} successfully deleted!" },
