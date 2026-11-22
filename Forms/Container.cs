@@ -11,6 +11,8 @@ namespace _4RTools.Forms
     public partial class Container : Form, IObserver
     {
         private readonly Subject subject = new Subject();
+        private readonly SessionContext session;
+        private readonly bool isEmbeddedTab;
         private readonly Timer clientMonitorTimer;
         private readonly Timer vitalsTimer;
         private readonly byte[] vitalsBuffer = new byte[Constants.HP_SP_BLOCK_BYTE_SIZE];
@@ -19,6 +21,7 @@ namespace _4RTools.Forms
         private readonly List<Font> ownedFonts = new List<Font>();
 
         private AppSettings appSettings;
+        private ToggleApplicationStateForm toggleForm;
         private CheckBox cbDarkMode;
         private CheckBox cbUseBuffsInTown;
         private CheckBox cbMiniHud;
@@ -28,6 +31,18 @@ namespace _4RTools.Forms
         private MiniHudForm miniHud;
         private ToolTip headerToolTip;
         private ProfileForm profileForm;
+        private Func<HashSet<string>> assignedProcessProvider;
+
+        public SessionContext Session { get { return this.session; } }
+        public bool IsAutomationOn { get { return this.isAutomationOn; } }
+        public bool IsChatPaused { get { return this.session.IsChatting; } }
+        public string DetectedCharacterName { get { return this.lastDetectedCharacter; } }
+        public string SelectedProcessLabel { get { return this.processCB != null ? (this.processCB.SelectedItem as string) : string.Empty; } }
+
+        public event EventHandler SessionStateChanged;
+        public event Action<bool> DarkModeChangedByUser;
+        public event Action<string> LanguageChangedByUser;
+        public event Action<bool> UseBuffsInTownChangedByUser;
 
         // Modern layout shell controls
         private Panel panelTopBar;
@@ -67,52 +82,156 @@ namespace _4RTools.Forms
         private bool isShuttingDown;
 
         public Container()
+            : this(SessionContext.Default, false, null)
         {
-            this.subject.Attach(this);
-            this.appSettings = AppSettings.Load();
-            LocalizationManager.SetLanguage(this.appSettings.Language);
+        }
 
-            InitializeComponent();
-            this.Text = AppConfig.Name + " - " + AppConfig.Version;
-            this.TransparencyKey = Color.Empty;
-            this.DoubleBuffered = true;
-            this.Tag = ThemeManager.TAG_CANVAS;
+        public Container(SessionContext session, bool isEmbeddedTab, Func<HashSet<string>> assignedProcessProvider = null)
+        {
+            this.session = session ?? SessionContext.Default;
+            this.isEmbeddedTab = isEmbeddedTab;
+            this.assignedProcessProvider = assignedProcessProvider;
+            SessionContext.RegisterSession(this.session);
 
-            BuildModernLayout();
+            using (SessionContext.Enter(this.session))
+            {
+                this.subject.Attach(this);
+                this.appSettings = AppSettings.Load();
+                LocalizationManager.SetLanguage(this.appSettings.Language);
 
-            // Monitor active Ragnarok client so macros stop automatically if the game closes.
-            this.clientMonitorTimer = new Timer();
-            this.clientMonitorTimer.Interval = 1500;
-            this.clientMonitorTimer.Tick += ClientMonitorTimer_Tick;
+                InitializeComponent();
+                this.Text = AppConfig.Name + " - " + AppConfig.Version;
+                this.TransparencyKey = Color.Empty;
+                this.DoubleBuffered = true;
+                this.Tag = ThemeManager.TAG_CANVAS;
 
-            // Live HP/SP bars and character-change detection for profile auto-switch.
-            this.vitalsTimer = new Timer();
-            this.vitalsTimer.Interval = 300;
-            this.vitalsTimer.Tick += VitalsTimer_Tick;
+                BuildModernLayout();
 
-            ChatPauseState.StateChanged += OnChatPauseStateChanged;
-            KeyboardHook.PhysicalKeyDown += OnPhysicalPlayerKeyDown;
+                // Monitor active Ragnarok client so macros stop automatically if the game closes.
+                this.clientMonitorTimer = new Timer();
+                this.clientMonitorTimer.Interval = 1500;
+                this.clientMonitorTimer.Tick += ClientMonitorTimer_Tick;
 
-            // Embed all child forms inside the modern dashboard cards.
-            SetToggleApplicationStateWindow();
-            SetAutopotWindow();
-            SetAutopotYggWindow();
-            SelectAutopotTab(false);
+                // Live HP/SP bars and character-change detection for profile auto-switch.
+                this.vitalsTimer = new Timer();
+                this.vitalsTimer.Interval = 300;
+                this.vitalsTimer.Tick += VitalsTimer_Tick;
 
-            SetAHKWindow();
-            SetDebuffRecoveryWindow();
-            SetAutobuffSkillWindow();
-            SetAutobuffStuffWindow();
-            SetSkillTimerWindow();
-            SetMacrosWindow();
-            SetMountWindow();
-            SetUtilitiesWindow();
-            SetProfileWindow();
-            SetGuideWindow();
+                this.session.ChatStateChanged += OnChatPauseStateChanged;
+                KeyboardHook.PhysicalKeyDown += OnPhysicalPlayerKeyDown;
 
-            SelectSection("spammer");
-            ApplyAppSettingsToUi();
-            UpdateSessionSummaryUi();
+                // Embed all child forms inside the modern dashboard cards.
+                SetToggleApplicationStateWindow();
+                SetAutopotWindow();
+                SetAutopotYggWindow();
+                SelectAutopotTab(false);
+
+                SetAHKWindow();
+                SetDebuffRecoveryWindow();
+                SetAutobuffSkillWindow();
+                SetAutobuffStuffWindow();
+                SetSkillTimerWindow();
+                SetMacrosWindow();
+                SetMountWindow();
+                SetUtilitiesWindow();
+                SetProfileWindow();
+                SetGuideWindow();
+
+                SelectSection("spammer");
+                ApplyAppSettingsToUi();
+                UpdateSessionSummaryUi();
+            }
+        }
+
+        public void SetAutomationState(bool turnOn)
+        {
+            if (this.toggleForm != null && !this.toggleForm.IsDisposed)
+            {
+                this.toggleForm.SetAutomationState(turnOn);
+            }
+        }
+
+        public void ApplyExternalTheme(bool darkMode)
+        {
+            using (SessionContext.Enter(this.session))
+            {
+                this.isApplyingSettings = true;
+                try
+                {
+                    this.appSettings.DarkMode = darkMode;
+                    if (this.cbDarkMode != null)
+                    {
+                        this.cbDarkMode.Checked = darkMode;
+                    }
+                    ThemeManager.ApplyTheme(this, darkMode);
+                    if (this.miniHud != null && !this.miniHud.IsDisposed)
+                    {
+                        this.miniHud.ApplyHudTheme(darkMode);
+                    }
+                }
+                finally
+                {
+                    this.isApplyingSettings = false;
+                }
+            }
+        }
+
+        public void ApplyExternalLanguage(string language)
+        {
+            using (SessionContext.Enter(this.session))
+            {
+                this.isApplyingSettings = true;
+                try
+                {
+                    this.appSettings.Language = language;
+                    LocalizationManager.SetLanguage(language);
+                    if (this.cbLanguage != null)
+                    {
+                        this.cbLanguage.SelectedItem = LocalizationManager.IsPortuguese ? "PT-BR" : "EN";
+                    }
+                    ApplyLanguageToUi();
+                }
+                finally
+                {
+                    this.isApplyingSettings = false;
+                }
+            }
+        }
+
+        public void ApplyExternalUseBuffsInTown(bool allowInTown)
+        {
+            using (SessionContext.Enter(this.session))
+            {
+                this.isApplyingSettings = true;
+                try
+                {
+                    this.appSettings.UseBuffsInTown = allowInTown;
+                    Client.AllowBuffsInTown = allowInTown;
+                    if (this.cbUseBuffsInTown != null)
+                    {
+                        this.cbUseBuffsInTown.Checked = allowInTown;
+                    }
+                    UpdateSessionSummaryUi();
+                }
+                finally
+                {
+                    this.isApplyingSettings = false;
+                }
+            }
+        }
+
+        public void ShutdownEmbedded()
+        {
+            ShutdownApplication(false);
+        }
+
+        private void RaiseSessionStateChanged()
+        {
+            EventHandler handler = this.SessionStateChanged;
+            if (handler != null)
+            {
+                handler(this, EventArgs.Empty);
+            }
         }
 
         private Font TrackFont(string familyName, float emSize, FontStyle style)
@@ -738,57 +857,62 @@ namespace _4RTools.Forms
                 this.pbBrandLogo.Image = this.isAutomationOn ? this.brandLogoOnBitmap : this.brandLogoOffBitmap;
             }
 
-            Client activeClient = ClientSingleton.GetClient();
-            bool hasClient = activeClient != null && activeClient.IsProcessAlive();
-
-            if (this.statusDot != null)
+            using (SessionContext.Enter(this.session))
             {
-                this.statusDot.IsConnected = hasClient;
+                Client activeClient = ClientSingleton.GetClient();
+                bool hasClient = activeClient != null && activeClient.IsProcessAlive();
+
+                if (this.statusDot != null)
+                {
+                    this.statusDot.IsConnected = hasClient;
+                }
+
+                if (this.sessionStatusDot != null && this.lblSessionStatus != null)
+                {
+                    if (this.isAutomationOn && this.session.IsChatting)
+                    {
+                        this.sessionStatusDot.CustomColor = Color.FromArgb(245, 158, 11);
+                        this.lblSessionStatus.Text = LocalizationManager.T("sidebar.status_chat");
+                    }
+                    else if (this.isAutomationOn && hasClient && activeClient.ShouldPauseForTown())
+                    {
+                        this.sessionStatusDot.CustomColor = Color.FromArgb(244, 217, 122);
+                        this.lblSessionStatus.Text = LocalizationManager.T("sidebar.status_town");
+                    }
+                    else if (this.isAutomationOn)
+                    {
+                        this.sessionStatusDot.CustomColor = Color.FromArgb(46, 204, 113);
+                        this.lblSessionStatus.Text = LocalizationManager.T("sidebar.status_on");
+                    }
+                    else
+                    {
+                        this.sessionStatusDot.CustomColor = Color.FromArgb(158, 140, 102);
+                        this.lblSessionStatus.Text = LocalizationManager.T("sidebar.status_off");
+                    }
+                }
+
+                if (this.lblSessionProfile != null)
+                {
+                    string profName = !string.IsNullOrWhiteSpace(this.currentProfile)
+                        ? this.currentProfile
+                        : ProfileSingleton.GetCurrent().Name;
+                    this.lblSessionProfile.Text = LocalizationManager.T("sidebar.profile_prefix", profName);
+                }
+
+                if (this.lblSessionClient != null)
+                {
+                    if (hasClient)
+                    {
+                        this.lblSessionClient.Text = LocalizationManager.T("sidebar.client_connected", activeClient.processName);
+                    }
+                    else
+                    {
+                        this.lblSessionClient.Text = LocalizationManager.T("sidebar.client_none");
+                    }
+                }
             }
 
-            if (this.sessionStatusDot != null && this.lblSessionStatus != null)
-            {
-                if (this.isAutomationOn && ChatPauseState.IsChatting)
-                {
-                    this.sessionStatusDot.CustomColor = Color.FromArgb(245, 158, 11);
-                    this.lblSessionStatus.Text = LocalizationManager.T("sidebar.status_chat");
-                }
-                else if (this.isAutomationOn && hasClient && activeClient.ShouldPauseForTown())
-                {
-                    this.sessionStatusDot.CustomColor = Color.FromArgb(244, 217, 122);
-                    this.lblSessionStatus.Text = LocalizationManager.T("sidebar.status_town");
-                }
-                else if (this.isAutomationOn)
-                {
-                    this.sessionStatusDot.CustomColor = Color.FromArgb(46, 204, 113);
-                    this.lblSessionStatus.Text = LocalizationManager.T("sidebar.status_on");
-                }
-                else
-                {
-                    this.sessionStatusDot.CustomColor = Color.FromArgb(158, 140, 102);
-                    this.lblSessionStatus.Text = LocalizationManager.T("sidebar.status_off");
-                }
-            }
-
-            if (this.lblSessionProfile != null)
-            {
-                string profName = !string.IsNullOrWhiteSpace(this.currentProfile)
-                    ? this.currentProfile
-                    : ProfileSingleton.GetCurrent().Name;
-                this.lblSessionProfile.Text = LocalizationManager.T("sidebar.profile_prefix", profName);
-            }
-
-            if (this.lblSessionClient != null)
-            {
-                if (hasClient)
-                {
-                    this.lblSessionClient.Text = LocalizationManager.T("sidebar.client_connected", activeClient.processName);
-                }
-                else
-                {
-                    this.lblSessionClient.Text = LocalizationManager.T("sidebar.client_none");
-                }
-            }
+            RaiseSessionStateChanged();
         }
 
         private void ApplyAppSettingsToUi()
@@ -907,6 +1031,11 @@ namespace _4RTools.Forms
             LocalizationManager.SetLanguage(this.appSettings.Language);
             ApplyLanguageToUi();
             AppSettings.Save(this.appSettings);
+            Action<string> langChanged = this.LanguageChangedByUser;
+            if (langChanged != null)
+            {
+                langChanged(this.appSettings.Language);
+            }
         }
 
         public void ReloadAppSettings()
@@ -938,6 +1067,11 @@ namespace _4RTools.Forms
                 this.miniHud.ApplyHudTheme(this.appSettings.DarkMode);
             }
             AppSettings.Save(this.appSettings);
+            Action<bool> darkChanged = this.DarkModeChangedByUser;
+            if (darkChanged != null)
+            {
+                darkChanged(this.appSettings.DarkMode);
+            }
         }
 
         private void OnUseBuffsInTownCheckedChanged(object sender, EventArgs e)
@@ -951,6 +1085,11 @@ namespace _4RTools.Forms
             Client.AllowBuffsInTown = this.appSettings.UseBuffsInTown;
             UpdateSessionSummaryUi();
             AppSettings.Save(this.appSettings);
+            Action<bool> townChanged = this.UseBuffsInTownChangedByUser;
+            if (townChanged != null)
+            {
+                townChanged(this.appSettings.UseBuffsInTown);
+            }
         }
 
         private void OnMiniHudCheckedChanged(object sender, EventArgs e)
@@ -1027,7 +1166,7 @@ namespace _4RTools.Forms
                 UpdateSessionSummaryUi();
                 if (this.miniHud != null && !this.miniHud.IsDisposed)
                 {
-                    this.miniHud.UpdateStatus(this.isAutomationOn, ChatPauseState.IsChatting);
+                    this.miniHud.UpdateStatus(this.isAutomationOn, this.session.IsChatting);
                 }
             };
 
@@ -1094,45 +1233,49 @@ namespace _4RTools.Forms
                 return;
             }
 
-            Client client = ClientSingleton.GetClient();
-            if (client == null || !client.IsProcessAlive())
+            using (SessionContext.Enter(this.session))
             {
-                this.vitalsTimer.Stop();
-                this.hpBar.ClearValues();
-                this.spBar.ClearValues();
-                if (this.miniHud != null && !this.miniHud.IsDisposed)
+                Client client = ClientSingleton.GetClient();
+                if (client == null || !client.IsProcessAlive())
                 {
-                    this.miniHud.ClearVitals();
-                }
-                this.lastDetectedCharacter = string.Empty;
-                UpdateSessionSummaryUi();
-                return;
-            }
-
-            if (ChatPauseState.IsChatting && !client.IsGameWindowFocused())
-            {
-                // Auto-clear stuck CHAT state whenever the game window loses focus (e.g. Alt+Tab or clicking 4Tools).
-                ChatPauseState.Resume();
-            }
-
-            UpdateVitalsDisplay(client);
-
-            if (client.HasMemorySupport)
-            {
-                string detected = client.ReadCharacterName();
-                string normalized = string.IsNullOrWhiteSpace(detected) ? string.Empty : detected.Trim();
-                if (!string.Equals(normalized, this.lastDetectedCharacter, StringComparison.Ordinal))
-                {
-                    this.lastDetectedCharacter = normalized;
-                    this.characterName.Text = string.IsNullOrEmpty(normalized) ? "- -" : normalized;
+                    this.vitalsTimer.Stop();
+                    this.hpBar.ClearValues();
+                    this.spBar.ClearValues();
                     if (this.miniHud != null && !this.miniHud.IsDisposed)
                     {
-                        this.miniHud.UpdateIdentity(this.currentProfile ?? ProfileSingleton.GetCurrent().Name, this.characterName.Text);
+                        this.miniHud.ClearVitals();
                     }
+                    this.lastDetectedCharacter = string.Empty;
+                    UpdateSessionSummaryUi();
+                    return;
+                }
 
-                    if (!string.IsNullOrEmpty(normalized) && this.profileCB.Enabled)
+                if (this.session.IsChatting && !client.IsGameWindowFocused())
+                {
+                    // Auto-clear stuck CHAT state whenever the game window loses focus (e.g. Alt+Tab or clicking 4Tools).
+                    this.session.ResumeChat();
+                }
+
+                UpdateVitalsDisplay(client);
+
+                if (client.HasMemorySupport)
+                {
+                    string detected = client.ReadCharacterName();
+                    string normalized = string.IsNullOrWhiteSpace(detected) ? string.Empty : detected.Trim();
+                    if (!string.Equals(normalized, this.lastDetectedCharacter, StringComparison.Ordinal))
                     {
-                        TryAutoSwitchProfileForCharacter(normalized);
+                        this.lastDetectedCharacter = normalized;
+                        this.characterName.Text = string.IsNullOrEmpty(normalized) ? "- -" : normalized;
+                        RaiseSessionStateChanged();
+                        if (this.miniHud != null && !this.miniHud.IsDisposed)
+                        {
+                            this.miniHud.UpdateIdentity(this.currentProfile ?? ProfileSingleton.GetCurrent().Name, this.characterName.Text);
+                        }
+
+                        if (!string.IsNullOrEmpty(normalized) && this.profileCB.Enabled)
+                        {
+                            TryAutoSwitchProfileForCharacter(normalized);
+                        }
                     }
                 }
             }
@@ -1168,27 +1311,31 @@ namespace _4RTools.Forms
 
         private void ClientMonitorTimer_Tick(object sender, EventArgs e)
         {
-            Client client = ClientSingleton.GetClient();
-            if (client != null && !client.IsProcessAlive())
+            using (SessionContext.Enter(this.session))
             {
-                this.clientMonitorTimer.Stop();
-                this.vitalsTimer.Stop();
-                this.isAutomationOn = false;
-                this.subject.Notify(new Utils.Message(MessageCode.TURN_OFF, null));
-                this.subject.Notify(new Utils.Message(MessageCode.CLIENT_DISCONNECTED, null));
-                ClientSingleton.Clear();
-                this.lastDetectedCharacter = string.Empty;
-                this.characterName.Text = "- -";
-                this.hpBar.ClearValues();
-                this.spBar.ClearValues();
-                UpdateSessionSummaryUi();
-                if (this.miniHud != null && !this.miniHud.IsDisposed)
+                Client client = ClientSingleton.GetClient();
+                if (client != null && !client.IsProcessAlive())
                 {
-                    this.miniHud.ClearVitals();
-                    this.miniHud.UpdateIdentity(this.currentProfile ?? ProfileSingleton.GetCurrent().Name, "- -");
-                    this.miniHud.UpdateStatus(false, false);
+                    this.clientMonitorTimer.Stop();
+                    this.vitalsTimer.Stop();
+                    this.isAutomationOn = false;
+                    this.session.IsAutomationOn = false;
+                    this.subject.Notify(new Utils.Message(MessageCode.TURN_OFF, null));
+                    this.subject.Notify(new Utils.Message(MessageCode.CLIENT_DISCONNECTED, null));
+                    ClientSingleton.Clear();
+                    this.lastDetectedCharacter = string.Empty;
+                    this.characterName.Text = "- -";
+                    this.hpBar.ClearValues();
+                    this.spBar.ClearValues();
+                    UpdateSessionSummaryUi();
+                    if (this.miniHud != null && !this.miniHud.IsDisposed)
+                    {
+                        this.miniHud.ClearVitals();
+                        this.miniHud.UpdateIdentity(this.currentProfile ?? ProfileSingleton.GetCurrent().Name, "- -");
+                        this.miniHud.UpdateStatus(false, false);
+                    }
+                    this.refreshProcessList();
                 }
-                this.refreshProcessList();
             }
         }
 
@@ -1199,29 +1346,35 @@ namespace _4RTools.Forms
                 return;
             }
 
-            Client client = new Client(this.processCB.SelectedItem.ToString());
-            ClientSingleton.Instance(client);
-
-            if (!client.IsSupported)
+            using (SessionContext.Enter(this.session))
             {
-                MessageBox.Show(
-                    LocalizationManager.T("msg.client_unsupported"),
-                    LocalizationManager.T("title.warning"),
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
+                Client client = new Client(this.processCB.SelectedItem.ToString());
+                ClientSingleton.Instance(client);
 
-            this.subject.Notify(new Utils.Message(Utils.MessageCode.PROCESS_CHANGED, null));
+                if (!client.IsSupported)
+                {
+                    MessageBox.Show(
+                        LocalizationManager.T("msg.client_unsupported"),
+                        LocalizationManager.T("title.warning"),
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+
+                this.subject.Notify(new Utils.Message(Utils.MessageCode.PROCESS_CHANGED, null));
+            }
         }
 
         private void Container_Load(object sender, EventArgs e)
         {
-            ProfileSingleton.Create("Default");
-            this.refreshProcessList();
-            this.refreshProfileList("Default");
-            ApplyLanguageToUi();
-            ThemeManager.ApplyTheme(this, this.appSettings.DarkMode);
-            UpdateSessionSummaryUi();
+            using (SessionContext.Enter(this.session))
+            {
+                ProfileSingleton.Create("Default");
+                this.refreshProcessList();
+                this.refreshProfileList("Default");
+                ApplyLanguageToUi();
+                ThemeManager.ApplyTheme(this, this.appSettings.DarkMode);
+                UpdateSessionSummaryUi();
+            }
         }
 
         public void refreshProfileList(string selectProfile = null)
@@ -1315,9 +1468,25 @@ namespace _4RTools.Forms
                 {
                     this.processCB.SelectedItem = previousSelection;
                 }
-                else if (this.processCB.Items.Count == 1)
+                else
                 {
-                    this.processCB.SelectedIndex = 0;
+                    HashSet<string> assigned = this.assignedProcessProvider != null ? this.assignedProcessProvider() : null;
+                    if (assigned != null && assigned.Count > 0)
+                    {
+                        for (int i = 0; i < this.processCB.Items.Count; i++)
+                        {
+                            string candidate = this.processCB.Items[i] as string;
+                            if (!string.IsNullOrEmpty(candidate) && !assigned.Contains(candidate))
+                            {
+                                this.processCB.SelectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    else if (this.processCB.Items.Count == 1)
+                    {
+                        this.processCB.SelectedIndex = 0;
+                    }
                 }
             };
 
@@ -1382,37 +1551,49 @@ namespace _4RTools.Forms
 
             try
             {
-                KeyboardHook.PhysicalKeyDown -= OnPhysicalPlayerKeyDown;
-                ChatPauseState.StateChanged -= OnChatPauseStateChanged;
-                ActionPriorityCoordinator.SetYggEmergencyActive(false);
-                this.clientMonitorTimer.Stop();
-                this.clientMonitorTimer.Dispose();
-                this.vitalsTimer.Stop();
-                this.vitalsTimer.Dispose();
-                if (this.miniHud != null && !this.miniHud.IsDisposed)
+                using (SessionContext.Enter(this.session))
                 {
-                    this.miniHud.CloseRequested -= OnMiniHudCloseRequested;
-                    this.miniHud.PositionChanged -= OnMiniHudPositionChanged;
-                    this.miniHud.Close();
-                    this.miniHud.Dispose();
-                    this.miniHud = null;
+                    KeyboardHook.PhysicalKeyDown -= OnPhysicalPlayerKeyDown;
+                    this.session.ChatStateChanged -= OnChatPauseStateChanged;
+                    ActionPriorityCoordinator.SetYggEmergencyActive(false);
+                    this.clientMonitorTimer.Stop();
+                    this.clientMonitorTimer.Dispose();
+                    this.vitalsTimer.Stop();
+                    this.vitalsTimer.Dispose();
+                    if (this.miniHud != null && !this.miniHud.IsDisposed)
+                    {
+                        this.miniHud.CloseRequested -= OnMiniHudCloseRequested;
+                        this.miniHud.PositionChanged -= OnMiniHudPositionChanged;
+                        this.miniHud.Close();
+                        this.miniHud.Dispose();
+                        this.miniHud = null;
+                    }
+                    if (this.headerToolTip != null)
+                    {
+                        this.headerToolTip.Dispose();
+                        this.headerToolTip = null;
+                    }
+                    if (this.toggleForm != null && !this.toggleForm.IsDisposed)
+                    {
+                        this.toggleForm.Shutdown();
+                    }
+                    this.session.ResumeChat();
+                    this.session.IsAutomationOn = false;
+                    if (!this.isEmbeddedTab)
+                    {
+                        KeyboardHook.Disable();
+                    }
+                    this.subject.Notify(new Utils.Message(MessageCode.TURN_OFF, null));
+                    ClientSingleton.Clear();
+                    SessionContext.UnregisterSession(this.session);
                 }
-                if (this.headerToolTip != null)
-                {
-                    this.headerToolTip.Dispose();
-                    this.headerToolTip = null;
-                }
-                ChatPauseState.Resume();
-                KeyboardHook.Disable();
-                this.subject.Notify(new Utils.Message(MessageCode.TURN_OFF, null));
-                ClientSingleton.Clear();
             }
             catch (Exception ex)
             {
                 Logger.Error("Container", "Error during shutdown", ex);
             }
 
-            if (requestClose && !this.IsDisposed)
+            if (requestClose && !this.isEmbeddedTab && !this.IsDisposed)
             {
                 this.Close();
             }
@@ -1463,10 +1644,13 @@ namespace _4RTools.Forms
 
             try
             {
-                ProfileSingleton.Load(active);
-                using (ProfileSingleton.SuppressSave())
+                using (SessionContext.Enter(this.session))
                 {
-                    this.subject.Notify(new Utils.Message(MessageCode.PROFILE_CHANGED, null));
+                    ProfileSingleton.Load(active);
+                    using (ProfileSingleton.SuppressSave())
+                    {
+                        this.subject.Notify(new Utils.Message(MessageCode.PROFILE_CHANGED, null));
+                    }
                 }
             }
             catch (Exception ex)
@@ -1485,11 +1669,14 @@ namespace _4RTools.Forms
 
             try
             {
-                ProfileSingleton.Load(selected);
-                this.currentProfile = selected;
-                using (ProfileSingleton.SuppressSave())
+                using (SessionContext.Enter(this.session))
                 {
-                    this.subject.Notify(new Utils.Message(MessageCode.PROFILE_CHANGED, null));
+                    ProfileSingleton.Load(selected);
+                    this.currentProfile = selected;
+                    using (ProfileSingleton.SuppressSave())
+                    {
+                        this.subject.Notify(new Utils.Message(MessageCode.PROFILE_CHANGED, null));
+                    }
                 }
             }
             catch (Exception ex)
@@ -1511,78 +1698,87 @@ namespace _4RTools.Forms
                 return;
             }
 
-            switch (subj.Message.code)
+            using (SessionContext.Enter(this.session))
             {
-                case MessageCode.PROCESS_CHANGED:
-                    Client activeClient = ClientSingleton.GetClient();
-                    UpdateCharacterNameLabel(true);
-                    UpdateVitalsDisplay(activeClient);
-                    UpdateSessionSummaryUi();
-                    if (activeClient != null && activeClient.IsProcessAlive())
-                    {
+                switch (subj.Message.code)
+                {
+                    case MessageCode.PROCESS_CHANGED:
+                        Client activeClient = ClientSingleton.GetClient();
+                        UpdateCharacterNameLabel(true);
+                        UpdateVitalsDisplay(activeClient);
+                        UpdateSessionSummaryUi();
+                        if (activeClient != null && activeClient.IsProcessAlive())
+                        {
+                            this.vitalsTimer.Start();
+                        }
+                        else
+                        {
+                            this.vitalsTimer.Stop();
+                        }
+                        break;
+                    case MessageCode.PROFILE_CHANGED:
+                        UpdateCharacterNameLabel(false);
+                        UpdateSessionSummaryUi();
+                        if (this.profileForm != null)
+                        {
+                            this.profileForm.RefreshCharacterBindingUi();
+                        }
+                        if (this.miniHud != null && !this.miniHud.IsDisposed)
+                        {
+                            this.miniHud.UpdateIdentity(this.currentProfile ?? ProfileSingleton.GetCurrent().Name, this.characterName.Text);
+                        }
+                        break;
+                    case MessageCode.TURN_OFF:
+                        this.isAutomationOn = false;
+                        this.session.IsAutomationOn = false;
+                        ActionPriorityCoordinator.SetYggEmergencyActive(false);
+                        this.clientMonitorTimer.Stop();
+                        this.profileCB.Enabled = true;
+                        this.processCB.Enabled = true;
+                        UpdateSessionSummaryUi();
+                        if (this.miniHud != null && !this.miniHud.IsDisposed)
+                        {
+                            this.miniHud.UpdateStatus(false, false);
+                        }
+                        break;
+                    case MessageCode.TURN_ON:
+                        this.isAutomationOn = true;
+                        this.session.IsAutomationOn = true;
+                        this.profileCB.Enabled = false;
+                        this.processCB.Enabled = false;
+                        UpdateCharacterNameLabel(false);
+                        UpdateSessionSummaryUi();
+                        this.clientMonitorTimer.Start();
                         this.vitalsTimer.Start();
-                    }
-                    else
-                    {
-                        this.vitalsTimer.Stop();
-                    }
-                    break;
-                case MessageCode.PROFILE_CHANGED:
-                    UpdateCharacterNameLabel(false);
-                    UpdateSessionSummaryUi();
-                    if (this.profileForm != null)
-                    {
-                        this.profileForm.RefreshCharacterBindingUi();
-                    }
-                    if (this.miniHud != null && !this.miniHud.IsDisposed)
-                    {
-                        this.miniHud.UpdateIdentity(this.currentProfile ?? ProfileSingleton.GetCurrent().Name, this.characterName.Text);
-                    }
-                    break;
-                case MessageCode.TURN_OFF:
-                    this.isAutomationOn = false;
-                    ActionPriorityCoordinator.SetYggEmergencyActive(false);
-                    this.clientMonitorTimer.Stop();
-                    this.profileCB.Enabled = true;
-                    this.processCB.Enabled = true;
-                    UpdateSessionSummaryUi();
-                    if (this.miniHud != null && !this.miniHud.IsDisposed)
-                    {
-                        this.miniHud.UpdateStatus(false, false);
-                    }
-                    break;
-                case MessageCode.TURN_ON:
-                    this.isAutomationOn = true;
-                    this.profileCB.Enabled = false;
-                    this.processCB.Enabled = false;
-                    UpdateCharacterNameLabel(false);
-                    UpdateSessionSummaryUi();
-                    this.clientMonitorTimer.Start();
-                    this.vitalsTimer.Start();
-                    if (this.miniHud != null && !this.miniHud.IsDisposed)
-                    {
-                        this.miniHud.UpdateStatus(true, ChatPauseState.IsChatting);
-                    }
-                    break;
-                case MessageCode.CLIENT_DISCONNECTED:
-                    UpdateSessionSummaryUi();
-                    break;
-                case MessageCode.SERVER_LIST_CHANGED:
-                    this.refreshProcessList();
-                    break;
-                case MessageCode.CLICK_ICON_TRAY:
-                    this.Show();
-                    this.WindowState = FormWindowState.Normal;
-                    this.Activate();
-                    break;
-                case MessageCode.SHUTDOWN_APPLICATION:
-                    ShutdownApplication(true);
-                    break;
+                        if (this.miniHud != null && !this.miniHud.IsDisposed)
+                        {
+                            this.miniHud.UpdateStatus(true, this.session.IsChatting);
+                        }
+                        break;
+                    case MessageCode.CLIENT_DISCONNECTED:
+                        UpdateSessionSummaryUi();
+                        break;
+                    case MessageCode.SERVER_LIST_CHANGED:
+                        this.refreshProcessList();
+                        break;
+                    case MessageCode.CLICK_ICON_TRAY:
+                        if (!this.isEmbeddedTab)
+                        {
+                            this.Show();
+                            this.WindowState = FormWindowState.Normal;
+                            this.Activate();
+                        }
+                        break;
+                    case MessageCode.SHUTDOWN_APPLICATION:
+                        ShutdownApplication(true);
+                        break;
+                }
             }
         }
 
         private void UpdateCharacterNameLabel(bool allowAutoSwitch)
         {
+            string previousDetected = this.lastDetectedCharacter;
             Client client = ClientSingleton.GetClient();
             if (client != null && client.IsProcessAlive())
             {
@@ -1605,6 +1801,11 @@ namespace _4RTools.Forms
             if (this.miniHud != null && !this.miniHud.IsDisposed)
             {
                 this.miniHud.UpdateIdentity(this.currentProfile ?? ProfileSingleton.GetCurrent().Name, this.characterName.Text);
+            }
+
+            if (!string.Equals(previousDetected, this.lastDetectedCharacter, StringComparison.Ordinal))
+            {
+                RaiseSessionStateChanged();
             }
         }
 
@@ -1631,10 +1832,11 @@ namespace _4RTools.Forms
 
         public void SetToggleApplicationStateWindow()
         {
-            ToggleApplicationStateForm frm = new ToggleApplicationStateForm(this.subject);
+            ToggleApplicationStateForm frm = new ToggleApplicationStateForm(this.subject, this.session, this.isEmbeddedTab);
             frm.TopLevel = false;
             frm.FormBorderStyle = FormBorderStyle.None;
             frm.Dock = DockStyle.Fill;
+            this.toggleForm = frm;
             this.OnOffPanel.Controls.Add(frm);
             frm.Show();
         }
@@ -1729,25 +1931,28 @@ namespace _4RTools.Forms
 
         private void OnPhysicalPlayerKeyDown(Keys key)
         {
-            if (!this.isAutomationOn || KeyboardHook.Alt || KeyboardHook.Control)
+            using (SessionContext.Enter(this.session))
             {
-                return;
-            }
-
-            Profile prof = ProfileSingleton.GetCurrent();
-            if (prof != null && prof.UserPreferences != null)
-            {
-                Keys toggleKey;
-                if (KeyHelper.TryParseFormsKeys(prof.UserPreferences.toggleStateKey, out toggleKey) && key == toggleKey)
+                if (!this.isAutomationOn || KeyboardHook.Alt || KeyboardHook.Control)
                 {
                     return;
                 }
-            }
 
-            Client activeClient = ClientSingleton.GetClient();
-            if (activeClient != null && activeClient.IsProcessAlive() && activeClient.IsGameWindowFocused())
-            {
-                ActionPriorityCoordinator.NotifyPlayerInput();
+                Profile prof = ProfileSingleton.GetCurrent();
+                if (prof != null && prof.UserPreferences != null)
+                {
+                    Keys toggleKey;
+                    if (KeyHelper.TryParseFormsKeys(prof.UserPreferences.toggleStateKey, out toggleKey) && key == toggleKey)
+                    {
+                        return;
+                    }
+                }
+
+                Client activeClient = ClientSingleton.GetClient();
+                if (activeClient != null && activeClient.IsProcessAlive() && activeClient.IsGameWindowFocused())
+                {
+                    ActionPriorityCoordinator.NotifyPlayerInput();
+                }
             }
         }
 

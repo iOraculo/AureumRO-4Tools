@@ -1,5 +1,14 @@
 # Changelogs
 
+## [v2.35.0] - 2026-11-22 — Modo Multi-Conta 3 em 1 (`Conta 1 | Conta 2 | Conta 3` em 1 Janela)
+### Added
+- **Janela única Multi-Conta 3 em 1 (`Forms/MultiAccountShellForm.cs`, `Utils/SessionContext.cs`, `Forms/Container.cs`, `Forms/ToggleApplicationStateForm.cs`, `Utils/_4RThread.cs`)**:
+  - Agora você controla **3 contas completas e independentes** (`Conta 1`, `Conta 2`, `Conta 3`) dentro de **uma única janela** do AureumRO 4Tools — sem precisar abrir 3 executáveis diferentes nem duplicar hooks de teclado.
+  - **Barra superior de abas ao vivo**: cada aba exibe uma bolinha de status (**Verde = ON**, **Laranja = CHAT**, **Cinza = OFF**) e o nome do personagem detectado em tempo real, além de botões rápidos **`Ligar Todas`** e **`Parar Todas`** e um único ícone na bandeja do sistema.
+  - **Isolamento total por conta (`SessionContext`)**: cliente (`PID`), perfil, Autopot/Yggdrasil, Auto-skills, Auto-consumíveis, Anti-debuffs, Temporizadores, Auto-Fuga, `@refresh`, Montaria, estado `CHAT` e `Prioridade de Ações` / `Segurar pausa` rodam isolados por aba, inclusive em threads em background (`_4RThread`).
+  - **Seleção inteligente de janelas e atalhos**: ao detectar vários clientes abertos, cada aba evita selecionar um `PID` já ocupado por outra aba; se 2+ contas estiverem ligadas juntas, **Autopot / Ygg / Auto-Fuga / Auto-buffs / Anti-debuffs** rodam simultaneamente em segundo plano em todas elas enquanto **Spammers / Macros manuais** respondem apenas na janela do RO em foco. A tecla de ligar/desligar (`End` ou customizada) alterna a janela do RO em foco se compartilhada, ou controla uma conta específica de qualquer lugar se configurada com tecla única.
+  - **Tema, Idioma e Buffs em cidade sincronizados** automaticamente entre as 3 abas.
+
 ## [v2.34.1] - 2026-11-22 — Correção do Envio de `@refresh` no Ragexe 2022 (`SendInput` Unicode) e Dessincronia do Estado `CHAT`
 ### Fixed
 - **Envio real de `@refresh` no chat do Ragexe 2022 (`Utils/Interop.cs`, `Model/AutoRefreshCommand.cs`, `Forms/UtilitiesForm.cs`)**:

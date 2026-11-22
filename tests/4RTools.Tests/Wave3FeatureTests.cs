@@ -1630,5 +1630,176 @@ namespace _4RTools.Tests
                 ActionPriorityCoordinator.Reset();
             }
         }
+
+        [Fact]
+        public void SessionContext_IsolatesProfilesClientsChatPausePriorityAndWorkerThreads()
+        {
+            SessionContext sessionA = new SessionContext(0);
+            SessionContext sessionB = new SessionContext(1);
+            SessionContext.RegisterSession(sessionA);
+            SessionContext.RegisterSession(sessionB);
+
+            try
+            {
+                using (SessionContext.Enter(sessionA))
+                {
+                    ProfileSingleton.profile = new Profile("AccountOne");
+                    ChatPauseState.SetChatting(true);
+                    ActionPriorityCoordinator.PlayerInputYieldMs = 210;
+                    ActionPriorityCoordinator.HoldPauseKey = Key.LeftCtrl;
+                    ActionPriorityCoordinator.HoldPauseIncludeAutopot = true;
+                    Assert.True(sessionA.TryBeginSendingCommand());
+                }
+
+                using (SessionContext.Enter(sessionB))
+                {
+                    ProfileSingleton.profile = new Profile("AccountTwo");
+                    Assert.False(ChatPauseState.IsChatting);
+                    Assert.Equal(ActionPriorityCoordinator.DEFAULT_PLAYER_INPUT_YIELD_MS, ActionPriorityCoordinator.PlayerInputYieldMs);
+                    Assert.Equal(Key.None, ActionPriorityCoordinator.HoldPauseKey);
+                    Assert.False(ActionPriorityCoordinator.HoldPauseIncludeAutopot);
+                    Assert.False(AutoRefreshCommand.IsSendingCommand);
+
+                    ActionPriorityCoordinator.PlayerInputYieldMs = 95;
+                    ActionPriorityCoordinator.HoldPauseKey = Key.Tab;
+                }
+
+                using (SessionContext.Enter(sessionA))
+                {
+                    Assert.Equal("AccountOne", ProfileSingleton.GetCurrent().Name);
+                    Assert.True(ChatPauseState.IsChatting);
+                    Assert.Equal(210, ActionPriorityCoordinator.PlayerInputYieldMs);
+                    Assert.Equal(Key.LeftCtrl, ActionPriorityCoordinator.HoldPauseKey);
+                    Assert.True(ActionPriorityCoordinator.HoldPauseIncludeAutopot);
+                    Assert.True(AutoRefreshCommand.IsSendingCommand);
+                    sessionA.EndSendingCommand();
+                }
+
+                using (SessionContext.Enter(sessionB))
+                {
+                    Assert.Equal("AccountTwo", ProfileSingleton.GetCurrent().Name);
+                    Assert.Equal(95, ActionPriorityCoordinator.PlayerInputYieldMs);
+                    Assert.Equal(Key.Tab, ActionPriorityCoordinator.HoldPauseKey);
+                }
+
+                // _4RThread must inherit the SessionContext that created it.
+                SessionContext seenInThreadA = null;
+                SessionContext seenInThreadB = null;
+                System.Threading.ManualResetEventSlim doneA = new System.Threading.ManualResetEventSlim(false);
+                System.Threading.ManualResetEventSlim doneB = new System.Threading.ManualResetEventSlim(false);
+
+                _4RThread threadA;
+                using (SessionContext.Enter(sessionA))
+                {
+                    threadA = new _4RThread(_ =>
+                    {
+                        seenInThreadA = SessionContext.Current;
+                        doneA.Set();
+                        return 100;
+                    });
+                }
+
+                _4RThread threadB;
+                using (SessionContext.Enter(sessionB))
+                {
+                    threadB = new _4RThread(_ =>
+                    {
+                        seenInThreadB = SessionContext.Current;
+                        doneB.Set();
+                        return 100;
+                    });
+                }
+
+                try
+                {
+                    _4RThread.Start(threadA);
+                    _4RThread.Start(threadB);
+                    Assert.True(doneA.Wait(2000));
+                    Assert.True(doneB.Wait(2000));
+                    Assert.Same(sessionA, seenInThreadA);
+                    Assert.Same(sessionB, seenInThreadB);
+                }
+                finally
+                {
+                    _4RThread.Stop(threadA);
+                    _4RThread.Stop(threadB);
+                    doneA.Dispose();
+                    doneB.Dispose();
+                }
+
+                // HasMultipleActiveSessions reflects how many registered sessions are currently ON.
+                sessionA.IsAutomationOn = false;
+                sessionB.IsAutomationOn = false;
+                Assert.False(SessionContext.HasMultipleActiveSessions);
+                sessionA.IsAutomationOn = true;
+                Assert.False(SessionContext.HasMultipleActiveSessions);
+                sessionB.IsAutomationOn = true;
+                Assert.True(SessionContext.HasMultipleActiveSessions);
+            }
+            finally
+            {
+                sessionA.IsAutomationOn = false;
+                sessionB.IsAutomationOn = false;
+                SessionContext.UnregisterSession(sessionA);
+                SessionContext.UnregisterSession(sessionB);
+            }
+        }
+
+        [Fact]
+        public void MultiAccountShellForm_HostsThreeIndependentAccountTabsAndSwitchesActiveUiSession()
+        {
+            SessionContext s0;
+            SessionContext s1;
+            SessionContext s2;
+
+            using (MultiAccountShellForm shell = new MultiAccountShellForm())
+            {
+                Assert.Equal(3, shell.AccountCount);
+                Assert.Equal(0, shell.ActiveAccountIndex);
+
+                s0 = shell.GetAccountSession(0);
+                s1 = shell.GetAccountSession(1);
+                s2 = shell.GetAccountSession(2);
+
+                Assert.NotNull(s0);
+                Assert.NotNull(s1);
+                Assert.NotNull(s2);
+                Assert.NotSame(s0, s1);
+                Assert.NotSame(s1, s2);
+                Assert.NotSame(s0, s2);
+
+                Container c0 = shell.GetAccountContainer(0);
+                Container c1 = shell.GetAccountContainer(1);
+                Container c2 = shell.GetAccountContainer(2);
+                Assert.NotNull(c0);
+                Assert.NotNull(c1);
+                Assert.NotNull(c2);
+
+                Assert.Same(s0, SessionContext.ActiveUiSession);
+                Assert.True(c0.Visible);
+                Assert.False(c1.Visible);
+                Assert.False(c2.Visible);
+
+                shell.SelectAccountTab(1);
+                Assert.Equal(1, shell.ActiveAccountIndex);
+                Assert.Same(s1, SessionContext.ActiveUiSession);
+                Assert.False(c0.Visible);
+                Assert.True(c1.Visible);
+                Assert.False(c2.Visible);
+
+                shell.SelectAccountTab(2);
+                Assert.Equal(2, shell.ActiveAccountIndex);
+                Assert.Same(s2, SessionContext.ActiveUiSession);
+                Assert.False(c0.Visible);
+                Assert.False(c1.Visible);
+                Assert.True(c2.Visible);
+            }
+
+            Assert.Same(SessionContext.Default, SessionContext.ActiveUiSession);
+            List<SessionContext> remaining = SessionContext.GetRegisteredSessions();
+            Assert.DoesNotContain(s0, remaining);
+            Assert.DoesNotContain(s1, remaining);
+            Assert.DoesNotContain(s2, remaining);
+        }
     }
 }

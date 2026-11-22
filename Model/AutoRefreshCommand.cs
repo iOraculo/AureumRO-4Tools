@@ -22,16 +22,15 @@ namespace _4RTools.Model
         public const int MAX_INTERVAL_SECONDS = 3600;
         public const int MANUAL_DEBOUNCE_MS = 1500;
 
-        private static int sendingCommandFlag = 0;
-
         public static bool IsSendingCommand
         {
-            get { return Volatile.Read(ref sendingCommandFlag) == 1; }
+            get { return SessionContext.Current.IsSendingCommand; }
         }
 
         private readonly object stateLock = new object();
         private readonly Stopwatch clock = Stopwatch.StartNew();
         private _4RThread periodicThread;
+        private SessionContext boundSession;
         private bool hookSubscribed;
         private long lastManualTriggerMs = -MANUAL_DEBOUNCE_MS;
         private long lastRefreshMs = -MANUAL_DEBOUNCE_MS;
@@ -129,6 +128,7 @@ namespace _4RTools.Model
 
             lock (this.stateLock)
             {
+                this.boundSession = SessionContext.Current;
                 // Manual hotkey works immediately after turning ON, while periodic countdown waits one full interval.
                 this.lastManualTriggerMs = -MANUAL_DEBOUNCE_MS;
                 this.lastRefreshMs = this.clock.ElapsedMilliseconds;
@@ -163,39 +163,49 @@ namespace _4RTools.Model
 
         private void OnPhysicalKeyDown(Keys formsKey)
         {
-            if (!this.Enabled || KeyHelper.IsAltPressed())
+            SessionContext targetSession = this.boundSession ?? SessionContext.Current;
+            using (SessionContext.Enter(targetSession))
             {
-                return;
-            }
+                if (!this.Enabled || KeyHelper.IsAltPressed())
+                {
+                    return;
+                }
 
-            Key pressedKey = KeyHelper.FromFormsKeys(formsKey);
-            if (pressedKey == Key.None || pressedKey != this.Hotkey)
-            {
-                return;
-            }
+                Key pressedKey = KeyHelper.FromFormsKeys(formsKey);
+                if (pressedKey == Key.None || pressedKey != this.Hotkey)
+                {
+                    return;
+                }
 
-            // If user is chatting and bound a typing key (e.g. letter/number), do not interrupt their chat message.
-            // Non-typing function keys (F1-F24) still execute @refresh even if the chat bar is already open!
-            bool chatAlreadyOpen = ChatPauseState.IsChatting;
-            if (chatAlreadyOpen && ChatPauseState.IsTypingKey(pressedKey))
-            {
-                return;
-            }
+                // If user is chatting and bound a typing key (e.g. letter/number), do not interrupt their chat message.
+                // Non-typing function keys (F1-F24) still execute @refresh even if the chat bar is already open!
+                bool chatAlreadyOpen = ChatPauseState.IsChatting;
+                if (chatAlreadyOpen && ChatPauseState.IsTypingKey(pressedKey))
+                {
+                    return;
+                }
 
-            Client roClient = ClientSingleton.GetClient();
-            if (roClient == null || !roClient.IsProcessAlive() || !roClient.IsGameWindowFocused())
-            {
-                return;
-            }
+                Client roClient = ClientSingleton.GetClient();
+                if (roClient == null || !roClient.IsProcessAlive() || !roClient.IsGameWindowFocused())
+                {
+                    return;
+                }
 
-            long nowMs = this.clock.ElapsedMilliseconds;
-            if (!CanTriggerManual(nowMs))
-            {
-                return;
-            }
+                long nowMs = this.clock.ElapsedMilliseconds;
+                if (!CanTriggerManual(nowMs))
+                {
+                    return;
+                }
 
-            RecordRefreshExecuted(nowMs, true);
-            ThreadPool.QueueUserWorkItem(_ => SendRefreshCommand(roClient, chatAlreadyOpen, false));
+                RecordRefreshExecuted(nowMs, true);
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    using (SessionContext.Enter(targetSession))
+                    {
+                        SendRefreshCommand(roClient, chatAlreadyOpen, false);
+                    }
+                });
+            }
         }
 
         private _4RThread CreatePeriodicThread(Client client)
@@ -261,7 +271,8 @@ namespace _4RTools.Model
                 return false;
             }
 
-            if (Interlocked.CompareExchange(ref sendingCommandFlag, 1, 0) != 0)
+            SessionContext session = SessionContext.Current;
+            if (!session.TryBeginSendingCommand())
             {
                 return false;
             }
@@ -283,7 +294,7 @@ namespace _4RTools.Model
             }
             finally
             {
-                Interlocked.Exchange(ref sendingCommandFlag, 0);
+                session.EndSendingCommand();
             }
         }
 

@@ -584,7 +584,15 @@ namespace _4RTools.Utils
             { "tooltip.escape_hp", "Porcentagem crítica de HP abaixo da qual o 4Tools aciona a fuga automaticamente (ex.: 20%)." },
             { "tooltip.escape_cooldown", "Intervalo mínimo em milissegundos (ms) entre disparos para evitar gastar várias asas durante o teleporte (padrão: 2000ms)." },
             { "tooltip.escape_confirm_enter", "Marque se usar a skill Teleporte (Noviço/Sacerdote/Carta Creamy): pressiona Enter automaticamente 80ms após a tecla para confirmar." },
-            { "tooltip.escape_pause_town", "Mantém o Auto-Fuga desativado dentro de cidades para evitar gastar asas acidentalmente." }
+            { "tooltip.escape_pause_town", "Mantém o Auto-Fuga desativado dentro de cidades para evitar gastar asas acidentalmente." },
+
+            // Multi-Account 3-in-1 Shell
+            { "shell.account_tab", "Conta {0}" },
+            { "shell.start_all", "Ligar Todas" },
+            { "shell.stop_all", "Parar Todas" },
+            { "tooltip.shell_account_tab", "Alterna para a Conta {0} (cada aba possui Cliente, Perfil, ON/OFF e automações independentes)." },
+            { "tooltip.shell_start_all", "Liga todas as contas que já possuem uma janela do AureumRO selecionada." },
+            { "tooltip.shell_stop_all", "Desliga imediatamente todas as contas ativas (emergência)." }
         };
 
         private static readonly Dictionary<string, string> MessagesEn = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -897,7 +905,15 @@ namespace _4RTools.Utils
             { "tooltip.escape_hp", "Critical HP percentage threshold below which 4Tools triggers escape automatically (e.g., 20%)." },
             { "tooltip.escape_cooldown", "Minimum cooldown in milliseconds (ms) between triggers so you don't waste multiple wings while teleporting (default: 2000ms)." },
             { "tooltip.escape_confirm_enter", "Enable when using the Teleport skill (Acolyte/Priest/Creamy Card): automatically presses Enter 80ms later to confirm." },
-            { "tooltip.escape_pause_town", "Keeps Auto-Escape disabled in towns so you never accidentally burn wings in Prontera." }
+            { "tooltip.escape_pause_town", "Keeps Auto-Escape disabled in towns so you never accidentally burn wings in Prontera." },
+
+            // Multi-Account 3-in-1 Shell
+            { "shell.account_tab", "Account {0}" },
+            { "shell.start_all", "Start All" },
+            { "shell.stop_all", "Stop All" },
+            { "tooltip.shell_account_tab", "Switch to Account {0} (each tab has its own independent Client, Profile, ON/OFF, and automations)." },
+            { "tooltip.shell_start_all", "Turns ON all accounts that have an AureumRO window selected." },
+            { "tooltip.shell_stop_all", "Immediately turns OFF all running accounts (emergency stop)." }
         };
 
         public static string CurrentLanguage

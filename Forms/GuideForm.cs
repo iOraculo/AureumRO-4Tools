@@ -174,18 +174,16 @@ namespace _4RTools.Forms
                 new GuideSectionData
                 {
                     Key = "getting_started",
-                    TitlePt = "1. Primeiros Passos e Barra Superior",
+                    TitlePt = "1. Primeiros Passos, 3 Contas em 1 e Barra Superior",
                     BodyPt =
-                        "• Cliente (AureumRO.exe): quando há 1 janela aberta do AureumRO, o 4Tools seleciona automaticamente. Se abrir mais janelas, clique no botão atualizar (↻) e escolha qual janela controlar.\n" +
-                        "• Ligar / Desligar (ON/OFF): clique no botão grande ou pressione a tecla global configurada (padrão: End). Marque 'Som' para ouvir aviso ao ligar/desligar.\n" +
-                        "• Foco e Chat: 'Foco' pausa as automações quando você sai da janela do jogo. 'Chat' pausa ao apertar Enter para digitar no chat (Enter ou Esc retoma; Autopot em F1–F24 continua protegendo você).\n" +
-                        "• Cidade, Mini-HUD e Visual: desmarque 'Usar Buffs em Cidade' para economizar consumíveis/SP nas cidades. Use 'Mini-HUD' para uma barra flutuante compacta de HP/SP sobre o jogo, além de Tema Escuro/Claro e Idioma PT/EN.",
-                    TitleEn = "1. Getting Started and Top Bar",
+                        "• 3 Contas em 1 Janela (Conta 1 | Conta 2 | Conta 3): no topo do app você alterna entre 3 instâncias completas e independentes do 4Tools — cada aba tem seu próprio Cliente (PID), Perfil, ON/OFF e automações rodando juntas em segundo plano! Use 'Ligar Todas' / 'Parar Todas' para controle rápido.\n" +
+                        "• Cliente (AureumRO.exe): quando há 1 janela aberta do AureumRO, o 4Tools seleciona automaticamente. Com várias janelas, clique em atualizar (↻) e escolha qual PID vai em cada aba (Contas 2 e 3 evitam duplicar o PID já usado pela Conta 1).\n" +
+                        "• Ligar / Desligar (ON/OFF): clique no botão grande ou pressione a tecla global (padrão: End — alterna a janela do jogo em foco, ou a aba visível). 'Foco', 'Chat', 'Usar Buffs em Cidade', 'Mini-HUD', Tema e Idioma completam a barra superior.",
+                    TitleEn = "1. Getting Started, 3-in-1 Accounts, and Top Bar",
                     BodyEn =
-                        "• Client (AureumRO.exe): when 1 AureumRO window is open, 4Tools selects it automatically. With multiple windows, click Refresh (↻) and choose which window to control.\n" +
-                        "• Toggle ON / OFF: click the main status button or press your global toggle key (default: End). Enable 'Audio' for a sound cue on toggle.\n" +
-                        "• Focus and Chat Pause: 'Focus' pauses automations whenever Ragnarok is unfocused. 'Chat' pauses when pressing Enter to type (Enter or Esc resumes; F1–F24 Autopot remains active).\n" +
-                        "• Town Pause, Mini-HUD and Theme: uncheck 'Use Buffs in Town' to save SP and consumables in towns. Toggle 'Mini-HUD' for a compact HP/SP overlay, Dark/Light theme, and PT/EN language."
+                        "• 3 Accounts in 1 Window (Account 1 | Account 2 | Account 3): switch between 3 complete, independent 4Tools sessions at the top — each tab has its own Client (PID), Profile, ON/OFF, and background automations running simultaneously! Use 'Start All' / 'Stop All' for quick control.\n" +
+                        "• Client (AureumRO.exe): automatically selects when 1 window is open. With multiple windows, click Refresh (↻) and assign each PID per tab (Accounts 2 and 3 avoid grabbing a PID already assigned to Account 1).\n" +
+                        "• Toggle ON / OFF: click the status button or press your toggle hotkey (default: End — targets the focused RO window, or the visible tab). 'Focus', 'Chat', 'Use Buffs in Town', 'Mini-HUD', Theme, and Language round out the top bar."
                 },
                 new GuideSectionData
                 {

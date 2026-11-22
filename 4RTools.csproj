@@ -272,6 +272,9 @@
     <Compile Include="Forms\MountForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\MultiAccountShellForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\UtilitiesForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -387,6 +390,7 @@
     <Compile Include="Utils\ProcessMemoryReader.cs" />
     <Compile Include="Utils\ProfileBackupManager.cs" />
     <Compile Include="Utils\RObserver.cs" />
+    <Compile Include="Utils\SessionContext.cs" />
     <Compile Include="Utils\ThemeManager.cs" />
     <Compile Include="Utils\VitalBar.cs" />
     <Compile Include="Utils\_4RThread.cs" />

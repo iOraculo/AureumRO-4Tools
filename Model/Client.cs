@@ -107,25 +107,9 @@ namespace _4RTools.Model
 
     public sealed class ClientSingleton
     {
-        private static readonly object SyncRoot = new object();
-        private static Client client;
-
         private ClientSingleton(Client newClient)
         {
-            Client previous = null;
-            lock (SyncRoot)
-            {
-                if (!ReferenceEquals(client, newClient))
-                {
-                    previous = client;
-                    client = newClient;
-                }
-            }
-
-            if (previous != null)
-            {
-                previous.Dispose();
-            }
+            SessionContext.Current.SetClient(newClient);
         }
 
         public static ClientSingleton Instance(Client newClient)
@@ -135,25 +119,12 @@ namespace _4RTools.Model
 
         public static Client GetClient()
         {
-            lock (SyncRoot)
-            {
-                return client;
-            }
+            return SessionContext.Current.Client;
         }
 
         public static void Clear()
         {
-            Client previous;
-            lock (SyncRoot)
-            {
-                previous = client;
-                client = null;
-            }
-
-            if (previous != null)
-            {
-                previous.Dispose();
-            }
+            SessionContext.Current.SetClient(null);
         }
     }
 

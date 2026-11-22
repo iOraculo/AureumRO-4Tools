@@ -37,7 +37,7 @@ namespace _4RTools
                 updater.ShowDialog();
             }
 
-            Application.Run(new Forms.Container());
+            Application.Run(new Forms.MultiAccountShellForm());
         }
 
         private static void OnThreadException(object sender, ThreadExceptionEventArgs e)
