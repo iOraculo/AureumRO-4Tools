@@ -1866,6 +1866,7 @@ namespace _4RTools.Tests
             Subject subject = new Subject();
             using (AureumHubForm hub = new AureumHubForm(subject, false))
             {
+                hub.Show();
                 Assert.Equal("vote", hub.ActiveMainSubTab);
 
                 // Switch to Collection -> Cards
