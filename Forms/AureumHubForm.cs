@@ -950,13 +950,13 @@ namespace _4RTools.Forms
                 TimeSpan rem = AureumProgressStore.GetRemainingVoteCooldown(this.progress, ctrl.Site, now);
                 if (rem <= TimeSpan.Zero)
                 {
-                    ctrl.Dot.State = StatusDotState.Running;
+                    ctrl.Dot.CustomColor = readyColor;
                     ctrl.CountdownLabel.Text = LocalizationManager.T("aureum.vote_ready");
                     ctrl.CountdownLabel.ForeColor = readyColor;
                 }
                 else
                 {
-                    ctrl.Dot.State = StatusDotState.Paused;
+                    ctrl.Dot.CustomColor = waitColor;
                     int totalHours = (int)rem.TotalHours;
                     ctrl.CountdownLabel.Text = string.Format("{0:00}h {1:00}m {2:00}s", totalHours, rem.Minutes, rem.Seconds);
                     ctrl.CountdownLabel.ForeColor = waitColor;
