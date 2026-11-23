@@ -1,0 +1,1878 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
+using System.Linq;
+using System.Media;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+using _4RTools.Model;
+using _4RTools.Utils;
+
+namespace _4RTools.Forms
+{
+    public sealed class AureumHubForm : Form, IObserver
+    {
+        private readonly Subject subject;
+        private readonly bool enableVoteAlertDispatch;
+        private readonly AureumCatalogData catalog;
+        private List<AureumVoteSite> activeTopsites;
+        private AureumProgressData progress;
+
+        private readonly List<Font> ownedFonts = new List<Font>();
+        private Font regularFont;
+        private Font boldFont;
+        private Font smallFont;
+        private Font smallBoldFont;
+        private Font strikeFont;
+        private Font gridStrikeFont;
+
+        private ToolTip hubToolTip;
+        private System.Windows.Forms.Timer voteTickTimer;
+        private System.Windows.Forms.Timer copyFeedbackTimer;
+        private Button copyFeedbackButton;
+        private string copyFeedbackOriginalText;
+
+        // Top sub-tabs
+        private SegmentedTabButton btnSubVote;
+        private SegmentedTabButton btnSubCollection;
+        private SegmentedTabButton btnSubCards;
+        private SegmentedTabButton btnSubMaps;
+
+        // Content hosts
+        private Panel panelVote;
+        private Panel panelCards;
+        private Panel panelMaps;
+
+        // Voting controls
+        private Button btnOpenVotePage;
+        private Button btnMarkAllVoted;
+        private Button btnCopyVoteShopNavi;
+        private Button btnRefreshTopsites;
+        private Panel panelTopsitesList;
+        private CheckBox chkVoteReminder;
+        private CheckBox chkVoteSound;
+        private Label lblVoteStatusInfo;
+        private readonly List<VoteSiteCardControls> voteCardControls = new List<VoteSiteCardControls>();
+
+        // Card collection controls
+        private ComboBox cbCardCategory;
+        private ComboBox cbCardStatus;
+        private TextBox txtCardSearch;
+        private Button btnCopyCardNpc;
+        private Label lblCardProgress;
+        private CheckBox chkHideCollectedCards;
+        private Button btnMarkVisibleCards;
+        private Button btnClearVisibleCards;
+        private Panel panelCardsList;
+        private List<AureumCardCollection> currentlyVisibleCardCollections = new List<AureumCardCollection>();
+
+        // Map collection controls
+        private ComboBox cbMapGroupMode;
+        private ComboBox cbMapGroupFilter;
+        private ComboBox cbMapStatus;
+        private TextBox txtMapSearch;
+        private Label lblMapProgress;
+        private Button btnMarkVisibleMaps;
+        private Button btnClearVisibleMaps;
+        private DataGridView dgvMaps;
+        private Label lblMapSelectedDetails;
+        private Button btnCopyMapWarp;
+        private List<AureumMapEntry> currentlyVisibleMaps = new List<AureumMapEntry>();
+
+        private string activeMainSubTab = "vote"; // "vote" | "collection"
+        private string activeCollectionSubTab = "cards"; // "cards" | "maps"
+        private bool isPopulatingUi;
+        private bool isRefreshingRemoteTopsites;
+
+        public string ActiveMainSubTab { get { return this.activeMainSubTab; } }
+        public string ActiveCollectionSubTab { get { return this.activeCollectionSubTab; } }
+        public int VisibleCardCollectionCount { get { return this.currentlyVisibleCardCollections.Count; } }
+        public int VisibleMapCount { get { return this.currentlyVisibleMaps.Count; } }
+
+        public event Action<string> VoteNotificationRequested;
+
+        private sealed class VoteSiteCardControls
+        {
+            public AureumVoteSite Site;
+            public Panel CardPanel;
+            public StatusDot Dot;
+            public Label TitleLabel;
+            public Label SubLabel;
+            public Label CountdownLabel;
+            public Button VoteButton;
+            public Button ResetButton;
+        }
+
+        public AureumHubForm(Subject subject, bool enableVoteAlertDispatch = true)
+        {
+            this.subject = subject;
+            this.enableVoteAlertDispatch = enableVoteAlertDispatch;
+            this.catalog = AureumCatalog.Load();
+            this.activeTopsites = new List<AureumVoteSite>(this.catalog.Topsites);
+            this.progress = AureumProgressStore.Load();
+
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.ClientSize = new Size(584, 281);
+            this.DoubleBuffered = true;
+
+            this.regularFont = TrackFont("Segoe UI", 8.5F, FontStyle.Regular);
+            this.boldFont = TrackFont("Segoe UI", 8.5F, FontStyle.Bold);
+            this.smallFont = TrackFont("Segoe UI", 7.8F, FontStyle.Regular);
+            this.smallBoldFont = TrackFont("Segoe UI", 7.8F, FontStyle.Bold);
+            this.strikeFont = TrackFont("Segoe UI", 7.8F, FontStyle.Strikeout);
+            this.gridStrikeFont = TrackFont("Segoe UI", 8.2F, FontStyle.Strikeout);
+
+            this.hubToolTip = FormUtils.CreateHelpToolTip();
+
+            BuildSubTabBar();
+            BuildVotePanel();
+            BuildCardsPanel();
+            BuildMapsPanel();
+
+            this.voteTickTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+            this.voteTickTimer.Tick += (s, e) => RefreshVoteCountdowns(true);
+            this.voteTickTimer.Start();
+
+            this.copyFeedbackTimer = new System.Windows.Forms.Timer { Interval = 1400 };
+            this.copyFeedbackTimer.Tick += OnCopyFeedbackTick;
+
+            AureumProgressStore.ProgressChanged += OnExternalProgressChanged;
+            if (this.subject != null)
+            {
+                this.subject.Attach(this);
+            }
+
+            PopulateCardFilters();
+            PopulateMapFilters();
+            ApplyLocalizedTexts();
+            SelectMainSubTab("vote");
+            ApplyCustomThemeStyling();
+        }
+
+        private Font TrackFont(string family, float size, FontStyle style)
+        {
+            Font f = new Font(family, size, style);
+            this.ownedFonts.Add(f);
+            return f;
+        }
+
+        private void BuildSubTabBar()
+        {
+            this.btnSubVote = new SegmentedTabButton("Hora da Votação")
+            {
+                Location = new Point(6, 4),
+                Name = "btnAureumSubVote",
+                Size = new Size(148, 25),
+                IsActive = true
+            };
+            this.btnSubVote.Click += (s, e) => SelectMainSubTab("vote");
+
+            this.btnSubCollection = new SegmentedTabButton("Coleção")
+            {
+                Location = new Point(160, 4),
+                Name = "btnAureumSubCollection",
+                Size = new Size(120, 25),
+                IsActive = false
+            };
+            this.btnSubCollection.Click += (s, e) => SelectMainSubTab("collection");
+
+            this.btnSubCards = new SegmentedTabButton("Cartas (28)")
+            {
+                Location = new Point(316, 4),
+                Name = "btnAureumSubCards",
+                Size = new Size(128, 25),
+                IsActive = true,
+                Visible = false
+            };
+            this.btnSubCards.Click += (s, e) => SelectCollectionSubTab("cards");
+
+            this.btnSubMaps = new SegmentedTabButton("Mapas (311)")
+            {
+                Location = new Point(450, 4),
+                Name = "btnAureumSubMaps",
+                Size = new Size(128, 25),
+                IsActive = false,
+                Visible = false
+            };
+            this.btnSubMaps.Click += (s, e) => SelectCollectionSubTab("maps");
+
+            this.Controls.Add(this.btnSubVote);
+            this.Controls.Add(this.btnSubCollection);
+            this.Controls.Add(this.btnSubCards);
+            this.Controls.Add(this.btnSubMaps);
+        }
+
+        private void BuildVotePanel()
+        {
+            this.panelVote = new Panel
+            {
+                Location = new Point(0, 33),
+                Name = "panelAureumVote",
+                Size = new Size(584, 248)
+            };
+
+            this.btnOpenVotePage = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallBoldFont,
+                Location = new Point(6, 4),
+                Name = "btnOpenVotePage",
+                Size = new Size(176, 25),
+                Text = "Abrir aureumro.com/votar",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnOpenVotePage.Click += (s, e) => OpenExternalUrl(this.catalog.VotePageUrl);
+
+            this.btnMarkAllVoted = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallBoldFont,
+                Location = new Point(188, 4),
+                Name = "btnMarkAllVoted",
+                Size = new Size(138, 25),
+                Text = "Marcar Todos (12h)",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnMarkAllVoted.Click += (s, e) => MarkAllSitesVoted();
+
+            this.btnCopyVoteShopNavi = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallFont,
+                Location = new Point(332, 4),
+                Name = "btnCopyVoteShopNavi",
+                Size = new Size(146, 25),
+                Text = "/navi Loja de Votos",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnCopyVoteShopNavi.Click += (s, e) => CopyToClipboardWithFeedback(this.catalog.VoteShopNavi, this.btnCopyVoteShopNavi);
+
+            this.btnRefreshTopsites = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallFont,
+                Location = new Point(484, 4),
+                Name = "btnRefreshTopsites",
+                Size = new Size(94, 25),
+                Text = "Sincronizar",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnRefreshTopsites.Click += (s, e) => RefreshRemoteTopsitesAsync();
+
+            this.panelTopsitesList = new Panel
+            {
+                AutoScroll = true,
+                Location = new Point(6, 36),
+                Name = "panelTopsitesList",
+                Size = new Size(572, 146)
+            };
+
+            this.chkVoteReminder = new CheckBox
+            {
+                AutoSize = true,
+                Checked = this.progress.VoteReminderEnabled,
+                Cursor = Cursors.Hand,
+                Font = this.regularFont,
+                Location = new Point(8, 189),
+                Name = "chkVoteReminder",
+                Text = "Avisar quando liberar voto",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.chkVoteReminder.CheckedChanged += OnVoteReminderSettingChanged;
+
+            this.chkVoteSound = new CheckBox
+            {
+                AutoSize = true,
+                Checked = this.progress.VoteReminderSound,
+                Cursor = Cursors.Hand,
+                Font = this.regularFont,
+                Location = new Point(236, 189),
+                Name = "chkVoteSound",
+                Text = "Tocar som no lembrete",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.chkVoteSound.CheckedChanged += OnVoteReminderSettingChanged;
+
+            this.lblVoteStatusInfo = new Label
+            {
+                AutoSize = false,
+                Font = this.smallFont,
+                Location = new Point(8, 212),
+                Name = "lblVoteStatusInfo",
+                Size = new Size(568, 30),
+                Tag = ThemeManager.TAG_MUTED_TEXT,
+                UseMnemonic = false
+            };
+
+            this.panelVote.Controls.Add(this.btnOpenVotePage);
+            this.panelVote.Controls.Add(this.btnMarkAllVoted);
+            this.panelVote.Controls.Add(this.btnCopyVoteShopNavi);
+            this.panelVote.Controls.Add(this.btnRefreshTopsites);
+            this.panelVote.Controls.Add(this.panelTopsitesList);
+            this.panelVote.Controls.Add(this.chkVoteReminder);
+            this.panelVote.Controls.Add(this.chkVoteSound);
+            this.panelVote.Controls.Add(this.lblVoteStatusInfo);
+            this.Controls.Add(this.panelVote);
+
+            RebuildVoteCards();
+        }
+
+        private void BuildCardsPanel()
+        {
+            this.panelCards = new Panel
+            {
+                Location = new Point(0, 33),
+                Name = "panelAureumCards",
+                Size = new Size(584, 248),
+                Visible = false
+            };
+
+            this.cbCardCategory = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = this.smallFont,
+                Location = new Point(6, 4),
+                Name = "cbCardCategory",
+                Size = new Size(170, 21)
+            };
+            this.cbCardCategory.SelectedIndexChanged += (s, e) =>
+            {
+                if (!this.isPopulatingUi) RebuildCardCollectionList();
+            };
+
+            this.cbCardStatus = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = this.smallFont,
+                Location = new Point(182, 4),
+                Name = "cbCardStatus",
+                Size = new Size(92, 21)
+            };
+            this.cbCardStatus.SelectedIndexChanged += (s, e) =>
+            {
+                if (!this.isPopulatingUi) RebuildCardCollectionList();
+            };
+
+            this.txtCardSearch = new TextBox
+            {
+                Font = this.smallFont,
+                Location = new Point(280, 4),
+                Name = "txtCardSearch",
+                Size = new Size(158, 21)
+            };
+            this.txtCardSearch.TextChanged += (s, e) =>
+            {
+                if (!this.isPopulatingUi) RebuildCardCollectionList();
+            };
+
+            this.btnCopyCardNpc = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallFont,
+                Location = new Point(444, 3),
+                Name = "btnCopyCardNpc",
+                Size = new Size(134, 23),
+                Text = "/navi Colecionador",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnCopyCardNpc.Click += (s, e) => CopyToClipboardWithFeedback(this.catalog.CardNpcNavi, this.btnCopyCardNpc);
+
+            this.lblCardProgress = new Label
+            {
+                AutoEllipsis = true,
+                AutoSize = false,
+                Font = this.smallBoldFont,
+                Location = new Point(8, 32),
+                Name = "lblCardProgress",
+                Size = new Size(216, 17),
+                UseMnemonic = false
+            };
+
+            this.chkHideCollectedCards = new CheckBox
+            {
+                AutoSize = true,
+                Cursor = Cursors.Hand,
+                Font = this.smallFont,
+                Location = new Point(226, 31),
+                Name = "chkHideCollectedCards",
+                Text = "Ocultar obtidas",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.chkHideCollectedCards.CheckedChanged += (s, e) =>
+            {
+                if (!this.isPopulatingUi) RebuildCardCollectionList();
+            };
+
+            this.btnMarkVisibleCards = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallFont,
+                Location = new Point(358, 29),
+                Name = "btnMarkVisibleCards",
+                Size = new Size(106, 22),
+                Text = "Marcar visíveis",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnMarkVisibleCards.Click += (s, e) => SetVisibleCardsCollected(true);
+
+            this.btnClearVisibleCards = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallFont,
+                Location = new Point(470, 29),
+                Name = "btnClearVisibleCards",
+                Size = new Size(108, 22),
+                Text = "Desmarcar visív.",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnClearVisibleCards.Click += (s, e) => SetVisibleCardsCollected(false);
+
+            this.panelCardsList = new Panel
+            {
+                AutoScroll = true,
+                Location = new Point(6, 55),
+                Name = "panelCardsList",
+                Size = new Size(572, 189)
+            };
+
+            this.panelCards.Controls.Add(this.cbCardCategory);
+            this.panelCards.Controls.Add(this.cbCardStatus);
+            this.panelCards.Controls.Add(this.txtCardSearch);
+            this.panelCards.Controls.Add(this.btnCopyCardNpc);
+            this.panelCards.Controls.Add(this.lblCardProgress);
+            this.panelCards.Controls.Add(this.chkHideCollectedCards);
+            this.panelCards.Controls.Add(this.btnMarkVisibleCards);
+            this.panelCards.Controls.Add(this.btnClearVisibleCards);
+            this.panelCards.Controls.Add(this.panelCardsList);
+            this.Controls.Add(this.panelCards);
+        }
+
+        private void BuildMapsPanel()
+        {
+            this.panelMaps = new Panel
+            {
+                Location = new Point(0, 33),
+                Name = "panelAureumMaps",
+                Size = new Size(584, 248),
+                Visible = false
+            };
+
+            this.cbMapGroupMode = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = this.smallFont,
+                Location = new Point(6, 4),
+                Name = "cbMapGroupMode",
+                Size = new Size(124, 21)
+            };
+            this.cbMapGroupMode.SelectedIndexChanged += (s, e) =>
+            {
+                if (!this.isPopulatingUi)
+                {
+                    PopulateMapGroupFilterItems();
+                    RebuildMapGrid();
+                }
+            };
+
+            this.cbMapGroupFilter = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = this.smallFont,
+                Location = new Point(136, 4),
+                Name = "cbMapGroupFilter",
+                Size = new Size(166, 21)
+            };
+            this.cbMapGroupFilter.SelectedIndexChanged += (s, e) =>
+            {
+                if (!this.isPopulatingUi) RebuildMapGrid();
+            };
+
+            this.cbMapStatus = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = this.smallFont,
+                Location = new Point(308, 4),
+                Name = "cbMapStatus",
+                Size = new Size(88, 21)
+            };
+            this.cbMapStatus.SelectedIndexChanged += (s, e) =>
+            {
+                if (!this.isPopulatingUi) RebuildMapGrid();
+            };
+
+            this.txtMapSearch = new TextBox
+            {
+                Font = this.smallFont,
+                Location = new Point(402, 4),
+                Name = "txtMapSearch",
+                Size = new Size(176, 21)
+            };
+            this.txtMapSearch.TextChanged += (s, e) =>
+            {
+                if (!this.isPopulatingUi) RebuildMapGrid();
+            };
+
+            this.lblMapProgress = new Label
+            {
+                AutoEllipsis = true,
+                AutoSize = false,
+                Font = this.smallBoldFont,
+                Location = new Point(8, 32),
+                Name = "lblMapProgress",
+                Size = new Size(340, 17),
+                UseMnemonic = false
+            };
+
+            this.btnMarkVisibleMaps = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallFont,
+                Location = new Point(358, 29),
+                Name = "btnMarkVisibleMaps",
+                Size = new Size(106, 22),
+                Text = "Marcar visíveis",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnMarkVisibleMaps.Click += (s, e) => SetVisibleMapsCompleted(true);
+
+            this.btnClearVisibleMaps = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallFont,
+                Location = new Point(470, 29),
+                Name = "btnClearVisibleMaps",
+                Size = new Size(108, 22),
+                Text = "Desmarcar visív.",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnClearVisibleMaps.Click += (s, e) => SetVisibleMapsCompleted(false);
+
+            this.dgvMaps = new DataGridView
+            {
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                AllowUserToResizeRows = false,
+                BorderStyle = BorderStyle.FixedSingle,
+                ColumnHeadersHeight = 22,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
+                EnableHeadersVisualStyles = false,
+                Font = this.smallFont,
+                Location = new Point(6, 54),
+                MultiSelect = false,
+                Name = "dgvAureumMaps",
+                ReadOnly = true,
+                RowHeadersVisible = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                Size = new Size(572, 148),
+                Tag = ThemeManager.PRESERVE_COLORS_TAG
+            };
+            EnableDoubleBuffering(this.dgvMaps);
+
+            this.dgvMaps.Columns.Add(new DataGridViewCheckBoxColumn
+            {
+                Name = "colDone",
+                HeaderText = "✓",
+                Width = 26,
+                Resizable = DataGridViewTriState.False,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            });
+            this.dgvMaps.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colGroup",
+                HeaderText = "Cidade",
+                Width = 108,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            });
+            this.dgvMaps.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colMapName",
+                HeaderText = "Mapa",
+                Width = 132,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            });
+            this.dgvMaps.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colWarp",
+                HeaderText = "Warp",
+                Width = 100,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            });
+            this.dgvMaps.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colBonus",
+                HeaderText = "Bônus",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            });
+
+            this.dgvMaps.CellClick += OnMapGridCellClick;
+            this.dgvMaps.CellDoubleClick += OnMapGridCellDoubleClick;
+            this.dgvMaps.SelectionChanged += (s, e) => UpdateSelectedMapDetailBar();
+
+            this.lblMapSelectedDetails = new Label
+            {
+                AutoEllipsis = true,
+                AutoSize = false,
+                Font = this.smallFont,
+                Location = new Point(8, 206),
+                Name = "lblMapSelectedDetails",
+                Size = new Size(446, 36),
+                Tag = ThemeManager.TAG_MUTED_TEXT,
+                UseMnemonic = false
+            };
+
+            this.btnCopyMapWarp = new Button
+            {
+                Cursor = Cursors.Hand,
+                Font = this.smallBoldFont,
+                Location = new Point(460, 210),
+                Name = "btnCopyMapWarp",
+                Size = new Size(118, 26),
+                Text = "Copiar @warp",
+                UseMnemonic = false,
+                UseVisualStyleBackColor = true
+            };
+            this.btnCopyMapWarp.Click += OnCopySelectedMapWarpClick;
+
+            this.panelMaps.Controls.Add(this.cbMapGroupMode);
+            this.panelMaps.Controls.Add(this.cbMapGroupFilter);
+            this.panelMaps.Controls.Add(this.cbMapStatus);
+            this.panelMaps.Controls.Add(this.txtMapSearch);
+            this.panelMaps.Controls.Add(this.lblMapProgress);
+            this.panelMaps.Controls.Add(this.btnMarkVisibleMaps);
+            this.panelMaps.Controls.Add(this.btnClearVisibleMaps);
+            this.panelMaps.Controls.Add(this.dgvMaps);
+            this.panelMaps.Controls.Add(this.lblMapSelectedDetails);
+            this.panelMaps.Controls.Add(this.btnCopyMapWarp);
+            this.Controls.Add(this.panelMaps);
+        }
+
+        private static void EnableDoubleBuffering(Control control)
+        {
+            try
+            {
+                PropertyInfo prop = typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (prop != null)
+                {
+                    prop.SetValue(control, true, null);
+                }
+            }
+            catch
+            {
+                // Non-critical optimization.
+            }
+        }
+
+        public void SelectMainSubTab(string subTab)
+        {
+            bool isCollection = string.Equals(subTab, "collection", StringComparison.OrdinalIgnoreCase);
+            this.activeMainSubTab = isCollection ? "collection" : "vote";
+
+            this.btnSubVote.IsActive = !isCollection;
+            this.btnSubCollection.IsActive = isCollection;
+            this.btnSubCards.Visible = isCollection;
+            this.btnSubMaps.Visible = isCollection;
+
+            this.panelVote.Visible = !isCollection;
+            this.panelCards.Visible = isCollection && this.activeCollectionSubTab == "cards";
+            this.panelMaps.Visible = isCollection && this.activeCollectionSubTab == "maps";
+
+            if (isCollection)
+            {
+                if (this.activeCollectionSubTab == "cards")
+                {
+                    RebuildCardCollectionList();
+                }
+                else
+                {
+                    RebuildMapGrid();
+                }
+            }
+            else
+            {
+                RefreshVoteCountdowns(false);
+            }
+        }
+
+        public void SelectCollectionSubTab(string subTab)
+        {
+            bool isMaps = string.Equals(subTab, "maps", StringComparison.OrdinalIgnoreCase);
+            this.activeCollectionSubTab = isMaps ? "maps" : "cards";
+            this.btnSubCards.IsActive = !isMaps;
+            this.btnSubMaps.IsActive = isMaps;
+
+            if (this.activeMainSubTab != "collection")
+            {
+                SelectMainSubTab("collection");
+                return;
+            }
+
+            this.panelCards.Visible = !isMaps;
+            this.panelMaps.Visible = isMaps;
+            if (isMaps)
+            {
+                RebuildMapGrid();
+            }
+            else
+            {
+                RebuildCardCollectionList();
+            }
+        }
+
+        public void SetCardCategoryFilter(string category)
+        {
+            if (this.cbCardCategory == null) return;
+            for (int i = 0; i < this.cbCardCategory.Items.Count; i++)
+            {
+                if (string.Equals(this.cbCardCategory.Items[i].ToString(), category, StringComparison.OrdinalIgnoreCase))
+                {
+                    this.cbCardCategory.SelectedIndex = i;
+                    return;
+                }
+            }
+        }
+
+        public void SetCardSearchText(string query)
+        {
+            if (this.txtCardSearch != null)
+            {
+                this.txtCardSearch.Text = query ?? string.Empty;
+            }
+        }
+
+        public void SetMapGroupMode(bool groupByBonusType)
+        {
+            if (this.cbMapGroupMode != null && this.cbMapGroupMode.Items.Count >= 2)
+            {
+                this.cbMapGroupMode.SelectedIndex = groupByBonusType ? 1 : 0;
+            }
+        }
+
+        public void SetMapGroupFilter(string filterText)
+        {
+            if (this.cbMapGroupFilter == null) return;
+            for (int i = 0; i < this.cbMapGroupFilter.Items.Count; i++)
+            {
+                if (string.Equals(this.cbMapGroupFilter.Items[i].ToString(), filterText, StringComparison.OrdinalIgnoreCase))
+                {
+                    this.cbMapGroupFilter.SelectedIndex = i;
+                    return;
+                }
+            }
+        }
+
+        public void SetMapSearchText(string query)
+        {
+            if (this.txtMapSearch != null)
+            {
+                this.txtMapSearch.Text = query ?? string.Empty;
+            }
+        }
+
+        private void RebuildVoteCards()
+        {
+            this.panelTopsitesList.SuspendLayout();
+            try
+            {
+                this.panelTopsitesList.Controls.Clear();
+                this.voteCardControls.Clear();
+
+                int y = 2;
+                int cardWidth = this.activeTopsites.Count > 2 ? 550 : 566;
+
+                for (int i = 0; i < this.activeTopsites.Count; i++)
+                {
+                    AureumVoteSite site = this.activeTopsites[i];
+
+                    Panel card = new Panel
+                    {
+                        BorderStyle = BorderStyle.FixedSingle,
+                        Location = new Point(2, y),
+                        Name = "cardVoteSite_" + site.Code,
+                        Size = new Size(cardWidth, 62),
+                        Tag = ThemeManager.PRESERVE_COLORS_TAG
+                    };
+
+                    StatusDot dot = new StatusDot
+                    {
+                        Location = new Point(12, 17),
+                        Name = "dotVote_" + site.Code
+                    };
+
+                    Label lblTitle = new Label
+                    {
+                        AutoSize = false,
+                        Font = this.boldFont,
+                        Location = new Point(28, 10),
+                        Size = new Size(215, 19),
+                        Text = site.Name,
+                        UseMnemonic = false
+                    };
+
+                    Label lblSub = new Label
+                    {
+                        AutoSize = false,
+                        Font = this.smallFont,
+                        Location = new Point(28, 31),
+                        Size = new Size(230, 18),
+                        Text = LocalizationManager.T("aureum.vote_site_meta", site.Points, site.CooldownHours),
+                        UseMnemonic = false
+                    };
+
+                    Label lblCountdown = new Label
+                    {
+                        AutoSize = false,
+                        Font = this.boldFont,
+                        Location = new Point(256, 18),
+                        Size = new Size(134, 24),
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        UseMnemonic = false,
+                        Tag = ThemeManager.PRESERVE_COLORS_TAG
+                    };
+
+                    AureumVoteSite capturedSite = site;
+                    Button btnVote = new Button
+                    {
+                        Cursor = Cursors.Hand,
+                        Font = this.smallBoldFont,
+                        Location = new Point(cardWidth - 166, 16),
+                        Name = "btnVoteSite_" + site.Code,
+                        Size = new Size(102, 28),
+                        Text = LocalizationManager.T("aureum.vote_now", site.CooldownHours),
+                        UseMnemonic = false,
+                        UseVisualStyleBackColor = true
+                    };
+                    btnVote.Click += (s, e) => OnVoteSiteClicked(capturedSite);
+
+                    Button btnReset = new Button
+                    {
+                        Cursor = Cursors.Hand,
+                        Font = this.smallFont,
+                        Location = new Point(cardWidth - 58, 16),
+                        Name = "btnResetVote_" + site.Code,
+                        Size = new Size(50, 28),
+                        Text = LocalizationManager.T("aureum.vote_reset"),
+                        UseMnemonic = false,
+                        UseVisualStyleBackColor = true
+                    };
+                    btnReset.Click += (s, e) =>
+                    {
+                        AureumProgressStore.ResetVote(this.progress, capturedSite.Code);
+                        RefreshVoteCountdowns(false);
+                    };
+
+                    card.Controls.Add(dot);
+                    card.Controls.Add(lblTitle);
+                    card.Controls.Add(lblSub);
+                    card.Controls.Add(lblCountdown);
+                    card.Controls.Add(btnVote);
+                    card.Controls.Add(btnReset);
+                    this.panelTopsitesList.Controls.Add(card);
+
+                    this.voteCardControls.Add(new VoteSiteCardControls
+                    {
+                        Site = site,
+                        CardPanel = card,
+                        Dot = dot,
+                        TitleLabel = lblTitle,
+                        SubLabel = lblSub,
+                        CountdownLabel = lblCountdown,
+                        VoteButton = btnVote,
+                        ResetButton = btnReset
+                    });
+
+                    y += 68;
+                }
+            }
+            finally
+            {
+                this.panelTopsitesList.ResumeLayout(true);
+            }
+
+            ApplyVoteCardsTheme();
+            RefreshVoteCountdowns(false);
+        }
+
+        private void OnVoteSiteClicked(AureumVoteSite site)
+        {
+            string url = !string.IsNullOrWhiteSpace(site.VoteUrl) ? site.VoteUrl : this.catalog.VotePageUrl;
+            OpenExternalUrl(url);
+            AureumProgressStore.RecordVote(this.progress, site.Code, DateTime.UtcNow);
+            RefreshVoteCountdowns(false);
+        }
+
+        private void MarkAllSitesVoted()
+        {
+            DateTime now = DateTime.UtcNow;
+            foreach (AureumVoteSite site in this.activeTopsites)
+            {
+                AureumProgressStore.RecordVote(this.progress, site.Code, now);
+            }
+            RefreshVoteCountdowns(false);
+        }
+
+        private void OnVoteReminderSettingChanged(object sender, EventArgs e)
+        {
+            if (this.isPopulatingUi) return;
+            this.progress.VoteReminderEnabled = this.chkVoteReminder.Checked;
+            this.progress.VoteReminderSound = this.chkVoteSound.Checked;
+            AureumProgressStore.Save(this.progress);
+        }
+
+        private void RefreshVoteCountdowns(bool checkAlerts)
+        {
+            if (this.IsDisposed) return;
+
+            DateTime now = DateTime.UtcNow;
+            bool dark = ThemeManager.IsDarkMode;
+            Color readyColor = dark ? Color.FromArgb(88, 224, 134) : Color.FromArgb(22, 138, 66);
+            Color waitColor = dark ? Color.FromArgb(245, 190, 74) : Color.FromArgb(182, 108, 12);
+
+            for (int i = 0; i < this.voteCardControls.Count; i++)
+            {
+                VoteSiteCardControls ctrl = this.voteCardControls[i];
+                TimeSpan rem = AureumProgressStore.GetRemainingVoteCooldown(this.progress, ctrl.Site, now);
+                if (rem <= TimeSpan.Zero)
+                {
+                    ctrl.Dot.State = StatusDotState.Running;
+                    ctrl.CountdownLabel.Text = LocalizationManager.T("aureum.vote_ready");
+                    ctrl.CountdownLabel.ForeColor = readyColor;
+                }
+                else
+                {
+                    ctrl.Dot.State = StatusDotState.Paused;
+                    int totalHours = (int)rem.TotalHours;
+                    ctrl.CountdownLabel.Text = string.Format("{0:00}h {1:00}m {2:00}s", totalHours, rem.Minutes, rem.Seconds);
+                    ctrl.CountdownLabel.ForeColor = waitColor;
+                }
+            }
+
+            if (checkAlerts && this.enableVoteAlertDispatch && this.progress.VoteReminderEnabled)
+            {
+                List<AureumVoteSite> newlyReady = AureumProgressStore.CheckNewlyReadyVoteSites(this.progress, this.activeTopsites, now);
+                if (newlyReady.Count > 0)
+                {
+                    if (this.progress.VoteReminderSound)
+                    {
+                        try { SystemSounds.Exclamation.Play(); } catch { }
+                    }
+
+                    string names = string.Join(", ", newlyReady.Select(s => s.Name));
+                    string alertMsg = LocalizationManager.T("aureum.vote_alert_body", names);
+                    Action<string> notify = this.VoteNotificationRequested;
+                    if (notify != null)
+                    {
+                        notify(alertMsg);
+                    }
+                }
+            }
+        }
+
+        private void RefreshRemoteTopsitesAsync()
+        {
+            if (this.isRefreshingRemoteTopsites) return;
+            this.isRefreshingRemoteTopsites = true;
+            this.btnRefreshTopsites.Enabled = false;
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                List<AureumVoteSite> fetched = AureumCatalog.TryFetchRemoteTopsites(this.catalog.TopsitesApiUrl, this.catalog.VotePageUrl);
+                if (this.IsDisposed || !this.IsHandleCreated)
+                {
+                    this.isRefreshingRemoteTopsites = false;
+                    return;
+                }
+
+                this.BeginInvoke((MethodInvoker)delegate
+                {
+                    this.isRefreshingRemoteTopsites = false;
+                    if (this.IsDisposed) return;
+
+                    this.btnRefreshTopsites.Enabled = true;
+                    if (fetched != null && fetched.Count > 0)
+                    {
+                        this.activeTopsites = fetched;
+                        RebuildVoteCards();
+                    }
+                });
+            });
+        }
+
+        private void PopulateCardFilters()
+        {
+            this.isPopulatingUi = true;
+            try
+            {
+                int prevCatIdx = Math.Max(0, this.cbCardCategory.SelectedIndex);
+                int prevStatusIdx = Math.Max(0, this.cbCardStatus.SelectedIndex);
+
+                this.cbCardCategory.Items.Clear();
+                this.cbCardCategory.Items.Add(LocalizationManager.T("aureum.all_categories"));
+                foreach (string cat in AureumCatalog.GetCardCategories(this.catalog))
+                {
+                    this.cbCardCategory.Items.Add(cat);
+                }
+                this.cbCardCategory.SelectedIndex = Math.Min(prevCatIdx, this.cbCardCategory.Items.Count - 1);
+
+                this.cbCardStatus.Items.Clear();
+                this.cbCardStatus.Items.Add(LocalizationManager.T("aureum.status_all"));
+                this.cbCardStatus.Items.Add(LocalizationManager.T("aureum.status_pending"));
+                this.cbCardStatus.Items.Add(LocalizationManager.T("aureum.status_complete"));
+                this.cbCardStatus.SelectedIndex = Math.Min(prevStatusIdx, this.cbCardStatus.Items.Count - 1);
+            }
+            finally
+            {
+                this.isPopulatingUi = false;
+            }
+        }
+
+        private void PopulateMapFilters()
+        {
+            this.isPopulatingUi = true;
+            try
+            {
+                int prevMode = Math.Max(0, this.cbMapGroupMode.SelectedIndex);
+                int prevStatus = Math.Max(0, this.cbMapStatus.SelectedIndex);
+
+                this.cbMapGroupMode.Items.Clear();
+                this.cbMapGroupMode.Items.Add(LocalizationManager.T("aureum.maps_by_city"));
+                this.cbMapGroupMode.Items.Add(LocalizationManager.T("aureum.maps_by_bonus"));
+                this.cbMapGroupMode.SelectedIndex = Math.Min(prevMode, 1);
+
+                this.cbMapStatus.Items.Clear();
+                this.cbMapStatus.Items.Add(LocalizationManager.T("aureum.status_all"));
+                this.cbMapStatus.Items.Add(LocalizationManager.T("aureum.status_pending"));
+                this.cbMapStatus.Items.Add(LocalizationManager.T("aureum.status_complete"));
+                this.cbMapStatus.SelectedIndex = Math.Min(prevStatus, 2);
+
+                PopulateMapGroupFilterItems();
+            }
+            finally
+            {
+                this.isPopulatingUi = false;
+            }
+        }
+
+        private void PopulateMapGroupFilterItems()
+        {
+            bool prevPopulating = this.isPopulatingUi;
+            this.isPopulatingUi = true;
+            try
+            {
+                bool byBonus = this.cbMapGroupMode.SelectedIndex == 1;
+                this.cbMapGroupFilter.Items.Clear();
+                this.cbMapGroupFilter.Items.Add(byBonus
+                    ? LocalizationManager.T("aureum.all_bonuses")
+                    : LocalizationManager.T("aureum.all_cities"));
+
+                List<string> groups = byBonus
+                    ? AureumCatalog.GetMapBonusCategories(this.catalog)
+                    : AureumCatalog.GetMapCities(this.catalog);
+
+                foreach (string g in groups)
+                {
+                    this.cbMapGroupFilter.Items.Add(g);
+                }
+
+                this.cbMapGroupFilter.SelectedIndex = 0;
+
+                if (this.dgvMaps != null && this.dgvMaps.Columns["colGroup"] != null)
+                {
+                    this.dgvMaps.Columns["colGroup"].HeaderText = byBonus
+                        ? LocalizationManager.T("aureum.col_bonus_type")
+                        : LocalizationManager.T("aureum.col_city");
+                }
+            }
+            finally
+            {
+                this.isPopulatingUi = prevPopulating;
+            }
+        }
+
+        private void RebuildCardCollectionList()
+        {
+            if (this.IsDisposed || this.panelCardsList == null) return;
+
+            string selectedCategory = this.cbCardCategory.SelectedIndex > 0 ? this.cbCardCategory.SelectedItem.ToString() : null;
+            int statusFilter = this.cbCardStatus.SelectedIndex; // 0=all, 1=pending, 2=complete
+            string query = NormalizeSearch(this.txtCardSearch.Text);
+            bool hideCollected = this.chkHideCollectedCards.Checked;
+
+            List<AureumCardCollection> filtered = new List<AureumCardCollection>();
+            int totalCards = 0;
+            int totalCollectedCards = 0;
+            int totalCompletedCollections = 0;
+
+            foreach (AureumCardCollection col in this.catalog.CardCollections)
+            {
+                int colCollected = AureumProgressStore.CountCollectedInCollection(this.progress, col);
+                totalCards += col.Cards.Count;
+                totalCollectedCards += colCollected;
+                if (col.Cards.Count > 0 && colCollected >= col.Cards.Count)
+                {
+                    totalCompletedCollections++;
+                }
+
+                if (!string.IsNullOrEmpty(selectedCategory)
+                    && !string.Equals(col.Category, selectedCategory, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (statusFilter == 1 && colCollected >= col.Cards.Count)
+                {
+                    continue;
+                }
+                if (statusFilter == 2 && colCollected < col.Cards.Count)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(query))
+                {
+                    bool matches = NormalizeSearch(col.Name).Contains(query)
+                        || NormalizeSearch(col.Category).Contains(query)
+                        || NormalizeSearch(col.TotalBonus).Contains(query)
+                        || col.Cards.Any(c => NormalizeSearch(c.Name).Contains(query) || NormalizeSearch(c.FullName).Contains(query));
+                    if (!matches)
+                    {
+                        continue;
+                    }
+                }
+
+                filtered.Add(col);
+            }
+
+            this.currentlyVisibleCardCollections = filtered;
+            this.lblCardProgress.Text = LocalizationManager.T(
+                "aureum.cards_progress",
+                totalCollectedCards,
+                totalCards,
+                totalCompletedCollections,
+                this.catalog.CardCollections.Count);
+
+            bool dark = ThemeManager.IsDarkMode;
+            Color cardBg = dark ? Color.FromArgb(30, 21, 7) : Color.FromArgb(255, 252, 243);
+            Color cardDoneBg = dark ? Color.FromArgb(24, 34, 20) : Color.FromArgb(240, 250, 240);
+            Color cardText = dark ? Color.FromArgb(244, 234, 206) : Color.FromArgb(46, 33, 12);
+            Color accentText = dark ? Color.FromArgb(244, 217, 122) : Color.FromArgb(148, 102, 12);
+            Color mutedText = dark ? Color.FromArgb(182, 165, 128) : Color.FromArgb(115, 96, 68);
+            Color chipIdleBg = dark ? Color.FromArgb(46, 33, 11) : Color.FromArgb(248, 240, 218);
+            Color chipIdleBorder = dark ? Color.FromArgb(95, 70, 24) : Color.FromArgb(204, 182, 136);
+            Color chipDoneBg = dark ? Color.FromArgb(28, 52, 34) : Color.FromArgb(222, 244, 226);
+            Color chipDoneFore = dark ? Color.FromArgb(132, 214, 152) : Color.FromArgb(36, 116, 62);
+            Color chipDoneBorder = dark ? Color.FromArgb(62, 134, 82) : Color.FromArgb(128, 194, 146);
+            Color miniBtnBg = dark ? Color.FromArgb(52, 38, 14) : Color.FromArgb(246, 238, 216);
+
+            int scrollPos = this.panelCardsList.VerticalScroll.Value;
+            this.panelCardsList.SuspendLayout();
+            try
+            {
+                this.panelCardsList.Controls.Clear();
+                int y = 2;
+                int cardW = 550;
+
+                foreach (AureumCardCollection col in filtered)
+                {
+                    int colCollected = AureumProgressStore.CountCollectedInCollection(this.progress, col);
+                    bool isComplete = col.Cards.Count > 0 && colCollected >= col.Cards.Count;
+                    int activeTier = AureumProgressStore.GetActiveTierLevel(colCollected);
+
+                    List<AureumCardItem> visibleCards = hideCollected
+                        ? col.Cards.Where(c => !AureumProgressStore.IsCardCollected(this.progress, col.Index, c.Id)).ToList()
+                        : col.Cards;
+
+                    int cardHeight = visibleCards.Count == 0 ? 54 : 84;
+
+                    Panel colCard = new Panel
+                    {
+                        BackColor = isComplete ? cardDoneBg : cardBg,
+                        BorderStyle = BorderStyle.FixedSingle,
+                        Location = new Point(2, y),
+                        Name = "cardCol_" + col.Index,
+                        Size = new Size(cardW, cardHeight),
+                        Tag = ThemeManager.PRESERVE_COLORS_TAG
+                    };
+
+                    Label lblHead = new Label
+                    {
+                        AutoEllipsis = true,
+                        AutoSize = false,
+                        BackColor = Color.Transparent,
+                        Font = this.boldFont,
+                        ForeColor = cardText,
+                        Location = new Point(8, 5),
+                        Size = new Size(340, 17),
+                        Text = string.Format("#{0:00} {1} · {2}", col.Index, col.Name, col.Category),
+                        UseMnemonic = false,
+                        Tag = ThemeManager.PRESERVE_COLORS_TAG
+                    };
+
+                    Label lblCount = new Label
+                    {
+                        AutoSize = false,
+                        BackColor = Color.Transparent,
+                        Font = this.smallBoldFont,
+                        ForeColor = isComplete ? chipDoneFore : accentText,
+                        Location = new Point(352, 5),
+                        Size = new Size(76, 17),
+                        TextAlign = ContentAlignment.MiddleRight,
+                        Text = string.Format("{0}/{1} ({2})", colCollected, col.Cards.Count, activeTier > 0 ? "Nv." + (activeTier == 1 ? 1 : (activeTier == 3 ? 2 : 3)) : "-"),
+                        UseMnemonic = false,
+                        Tag = ThemeManager.PRESERVE_COLORS_TAG
+                    };
+
+                    AureumCardCollection capturedCol = col;
+                    Button btnToggleCol = new Button
+                    {
+                        BackColor = miniBtnBg,
+                        Cursor = Cursors.Hand,
+                        FlatStyle = FlatStyle.Flat,
+                        Font = this.smallFont,
+                        ForeColor = cardText,
+                        Location = new Point(434, 3),
+                        Size = new Size(108, 21),
+                        Text = isComplete
+                            ? LocalizationManager.T("aureum.unmark_collection")
+                            : LocalizationManager.T("aureum.mark_collection"),
+                        UseMnemonic = false,
+                        Tag = ThemeManager.PRESERVE_COLORS_TAG
+                    };
+                    btnToggleCol.FlatAppearance.BorderColor = chipIdleBorder;
+                    btnToggleCol.Click += (s, e) =>
+                    {
+                        AureumProgressStore.SetCardCollectionCollected(this.progress, capturedCol, !isComplete);
+                        RebuildCardCollectionList();
+                    };
+
+                    string tiersSummary = string.Join("  |  ", col.Tiers.Select(t => t.Threshold + ": " + t.Effect));
+                    Label lblBonus = new Label
+                    {
+                        AutoEllipsis = true,
+                        AutoSize = false,
+                        BackColor = Color.Transparent,
+                        Font = this.smallFont,
+                        ForeColor = isComplete ? chipDoneFore : mutedText,
+                        Location = new Point(8, 25),
+                        Size = new Size(534, 17),
+                        Text = col.TotalBonus + "  (" + tiersSummary + ")",
+                        UseMnemonic = false,
+                        Tag = ThemeManager.PRESERVE_COLORS_TAG
+                    };
+                    this.hubToolTip.SetToolTip(lblBonus, col.TotalBonus + "\n" + string.Join("\n", col.Tiers.Select(t => t.Threshold + " → " + t.Effect)));
+
+                    colCard.Controls.Add(lblHead);
+                    colCard.Controls.Add(lblCount);
+                    colCard.Controls.Add(btnToggleCol);
+                    colCard.Controls.Add(lblBonus);
+
+                    if (visibleCards.Count > 0)
+                    {
+                        int chipW = 104;
+                        int chipGap = 4;
+                        for (int ci = 0; ci < visibleCards.Count; ci++)
+                        {
+                            AureumCardItem item = visibleCards[ci];
+                            bool collected = AureumProgressStore.IsCardCollected(this.progress, col.Index, item.Id);
+                            int capturedColIndex = col.Index;
+                            int capturedCardId = item.Id;
+
+                            Button chip = new Button
+                            {
+                                AutoEllipsis = true,
+                                BackColor = collected ? chipDoneBg : chipIdleBg,
+                                Cursor = Cursors.Hand,
+                                FlatStyle = FlatStyle.Flat,
+                                Font = collected ? this.strikeFont : this.smallFont,
+                                ForeColor = collected ? chipDoneFore : cardText,
+                                Location = new Point(8 + ci * (chipW + chipGap), 48),
+                                Name = string.Format("btnCard_{0:00}_{1}", col.Index, item.Id),
+                                Size = new Size(chipW, 28),
+                                Text = collected ? ("✓ " + item.Name) : item.Name,
+                                TextAlign = ContentAlignment.MiddleCenter,
+                                UseMnemonic = false,
+                                Tag = ThemeManager.PRESERVE_COLORS_TAG
+                            };
+                            chip.FlatAppearance.BorderColor = collected ? chipDoneBorder : chipIdleBorder;
+                            chip.FlatAppearance.BorderSize = 1;
+                            chip.Click += (s, e) =>
+                            {
+                                AureumProgressStore.ToggleCardCollected(this.progress, capturedColIndex, capturedCardId);
+                                RebuildCardCollectionList();
+                            };
+
+                            this.hubToolTip.SetToolTip(
+                                chip,
+                                string.Format("{0} (ID {1})\n{2}", item.FullName, item.Id, LocalizationManager.T("aureum.card_click_hint")));
+
+                            colCard.Controls.Add(chip);
+                        }
+                    }
+
+                    this.panelCardsList.Controls.Add(colCard);
+                    y += cardHeight + 6;
+                }
+
+                if (filtered.Count == 0)
+                {
+                    Label empty = new Label
+                    {
+                        AutoSize = false,
+                        Font = this.regularFont,
+                        ForeColor = mutedText,
+                        Location = new Point(12, 24),
+                        Size = new Size(540, 24),
+                        Text = LocalizationManager.T("aureum.no_results"),
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        UseMnemonic = false
+                    };
+                    this.panelCardsList.Controls.Add(empty);
+                }
+            }
+            finally
+            {
+                this.panelCardsList.ResumeLayout(true);
+                if (scrollPos > 0 && this.panelCardsList.VerticalScroll.Maximum > 0)
+                {
+                    this.panelCardsList.AutoScrollPosition = new Point(0, Math.Min(scrollPos, this.panelCardsList.VerticalScroll.Maximum));
+                }
+            }
+        }
+
+        private void SetVisibleCardsCollected(bool collected)
+        {
+            if (this.currentlyVisibleCardCollections.Count == 0) return;
+
+            this.progress.EnsureCollections();
+            foreach (AureumCardCollection col in this.currentlyVisibleCardCollections)
+            {
+                foreach (AureumCardItem card in col.Cards)
+                {
+                    string key = card.GetProgressKey(col.Index);
+                    if (collected)
+                    {
+                        this.progress.CollectedCardKeys.Add(key);
+                    }
+                    else
+                    {
+                        this.progress.CollectedCardKeys.Remove(key);
+                    }
+                }
+            }
+
+            AureumProgressStore.Save(this.progress);
+            RebuildCardCollectionList();
+        }
+
+        private void RebuildMapGrid()
+        {
+            if (this.IsDisposed || this.dgvMaps == null) return;
+
+            bool byBonus = this.cbMapGroupMode.SelectedIndex == 1;
+            string selectedGroup = this.cbMapGroupFilter.SelectedIndex > 0 ? this.cbMapGroupFilter.SelectedItem.ToString() : null;
+            int statusFilter = this.cbMapStatus.SelectedIndex; // 0=all, 1=pending, 2=complete
+            string query = NormalizeSearch(this.txtMapSearch.Text);
+
+            int totalCompleted = 0;
+            List<AureumMapEntry> filtered = new List<AureumMapEntry>();
+
+            foreach (AureumMapEntry map in this.catalog.MapCollections)
+            {
+                bool done = AureumProgressStore.IsMapCompleted(this.progress, map.Warp);
+                if (done) totalCompleted++;
+
+                string groupValue = byBonus ? map.BonusCategory : map.City;
+                if (!string.IsNullOrEmpty(selectedGroup)
+                    && !string.Equals(groupValue, selectedGroup, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (statusFilter == 1 && done) continue;
+                if (statusFilter == 2 && !done) continue;
+
+                if (!string.IsNullOrEmpty(query))
+                {
+                    bool matches = NormalizeSearch(map.Name).Contains(query)
+                        || NormalizeSearch(map.Warp).Contains(query)
+                        || NormalizeSearch(map.City).Contains(query)
+                        || NormalizeSearch(map.Bonus).Contains(query)
+                        || NormalizeSearch(map.BonusCategory).Contains(query)
+                        || map.Items.Any(it => NormalizeSearch(it.Name).Contains(query) || NormalizeSearch(it.Drops).Contains(query));
+                    if (!matches) continue;
+                }
+
+                filtered.Add(map);
+            }
+
+            if (byBonus)
+            {
+                filtered = filtered
+                    .OrderBy(m => m.BonusCategory, StringComparer.CurrentCultureIgnoreCase)
+                    .ThenBy(m => m.Bonus, StringComparer.CurrentCultureIgnoreCase)
+                    .ThenBy(m => m.Name, StringComparer.CurrentCultureIgnoreCase)
+                    .ToList();
+            }
+
+            this.currentlyVisibleMaps = filtered;
+            this.lblMapProgress.Text = LocalizationManager.T(
+                "aureum.maps_progress",
+                totalCompleted,
+                this.catalog.MapCollections.Count,
+                filtered.Count);
+
+            int firstRow = this.dgvMaps.FirstDisplayedScrollingRowIndex;
+            string selectedWarp = GetSelectedMapEntry() != null ? GetSelectedMapEntry().Warp : null;
+
+            this.dgvMaps.SuspendLayout();
+            try
+            {
+                this.dgvMaps.Rows.Clear();
+                foreach (AureumMapEntry map in filtered)
+                {
+                    bool done = AureumProgressStore.IsMapCompleted(this.progress, map.Warp);
+                    int rowIdx = this.dgvMaps.Rows.Add(
+                        done,
+                        byBonus ? map.BonusCategory : map.City,
+                        map.Name,
+                        map.WarpCommand,
+                        map.Bonus);
+
+                    DataGridViewRow row = this.dgvMaps.Rows[rowIdx];
+                    row.Tag = map;
+                    ApplyMapRowVisualStyle(row, done);
+                }
+
+                if (!string.IsNullOrEmpty(selectedWarp))
+                {
+                    for (int i = 0; i < this.dgvMaps.Rows.Count; i++)
+                    {
+                        AureumMapEntry entry = this.dgvMaps.Rows[i].Tag as AureumMapEntry;
+                        if (entry != null && string.Equals(entry.Warp, selectedWarp, StringComparison.OrdinalIgnoreCase))
+                        {
+                            this.dgvMaps.Rows[i].Selected = true;
+                            break;
+                        }
+                    }
+                }
+                else if (this.dgvMaps.Rows.Count > 0)
+                {
+                    this.dgvMaps.Rows[0].Selected = true;
+                }
+
+                if (firstRow >= 0 && firstRow < this.dgvMaps.Rows.Count)
+                {
+                    this.dgvMaps.FirstDisplayedScrollingRowIndex = firstRow;
+                }
+            }
+            finally
+            {
+                this.dgvMaps.ResumeLayout(true);
+            }
+
+            UpdateSelectedMapDetailBar();
+        }
+
+        private void ApplyMapRowVisualStyle(DataGridViewRow row, bool completed)
+        {
+            bool dark = ThemeManager.IsDarkMode;
+            if (completed)
+            {
+                row.DefaultCellStyle.Font = this.gridStrikeFont;
+                row.DefaultCellStyle.ForeColor = dark ? Color.FromArgb(132, 214, 152) : Color.FromArgb(46, 124, 68);
+                row.DefaultCellStyle.BackColor = dark ? Color.FromArgb(24, 38, 26) : Color.FromArgb(234, 248, 236);
+            }
+            else
+            {
+                row.DefaultCellStyle.Font = this.smallFont;
+                row.DefaultCellStyle.ForeColor = dark ? Color.FromArgb(240, 230, 200) : Color.FromArgb(46, 33, 12);
+                row.DefaultCellStyle.BackColor = dark ? Color.FromArgb(26, 18, 6) : Color.FromArgb(255, 253, 246);
+            }
+        }
+
+        private void OnMapGridCellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= this.dgvMaps.Rows.Count) return;
+            DataGridViewRow row = this.dgvMaps.Rows[e.RowIndex];
+            AureumMapEntry entry = row.Tag as AureumMapEntry;
+            if (entry == null) return;
+
+            if (e.ColumnIndex == 0)
+            {
+                bool nowDone = AureumProgressStore.ToggleMapCompleted(this.progress, entry.Warp);
+                row.Cells[0].Value = nowDone;
+                ApplyMapRowVisualStyle(row, nowDone);
+                UpdateMapProgressLabelOnly();
+            }
+            else if (e.ColumnIndex == 3)
+            {
+                CopyToClipboardWithFeedback(entry.WarpCommand, this.btnCopyMapWarp);
+            }
+        }
+
+        private void OnMapGridCellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= this.dgvMaps.Rows.Count) return;
+            AureumMapEntry entry = this.dgvMaps.Rows[e.RowIndex].Tag as AureumMapEntry;
+            if (entry == null) return;
+
+            if (e.ColumnIndex != 0)
+            {
+                CopyToClipboardWithFeedback(entry.WarpCommand, this.btnCopyMapWarp);
+            }
+        }
+
+        private void UpdateMapProgressLabelOnly()
+        {
+            int totalCompleted = this.catalog.MapCollections.Count(m => AureumProgressStore.IsMapCompleted(this.progress, m.Warp));
+            this.lblMapProgress.Text = LocalizationManager.T(
+                "aureum.maps_progress",
+                totalCompleted,
+                this.catalog.MapCollections.Count,
+                this.currentlyVisibleMaps.Count);
+        }
+
+        private void SetVisibleMapsCompleted(bool completed)
+        {
+            if (this.currentlyVisibleMaps.Count == 0) return;
+            AureumProgressStore.SetMapsCompleted(this.progress, this.currentlyVisibleMaps.Select(m => m.Warp), completed);
+            RebuildMapGrid();
+        }
+
+        private AureumMapEntry GetSelectedMapEntry()
+        {
+            if (this.dgvMaps == null || this.dgvMaps.SelectedRows.Count == 0)
+            {
+                return null;
+            }
+            return this.dgvMaps.SelectedRows[0].Tag as AureumMapEntry;
+        }
+
+        private void UpdateSelectedMapDetailBar()
+        {
+            AureumMapEntry entry = GetSelectedMapEntry();
+            if (entry == null)
+            {
+                this.lblMapSelectedDetails.Text = LocalizationManager.T("aureum.map_select_hint");
+                this.btnCopyMapWarp.Enabled = false;
+                return;
+            }
+
+            this.btnCopyMapWarp.Enabled = !string.IsNullOrWhiteSpace(entry.WarpCommand);
+            string itemsInline = entry.Items != null && entry.Items.Count > 0
+                ? string.Join(" · ", entry.Items.Select(it => string.IsNullOrWhiteSpace(it.Drops) ? it.Name : string.Format("{0} ({1})", it.Name, it.Drops)))
+                : "-";
+
+            this.lblMapSelectedDetails.Text = string.Format(
+                "{0} ({1}) — {2}\n@mc: {3}",
+                entry.Name,
+                entry.City,
+                entry.Bonus,
+                itemsInline);
+
+            string tooltipText = string.Format(
+                "{0} [{1}] — {2}\n{3}\n\n{4}",
+                entry.Name,
+                entry.City,
+                entry.WarpCommand,
+                entry.Bonus,
+                entry.Items != null && entry.Items.Count > 0
+                    ? string.Join("\n", entry.Items.Select(it => "• " + it.Name + (string.IsNullOrWhiteSpace(it.Drops) ? string.Empty : ": " + it.Drops)))
+                    : string.Empty);
+
+            this.hubToolTip.SetToolTip(this.lblMapSelectedDetails, tooltipText);
+        }
+
+        private void OnCopySelectedMapWarpClick(object sender, EventArgs e)
+        {
+            AureumMapEntry entry = GetSelectedMapEntry();
+            if (entry != null && !string.IsNullOrWhiteSpace(entry.WarpCommand))
+            {
+                CopyToClipboardWithFeedback(entry.WarpCommand, this.btnCopyMapWarp);
+            }
+        }
+
+        private void CopyToClipboardWithFeedback(string text, Button button)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+
+            try
+            {
+                Clipboard.SetText(text);
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn("AureumHubForm", "Failed to copy text to clipboard", ex);
+            }
+
+            if (button == null || button.IsDisposed) return;
+
+            if (this.copyFeedbackButton != null && !this.copyFeedbackButton.IsDisposed && !ReferenceEquals(this.copyFeedbackButton, button))
+            {
+                this.copyFeedbackButton.Text = this.copyFeedbackOriginalText;
+            }
+
+            this.copyFeedbackTimer.Stop();
+            if (!ReferenceEquals(this.copyFeedbackButton, button))
+            {
+                this.copyFeedbackOriginalText = button.Text;
+                this.copyFeedbackButton = button;
+            }
+            button.Text = LocalizationManager.T("aureum.copied");
+            this.copyFeedbackTimer.Start();
+        }
+
+        private void OnCopyFeedbackTick(object sender, EventArgs e)
+        {
+            this.copyFeedbackTimer.Stop();
+            if (this.copyFeedbackButton != null && !this.copyFeedbackButton.IsDisposed && !string.IsNullOrEmpty(this.copyFeedbackOriginalText))
+            {
+                this.copyFeedbackButton.Text = this.copyFeedbackOriginalText;
+            }
+            this.copyFeedbackButton = null;
+            this.copyFeedbackOriginalText = null;
+        }
+
+        private static void OpenExternalUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return;
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn("AureumHubForm", "Failed to open URL: " + url, ex);
+            }
+        }
+
+        private static string NormalizeSearch(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+            string formD = value.Trim().Normalize(NormalizationForm.FormD);
+            StringBuilder sb = new StringBuilder(formD.Length);
+            foreach (char ch in formD)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(char.ToLowerInvariant(ch));
+                }
+            }
+            return sb.ToString();
+        }
+
+        private void OnExternalProgressChanged(object sender, EventArgs e)
+        {
+            if (this.IsDisposed || !this.IsHandleCreated) return;
+
+            MethodInvoker reload = delegate
+            {
+                if (this.IsDisposed) return;
+                this.progress = AureumProgressStore.Load();
+                this.isPopulatingUi = true;
+                try
+                {
+                    if (this.chkVoteReminder != null) this.chkVoteReminder.Checked = this.progress.VoteReminderEnabled;
+                    if (this.chkVoteSound != null) this.chkVoteSound.Checked = this.progress.VoteReminderSound;
+                }
+                finally
+                {
+                    this.isPopulatingUi = false;
+                }
+
+                RefreshVoteCountdowns(false);
+                if (this.activeMainSubTab == "collection")
+                {
+                    if (this.activeCollectionSubTab == "cards")
+                    {
+                        RebuildCardCollectionList();
+                    }
+                    else
+                    {
+                        RebuildMapGrid();
+                    }
+                }
+            };
+
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(reload);
+            }
+            else
+            {
+                reload();
+            }
+        }
+
+        public void ApplyCustomThemeStyling()
+        {
+            bool dark = ThemeManager.IsDarkMode;
+            ApplyVoteCardsTheme();
+
+            if (this.dgvMaps != null)
+            {
+                Color bg = dark ? Color.FromArgb(26, 18, 6) : Color.FromArgb(255, 253, 246);
+                Color gridColor = dark ? Color.FromArgb(72, 52, 18) : Color.FromArgb(218, 200, 162);
+                Color headerBg = dark ? Color.FromArgb(46, 33, 10) : Color.FromArgb(242, 229, 194);
+                Color headerFore = dark ? Color.FromArgb(244, 217, 122) : Color.FromArgb(62, 44, 16);
+                Color selBg = dark ? Color.FromArgb(74, 54, 16) : Color.FromArgb(236, 216, 162);
+                Color selFore = dark ? Color.FromArgb(255, 246, 214) : Color.FromArgb(42, 28, 8);
+
+                this.dgvMaps.BackgroundColor = bg;
+                this.dgvMaps.GridColor = gridColor;
+                this.dgvMaps.ColumnHeadersDefaultCellStyle.BackColor = headerBg;
+                this.dgvMaps.ColumnHeadersDefaultCellStyle.ForeColor = headerFore;
+                this.dgvMaps.ColumnHeadersDefaultCellStyle.Font = this.smallBoldFont;
+                this.dgvMaps.DefaultCellStyle.SelectionBackColor = selBg;
+                this.dgvMaps.DefaultCellStyle.SelectionForeColor = selFore;
+
+                foreach (DataGridViewRow row in this.dgvMaps.Rows)
+                {
+                    AureumMapEntry entry = row.Tag as AureumMapEntry;
+                    bool done = entry != null && AureumProgressStore.IsMapCompleted(this.progress, entry.Warp);
+                    ApplyMapRowVisualStyle(row, done);
+                }
+            }
+
+            if (this.activeMainSubTab == "collection" && this.activeCollectionSubTab == "cards")
+            {
+                RebuildCardCollectionList();
+            }
+        }
+
+        private void ApplyVoteCardsTheme()
+        {
+            bool dark = ThemeManager.IsDarkMode;
+            Color cardBg = dark ? Color.FromArgb(30, 21, 7) : Color.FromArgb(255, 252, 243);
+            Color titleColor = dark ? Color.FromArgb(250, 240, 212) : Color.FromArgb(46, 33, 12);
+            Color subColor = dark ? Color.FromArgb(182, 165, 128) : Color.FromArgb(115, 96, 68);
+            Color btnBg = dark ? Color.FromArgb(52, 38, 14) : Color.FromArgb(248, 240, 218);
+            Color btnBorder = dark ? Color.FromArgb(112, 84, 28) : Color.FromArgb(196, 172, 124);
+
+            foreach (VoteSiteCardControls ctrl in this.voteCardControls)
+            {
+                ctrl.CardPanel.BackColor = cardBg;
+                ctrl.TitleLabel.ForeColor = titleColor;
+                ctrl.SubLabel.ForeColor = subColor;
+
+                ctrl.VoteButton.FlatStyle = FlatStyle.Flat;
+                ctrl.VoteButton.BackColor = btnBg;
+                ctrl.VoteButton.ForeColor = titleColor;
+                ctrl.VoteButton.FlatAppearance.BorderColor = btnBorder;
+
+                ctrl.ResetButton.FlatStyle = FlatStyle.Flat;
+                ctrl.ResetButton.BackColor = btnBg;
+                ctrl.ResetButton.ForeColor = subColor;
+                ctrl.ResetButton.FlatAppearance.BorderColor = btnBorder;
+            }
+        }
+
+        public void ApplyLocalizedTexts()
+        {
+            this.btnSubVote.Text = LocalizationManager.T("aureum.sub_vote");
+            this.btnSubCollection.Text = LocalizationManager.T("aureum.sub_collection");
+            this.btnSubCards.Text = LocalizationManager.T("aureum.sub_cards", this.catalog.CardCollections.Count);
+            this.btnSubMaps.Text = LocalizationManager.T("aureum.sub_maps", this.catalog.MapCollections.Count);
+
+            this.btnOpenVotePage.Text = LocalizationManager.T("aureum.open_vote_page");
+            this.btnMarkAllVoted.Text = LocalizationManager.T("aureum.mark_all_voted");
+            this.btnCopyVoteShopNavi.Text = LocalizationManager.T("aureum.copy_vote_shop");
+            this.btnRefreshTopsites.Text = LocalizationManager.T("aureum.sync_topsites");
+            this.chkVoteReminder.Text = LocalizationManager.T("aureum.vote_reminder");
+            this.chkVoteSound.Text = LocalizationManager.T("aureum.vote_sound");
+            this.lblVoteStatusInfo.Text = LocalizationManager.T("aureum.vote_info");
+
+            this.btnCopyCardNpc.Text = LocalizationManager.T("aureum.copy_card_npc");
+            this.chkHideCollectedCards.Text = LocalizationManager.T("aureum.hide_collected");
+            this.btnMarkVisibleCards.Text = LocalizationManager.T("aureum.mark_visible");
+            this.btnClearVisibleCards.Text = LocalizationManager.T("aureum.clear_visible");
+
+            this.btnMarkVisibleMaps.Text = LocalizationManager.T("aureum.mark_visible");
+            this.btnClearVisibleMaps.Text = LocalizationManager.T("aureum.clear_visible");
+            this.btnCopyMapWarp.Text = LocalizationManager.T("aureum.copy_warp");
+
+            if (this.dgvMaps != null)
+            {
+                this.dgvMaps.Columns["colMapName"].HeaderText = LocalizationManager.T("aureum.col_map");
+                this.dgvMaps.Columns["colWarp"].HeaderText = LocalizationManager.T("aureum.col_warp");
+                this.dgvMaps.Columns["colBonus"].HeaderText = LocalizationManager.T("aureum.col_bonus");
+            }
+
+            this.hubToolTip.SetToolTip(this.txtCardSearch, LocalizationManager.T("aureum.cards_search_tip"));
+            this.hubToolTip.SetToolTip(this.txtMapSearch, LocalizationManager.T("aureum.maps_search_tip"));
+            this.hubToolTip.SetToolTip(this.btnCopyVoteShopNavi, this.catalog.VoteShopNavi);
+            this.hubToolTip.SetToolTip(this.btnCopyCardNpc, this.catalog.CardNpcNavi);
+
+            PopulateCardFilters();
+            PopulateMapFilters();
+            RebuildVoteCards();
+            RebuildCardCollectionList();
+            RebuildMapGrid();
+        }
+
+        public void Update(ISubject subject)
+        {
+            Subject subj = subject as Subject;
+            if (subj == null || subj.Message == null) return;
+
+            if (subj.Message.code == MessageCode.LANGUAGE_CHANGED)
+            {
+                ApplyLocalizedTexts();
+            }
+        }
+
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+            ApplyCustomThemeStyling();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                AureumProgressStore.ProgressChanged -= OnExternalProgressChanged;
+                if (this.voteTickTimer != null)
+                {
+                    this.voteTickTimer.Stop();
+                    this.voteTickTimer.Dispose();
+                    this.voteTickTimer = null;
+                }
+                if (this.copyFeedbackTimer != null)
+                {
+                    this.copyFeedbackTimer.Stop();
+                    this.copyFeedbackTimer.Dispose();
+                    this.copyFeedbackTimer = null;
+                }
+                if (this.hubToolTip != null)
+                {
+                    this.hubToolTip.Dispose();
+                    this.hubToolTip = null;
+                }
+                for (int i = 0; i < this.ownedFonts.Count; i++)
+                {
+                    this.ownedFonts[i].Dispose();
+                }
+                this.ownedFonts.Clear();
+            }
+
+            base.Dispose(disposing);
+        }
+    }
+}

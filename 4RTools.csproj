@@ -278,6 +278,9 @@
     <Compile Include="Forms\UtilitiesForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\AureumHubForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\GuideForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -348,6 +351,7 @@
     <Compile Include="Model\UserPreferences.cs" />
     <Compile Include="Model\Client.cs" />
     <Compile Include="Model\Action.cs" />
+    <Compile Include="Model\AureumCatalog.cs" />
     <Compile Include="Model\Macro.cs" />
     <Compile Include="Model\Profile.cs" />
     <Compile Include="Forms\AutopotForm.cs">
@@ -374,6 +378,7 @@
       <DependentUpon>Icons.resx</DependentUpon>
     </Compile>
     <Compile Include="Utils\ActionPriorityCoordinator.cs" />
+    <Compile Include="Utils\AureumProgressStore.cs" />
     <Compile Include="Utils\ChatPauseState.cs" />
     <Compile Include="Utils\EffectStatusIDs.cs" />
     <Compile Include="Utils\AppConfig.cs" />
@@ -459,6 +464,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ETCResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\AureumCatalog.json" />
     <None Include="app.manifest" />
     <None Include="packages.config" />
     <None Include="Properties\DataSources\_4RTools.Model.ClientDTO.datasource" />

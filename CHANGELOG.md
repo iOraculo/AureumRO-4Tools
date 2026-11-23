@@ -1,5 +1,18 @@
 # Changelogs
 
+## [v2.36.0] - 2026-11-23 — Nova Aba `Aureum Hub` (Hora da Votação + Coleção de Cartas + Coleção de Mapas)
+### Added
+- **Nova aba `Aureum Hub` na barra lateral (`Forms/AureumHubForm.cs`, `Model/AureumCatalog.cs`, `Utils/AureumProgressStore.cs`, `Resources/AureumCatalog.json`)**:
+  - **Sub-aba `Hora da Votação`**:
+    - Lista os topsites oficiais do AureumRO (**Top Ragnarok BR** e **Top Ragnarok ORG**, 12h cada, +1 ponto cada, com sincronização opcional via `api.aureumro.com/vote/topsites`).
+    - Contagem regressiva persistente de 12h ao vivo por topsite, botão **`Votar (+12h)`** (abre `https://aureumro.com/votar/` e inicia o timer), **`Marcar Todos (12h)`**, **`Zerar`**, atalho para copiar `/navi prontera 183/135` (NPC Loja de Votos) e **lembrete automático com som e notificação na bandeja** quando um novo voto ficar disponível.
+  - **Sub-aba `Coleção` → `Coleção de Cartas (28 coleções / 140 cartas)`**:
+    - Catálogo completo da Wiki separado por **Categoria de Bônus** (`Utilidade, Drop & EXP`, `Dano Físico & Crítico`, `Magia & Conjuração`, `Defesa, PvP & Reflexão`, `HP, SP & Cura`), com busca em tempo real, filtro (`Todos / Pendentes / Completos`), progresso geral (`X/140 cartas · Y/28 coleções`) e atalho `/navi prontera 153/177` (Colecionador de Cartas).
+    - **Clique nas cartas já obtidas para marcá-las em tachado (`✓ Carta`)** (com isolamento por coleção para cartas repetidas como Carta Necromante), além de **`Marcar 5 / Desmarcar 5`** por coleção, **`Marcar visíveis / Desmarcar visíveis`** e **`Ocultar obtidas`**.
+  - **Sub-aba `Coleção` → `Coleção de Mapas (311 mapas / 27 cidades)`**:
+    - Alterna agrupamento **`Por Cidade`** (27 cidades oficiais) ou **`Por Tipo de Bônus`** (`Velocidade de Movimento`, `Crítico`, `Ataque, ASPD & Dano Físico`, `Dano Mágico & Elemental`, `Cast, Pós-Conj. & Recarga`, `Dano de Skills`, `Defesa, Resistências & PvP`, `HP, SP & Cura`, `Atributos, Precisão & Evasão`, `Utilidade, EXP, Drop & Peso`).
+    - Exibe nome do mapa, comando **`@warp`** (clique na coluna Warp, duplo clique ou botão **`Copiar @warp`**), descrição exata do bônus, lista de itens de drop (`@mc`) do mapa selecionado e marcação persistente em tachado dos mapas concluídos.
+
 ## [v2.35.0] - 2026-11-22 — Modo Multi-Conta 3 em 1 (`Conta 1 | Conta 2 | Conta 3` em 1 Janela)
 ### Added
 - **Janela única Multi-Conta 3 em 1 (`Forms/MultiAccountShellForm.cs`, `Utils/SessionContext.cs`, `Forms/Container.cs`, `Forms/ToggleApplicationStateForm.cs`, `Utils/_4RThread.cs`)**:

@@ -17,6 +17,7 @@ namespace _4RTools.Utils
         AtkDef,
         Mount,
         Utilities,
+        AureumHub,
         Profiles,
         Servers,
         Guide
@@ -97,7 +98,7 @@ namespace _4RTools.Utils
             this.Text = label;
             this.IconKind = iconKind;
             this.Cursor = Cursors.Hand;
-            this.Size = new Size(184, 34);
+            this.Size = new Size(184, 30);
             this.regularFont = new Font("Segoe UI", 9F, FontStyle.Regular);
             this.activeFont = new Font("Segoe UI", 9F, FontStyle.Bold);
         }
@@ -315,6 +316,22 @@ namespace _4RTools.Utils
                         // Stacked server bars
                         g.DrawRectangle(pen, r.X + 2, r.Y + 2, r.Width - 4, 4);
                         g.DrawRectangle(pen, r.X + 2, r.Y + 8, r.Width - 4, 4);
+                        break;
+
+                    case SidebarIconKind.AureumHub:
+                        // 4-point Aureum star / emblem
+                        Point[] star = new Point[]
+                        {
+                            new Point(cx, r.Y),
+                            new Point(cx + 2, cy - 2),
+                            new Point(r.Right, cy),
+                            new Point(cx + 2, cy + 2),
+                            new Point(cx, r.Bottom),
+                            new Point(cx - 2, cy + 2),
+                            new Point(r.X, cy),
+                            new Point(cx - 2, cy - 2)
+                        };
+                        g.FillPolygon(brush, star);
                         break;
 
                     case SidebarIconKind.Guide:

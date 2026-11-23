@@ -20,6 +20,7 @@ namespace _4RTools.Tests
         private readonly string originalProfileFolder;
         private readonly string originalServerFile;
         private readonly string originalSettingsFile;
+        private readonly string originalAureumProgressFile;
         private readonly bool originalDarkMode;
         private readonly string originalLanguage;
 
@@ -31,12 +32,14 @@ namespace _4RTools.Tests
             this.originalProfileFolder = AppConfig.ProfileFolder;
             this.originalServerFile = LocalServerManager.LocalServerFilePath;
             this.originalSettingsFile = AppSettings.SettingsFilePath;
+            this.originalAureumProgressFile = AureumProgressStore.ProgressFilePath;
             this.originalDarkMode = ThemeManager.IsDarkMode;
             this.originalLanguage = LocalizationManager.CurrentLanguage;
 
             AppConfig.ProfileFolder = Path.Combine(this.tempDir, "Profile") + Path.DirectorySeparatorChar;
             LocalServerManager.LocalServerFilePath = Path.Combine(this.tempDir, "supported_servers.json");
             AppSettings.SettingsFilePath = Path.Combine(this.tempDir, "settings.json");
+            AureumProgressStore.ProgressFilePath = Path.Combine(this.tempDir, "aureum_progress.json");
             LocalizationManager.SetLanguage(LocalizationManager.LANG_PT_BR);
         }
 
@@ -47,6 +50,7 @@ namespace _4RTools.Tests
             AppConfig.ProfileFolder = this.originalProfileFolder;
             LocalServerManager.LocalServerFilePath = this.originalServerFile;
             AppSettings.SettingsFilePath = this.originalSettingsFile;
+            AureumProgressStore.ProgressFilePath = this.originalAureumProgressFile;
 
             try
             {
@@ -1801,6 +1805,108 @@ namespace _4RTools.Tests
             Assert.DoesNotContain(s0, remaining);
             Assert.DoesNotContain(s1, remaining);
             Assert.DoesNotContain(s2, remaining);
+        }
+
+        [Fact]
+        public void AureumCatalog_AndProgressStore_LoadAllCollectionsMapsAndPersistIndependently()
+        {
+            AureumCatalogData catalog = AureumCatalog.Load();
+            Assert.NotNull(catalog);
+            Assert.Equal(2, catalog.Topsites.Count);
+            Assert.Equal(28, catalog.CardCollections.Count);
+            Assert.Equal(140, catalog.CardCollections.Sum(c => c.Cards.Count));
+            Assert.Equal(311, catalog.MapCollections.Count);
+            Assert.Equal(27, AureumCatalog.GetMapCities(catalog).Count);
+            Assert.True(AureumCatalog.GetCardCategories(catalog).Count >= 5);
+            Assert.True(AureumCatalog.GetMapBonusCategories(catalog).Count >= 9);
+
+            // Every map must have a valid @warp code and categorized bonus (no "Outros").
+            Assert.All(catalog.MapCollections, m =>
+            {
+                Assert.False(string.IsNullOrWhiteSpace(m.Name));
+                Assert.False(string.IsNullOrWhiteSpace(m.City));
+                Assert.False(string.IsNullOrWhiteSpace(m.Warp));
+                Assert.StartsWith("@warp ", m.WarpCommand);
+                Assert.False(string.IsNullOrWhiteSpace(m.Bonus));
+                Assert.NotEqual("Outros", m.BonusCategory);
+            });
+
+            // Shared cards (e.g., Necromancer 4440 in collections 21 and 22) must track separately per collection.
+            AureumProgressData progress = AureumProgressStore.Load();
+            Assert.True(AureumProgressStore.ToggleCardCollected(progress, 21, 4440));
+            Assert.True(AureumProgressStore.IsCardCollected(progress, 21, 4440));
+            Assert.False(AureumProgressStore.IsCardCollected(progress, 22, 4440));
+
+            // Map completion + 12h vote timer + ready notification fire once per cycle.
+            Assert.True(AureumProgressStore.ToggleMapCompleted(progress, "tur_dun01"));
+            Assert.True(AureumProgressStore.IsMapCompleted(progress, "tur_dun01"));
+
+            AureumVoteSite site = catalog.Topsites[0];
+            DateTime t0 = new DateTime(2026, 11, 23, 12, 0, 0, DateTimeKind.Utc);
+            AureumProgressStore.RecordVote(progress, site.Code, t0);
+            Assert.False(AureumProgressStore.IsVoteReady(progress, site, t0.AddHours(6)));
+            Assert.Equal(TimeSpan.FromHours(6), AureumProgressStore.GetRemainingVoteCooldown(progress, site, t0.AddHours(6)));
+
+            List<AureumVoteSite> alertsAt12h = AureumProgressStore.CheckNewlyReadyVoteSites(progress, catalog.Topsites, t0.AddHours(12));
+            Assert.Single(alertsAt12h);
+            Assert.Equal(site.Code, alertsAt12h[0].Code);
+            // Must not duplicate alert for the same vote cycle.
+            Assert.Empty(AureumProgressStore.CheckNewlyReadyVoteSites(progress, catalog.Topsites, t0.AddHours(13)));
+
+            // Persists cleanly across reload.
+            AureumProgressData reloaded = AureumProgressStore.Load();
+            Assert.True(AureumProgressStore.IsCardCollected(reloaded, 21, 4440));
+            Assert.False(AureumProgressStore.IsCardCollected(reloaded, 22, 4440));
+            Assert.True(AureumProgressStore.IsMapCompleted(reloaded, "tur_dun01"));
+        }
+
+        [Fact]
+        public void AureumHubForm_SwitchesSubTabsStrikesCollectedCardsAndGroupsMapsByCityOrBonus()
+        {
+            Subject subject = new Subject();
+            using (AureumHubForm hub = new AureumHubForm(subject, false))
+            {
+                Assert.Equal("vote", hub.ActiveMainSubTab);
+
+                // Switch to Collection -> Cards
+                hub.SelectMainSubTab("collection");
+                Assert.Equal("collection", hub.ActiveMainSubTab);
+                Assert.Equal("cards", hub.ActiveCollectionSubTab);
+                Assert.Equal(28, hub.VisibleCardCollectionCount);
+
+                // Click Poring card in collection #01 -> strikes through & persists!
+                System.Windows.Forms.Control[] poringBtns = hub.Controls.Find("btnCard_01_4001", true);
+                Assert.Single(poringBtns);
+                Assert.False(poringBtns[0].Font.Strikeout);
+                ((System.Windows.Forms.Button)poringBtns[0]).PerformClick();
+
+                System.Windows.Forms.Control[] poringAfter = hub.Controls.Find("btnCard_01_4001", true);
+                Assert.Single(poringAfter);
+                Assert.True(poringAfter[0].Font.Strikeout);
+                Assert.StartsWith("✓ ", poringAfter[0].Text);
+
+                // Filter cards by search
+                hub.SetCardSearchText("Poring");
+                Assert.Equal(1, hub.VisibleCardCollectionCount);
+                hub.SetCardSearchText(string.Empty);
+                Assert.Equal(28, hub.VisibleCardCollectionCount);
+
+                // Switch to Collection -> Maps, test City grouping and Bonus Type grouping
+                hub.SelectCollectionSubTab("maps");
+                Assert.Equal("maps", hub.ActiveCollectionSubTab);
+                Assert.Equal(311, hub.VisibleMapCount);
+
+                hub.SetMapGroupMode(false);
+                hub.SetMapGroupFilter("Alberta");
+                Assert.Equal(4, hub.VisibleMapCount);
+
+                hub.SetMapGroupMode(true);
+                hub.SetMapGroupFilter("Velocidade de Movimento");
+                Assert.Equal(26, hub.VisibleMapCount);
+
+                hub.SetMapGroupFilter("Crítico");
+                Assert.Equal(9, hub.VisibleMapCount);
+            }
         }
     }
 }

@@ -311,6 +311,7 @@ namespace _4RTools.Forms
                 container.DarkModeChangedByUser += dark => SyncThemeFromAccount(slotIndex, dark);
                 container.LanguageChangedByUser += lang => SyncLanguageFromAccount(slotIndex, lang);
                 container.UseBuffsInTownChangedByUser += allow => SyncUseBuffsInTownFromAccount(slotIndex, allow);
+                container.VoteNotificationRequested += ShowVoteBalloonNotification;
 
                 this.containers[slotIndex] = container;
                 this.panelHost.Controls.Add(container);
@@ -635,6 +636,27 @@ namespace _4RTools.Forms
             this.trayIcon.Icon = anyOn
                 ? Resources._4RTools.ETCResource.logo_4rtools_on
                 : Resources._4RTools.ETCResource.logo_4rtools_off;
+        }
+
+        private void ShowVoteBalloonNotification(string message)
+        {
+            if (this.IsDisposed || this.trayIcon == null || string.IsNullOrWhiteSpace(message))
+            {
+                return;
+            }
+
+            try
+            {
+                this.trayIcon.ShowBalloonTip(
+                    5000,
+                    LocalizationManager.T("aureum.vote_alert_title"),
+                    message,
+                    ToolTipIcon.Info);
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn("MultiAccountShellForm", "Failed to show vote reminder balloon", ex);
+            }
         }
 
         private void RestoreFromTray()

@@ -31,6 +31,7 @@ namespace _4RTools.Forms
         private MiniHudForm miniHud;
         private ToolTip headerToolTip;
         private ProfileForm profileForm;
+        private AureumHubForm aureumHubForm;
         private Func<HashSet<string>> assignedProcessProvider;
 
         public SessionContext Session { get { return this.session; } }
@@ -43,6 +44,7 @@ namespace _4RTools.Forms
         public event Action<bool> DarkModeChangedByUser;
         public event Action<string> LanguageChangedByUser;
         public event Action<bool> UseBuffsInTownChangedByUser;
+        public event Action<string> VoteNotificationRequested;
 
         // Modern layout shell controls
         private Panel panelTopBar;
@@ -134,6 +136,7 @@ namespace _4RTools.Forms
                 SetMacrosWindow();
                 SetMountWindow();
                 SetUtilitiesWindow();
+                SetAureumHubWindow();
                 SetProfileWindow();
                 SetGuideWindow();
 
@@ -164,6 +167,10 @@ namespace _4RTools.Forms
                         this.cbDarkMode.Checked = darkMode;
                     }
                     ThemeManager.ApplyTheme(this, darkMode);
+                    if (this.aureumHubForm != null && !this.aureumHubForm.IsDisposed)
+                    {
+                        this.aureumHubForm.ApplyCustomThemeStyling();
+                    }
                     if (this.miniHud != null && !this.miniHud.IsDisposed)
                     {
                         this.miniHud.ApplyHudTheme(darkMode);
@@ -440,20 +447,21 @@ namespace _4RTools.Forms
                 AddSidebarButton("mount", "Mount", SidebarIconKind.Mount, ref y);
                 AddSidebarButton("utilities", "Utilities", SidebarIconKind.Utilities, ref y);
 
-                this.panelSidebar.Controls.Add(CreateDivider(new Point(14, 326), new Size(176, 1)));
+                this.panelSidebar.Controls.Add(CreateDivider(new Point(14, 302), new Size(176, 1)));
 
                 Label lblGroupManagement = new Label
                 {
                     AutoSize = true,
                     Font = sidebarGroupFont,
-                    Location = new Point(14, 336),
+                    Location = new Point(14, 310),
                     Name = "lblGroupManagement",
                     Text = "MANAGEMENT",
                     Tag = ThemeManager.TAG_MUTED_TEXT
                 };
                 this.panelSidebar.Controls.Add(lblGroupManagement);
 
-                y = 356;
+                y = 328;
+                AddSidebarButton("aureum", "Aureum Hub", SidebarIconKind.AureumHub, ref y);
                 AddSidebarButton("profiles", "Profiles", SidebarIconKind.Profiles, ref y);
                 AddSidebarButton("guide", "Guide / Help", SidebarIconKind.Guide, ref y);
 
@@ -760,7 +768,7 @@ namespace _4RTools.Forms
 
             this.navButtons[sectionKey] = btn;
             this.panelSidebar.Controls.Add(btn);
-            y += 36;
+            y += 33;
         }
 
         private void SelectSection(string sectionKey)
@@ -928,6 +936,10 @@ namespace _4RTools.Forms
                 Client.AllowBuffsInTown = this.appSettings.UseBuffsInTown;
                 ApplyLanguageToUi();
                 ThemeManager.ApplyTheme(this, this.appSettings.DarkMode);
+                if (this.aureumHubForm != null && !this.aureumHubForm.IsDisposed)
+                {
+                    this.aureumHubForm.ApplyCustomThemeStyling();
+                }
                 SetMiniHudVisible(this.appSettings.ShowMiniHud);
             }
             finally
@@ -1062,6 +1074,10 @@ namespace _4RTools.Forms
 
             this.appSettings.DarkMode = this.cbDarkMode.Checked;
             ThemeManager.ApplyTheme(this, this.appSettings.DarkMode);
+            if (this.aureumHubForm != null && !this.aureumHubForm.IsDisposed)
+            {
+                this.aureumHubForm.ApplyCustomThemeStyling();
+            }
             if (this.miniHud != null && !this.miniHud.IsDisposed)
             {
                 this.miniHud.ApplyHudTheme(this.appSettings.DarkMode);
@@ -1909,6 +1925,22 @@ namespace _4RTools.Forms
         public void SetUtilitiesWindow()
         {
             RegisterSectionForm("utilities", new UtilitiesForm(this.subject));
+        }
+
+        public void SetAureumHubWindow()
+        {
+            bool enableAlerts = !this.isEmbeddedTab || this.session.SlotIndex == 0;
+            AureumHubForm frm = new AureumHubForm(this.subject, enableAlerts);
+            frm.VoteNotificationRequested += msg =>
+            {
+                Action<string> handler = this.VoteNotificationRequested;
+                if (handler != null)
+                {
+                    handler(msg);
+                }
+            };
+            this.aureumHubForm = frm;
+            RegisterSectionForm("aureum", frm);
         }
 
         public void SetGuideWindow()
