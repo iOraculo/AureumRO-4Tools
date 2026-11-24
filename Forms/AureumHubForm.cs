@@ -588,29 +588,36 @@ namespace _4RTools.Forms
             {
                 Name = "colDone",
                 HeaderText = "✓",
-                Width = 26,
+                Width = 24,
                 Resizable = DataGridViewTriState.False,
                 SortMode = DataGridViewColumnSortMode.NotSortable
             });
             this.dgvMaps.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "colGroup",
-                HeaderText = "Cidade",
-                Width = 108,
+                HeaderText = "Ref.",
+                Width = 74,
                 SortMode = DataGridViewColumnSortMode.NotSortable
             });
             this.dgvMaps.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "colMapName",
                 HeaderText = "Mapa",
-                Width = 132,
+                Width = 122,
                 SortMode = DataGridViewColumnSortMode.NotSortable
             });
             this.dgvMaps.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "colWarp",
-                HeaderText = "Warp",
-                Width = 100,
+                HeaderText = "Código",
+                Width = 74,
+                SortMode = DataGridViewColumnSortMode.NotSortable
+            });
+            this.dgvMaps.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "colDirections",
+                HeaderText = "Como chegar",
+                Width = 94,
                 SortMode = DataGridViewColumnSortMode.NotSortable
             });
             this.dgvMaps.Columns.Add(new DataGridViewTextBoxColumn
@@ -1094,9 +1101,7 @@ namespace _4RTools.Forms
 
                 if (this.dgvMaps != null && this.dgvMaps.Columns["colGroup"] != null)
                 {
-                    this.dgvMaps.Columns["colGroup"].HeaderText = byBonus
-                        ? LocalizationManager.T("aureum.col_bonus_type")
-                        : LocalizationManager.T("aureum.col_city");
+                    this.dgvMaps.Columns["colGroup"].HeaderText = LocalizationManager.T("aureum.col_ref");
                 }
             }
             finally
@@ -1449,9 +1454,10 @@ namespace _4RTools.Forms
                     bool done = AureumProgressStore.IsMapCompleted(this.progress, map.Warp);
                     int rowIdx = this.dgvMaps.Rows.Add(
                         done,
-                        byBonus ? map.BonusCategory : map.City,
+                        map.ReferenceCity,
                         map.Name,
-                        map.WarpCommand,
+                        map.MapCode,
+                        map.Directions ?? string.Empty,
                         map.Bonus);
 
                     DataGridViewRow row = this.dgvMaps.Rows[rowIdx];
@@ -1522,7 +1528,7 @@ namespace _4RTools.Forms
             }
             else if (e.ColumnIndex == 3)
             {
-                CopyToClipboardWithFeedback(entry.WarpCommand, this.btnCopyMapWarp);
+                CopyToClipboardWithFeedback(entry.MapCode, this.btnCopyMapWarp);
             }
         }
 
@@ -1534,7 +1540,7 @@ namespace _4RTools.Forms
 
             if (e.ColumnIndex != 0)
             {
-                CopyToClipboardWithFeedback(entry.WarpCommand, this.btnCopyMapWarp);
+                CopyToClipboardWithFeedback(entry.MapCode, this.btnCopyMapWarp);
             }
         }
 
@@ -1574,23 +1580,28 @@ namespace _4RTools.Forms
                 return;
             }
 
-            this.btnCopyMapWarp.Enabled = !string.IsNullOrWhiteSpace(entry.WarpCommand);
+            this.btnCopyMapWarp.Enabled = !string.IsNullOrWhiteSpace(entry.MapCode);
             string itemsInline = entry.Items != null && entry.Items.Count > 0
                 ? string.Join(" · ", entry.Items.Select(it => string.IsNullOrWhiteSpace(it.Drops) ? it.Name : string.Format("{0} ({1})", it.Name, it.Drops)))
                 : "-";
 
             this.lblMapSelectedDetails.Text = string.Format(
-                "{0} ({1}) — {2}\n@mc: {3}",
-                entry.Name,
-                entry.City,
+                "Ref: {0} ({1}) · {2}  |  {3}\n@mc: {4}",
+                entry.ReferenceCity,
+                entry.MapCode,
+                entry.Directions ?? "-",
                 entry.Bonus,
                 itemsInline);
 
+            string routeLine = !string.IsNullOrWhiteSpace(entry.RoutePath)
+                ? string.Format("{0}: {1}  ({2})", entry.ReferenceCity, entry.Directions, entry.RoutePath)
+                : string.Format("{0}: {1}", entry.ReferenceCity, entry.Directions);
+
             string tooltipText = string.Format(
-                "{0} [{1}] — {2}\n{3}\n\n{4}",
+                "{0} [{1}]\n{2}\n{3}\n\n{4}",
                 entry.Name,
-                entry.City,
-                entry.WarpCommand,
+                entry.MapCode,
+                routeLine,
                 entry.Bonus,
                 entry.Items != null && entry.Items.Count > 0
                     ? string.Join("\n", entry.Items.Select(it => "• " + it.Name + (string.IsNullOrWhiteSpace(it.Drops) ? string.Empty : ": " + it.Drops)))
@@ -1602,9 +1613,9 @@ namespace _4RTools.Forms
         private void OnCopySelectedMapWarpClick(object sender, EventArgs e)
         {
             AureumMapEntry entry = GetSelectedMapEntry();
-            if (entry != null && !string.IsNullOrWhiteSpace(entry.WarpCommand))
+            if (entry != null && !string.IsNullOrWhiteSpace(entry.MapCode))
             {
-                CopyToClipboardWithFeedback(entry.WarpCommand, this.btnCopyMapWarp);
+                CopyToClipboardWithFeedback(entry.MapCode, this.btnCopyMapWarp);
             }
         }
 
@@ -1809,8 +1820,10 @@ namespace _4RTools.Forms
 
             if (this.dgvMaps != null)
             {
+                this.dgvMaps.Columns["colGroup"].HeaderText = LocalizationManager.T("aureum.col_ref");
                 this.dgvMaps.Columns["colMapName"].HeaderText = LocalizationManager.T("aureum.col_map");
-                this.dgvMaps.Columns["colWarp"].HeaderText = LocalizationManager.T("aureum.col_warp");
+                this.dgvMaps.Columns["colWarp"].HeaderText = LocalizationManager.T("aureum.col_code");
+                this.dgvMaps.Columns["colDirections"].HeaderText = LocalizationManager.T("aureum.col_directions");
                 this.dgvMaps.Columns["colBonus"].HeaderText = LocalizationManager.T("aureum.col_bonus");
             }
 

@@ -1,5 +1,11 @@
 # Changelogs
 
+## [v2.36.1] - 2026-11-23 — Coleção de Mapas com Orientação por Setas (`← ↑ ↓ →`) e Código Limpo (sem `@warp`)
+### Changed
+- **Coleção de Mapas no `Aureum Hub` (`Forms/AureumHubForm.cs`, `Model/AureumCatalog.cs`, `Resources/AureumCatalog.json`)**:
+  - Removido o prefixo `@warp` da coluna de código (agora exibe o código limpo, ex.: `prt_monk`, `tur_dun01`, `ice_dun03`) e do botão **`Copiar código`**.
+  - Adicionada a coluna **`Como chegar`** com setas de orientação direcional (**`← ↑ ↓ →`**, `Barco`, `Trem`, `· 2F/3F`) a partir da cidade de referência (**`Ref.`**) para todos os **311 mapas** (ex.: `prt_monk` → `Ref: Prontera` · `→ ↑ → →`), além do trajeto detalhado passo a passo no rodapé/tooltip!
+
 ## [v2.36.0] - 2026-11-23 — Nova Aba `Aureum Hub` (Hora da Votação + Coleção de Cartas + Coleção de Mapas)
 ### Added
 - **Nova aba `Aureum Hub` na barra lateral (`Forms/AureumHubForm.cs`, `Model/AureumCatalog.cs`, `Utils/AureumProgressStore.cs`, `Resources/AureumCatalog.json`)**:

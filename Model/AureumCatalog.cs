@@ -109,12 +109,26 @@ namespace _4RTools.Model
         [JsonProperty("bonusCategory")]
         public string BonusCategory { get; set; }
 
+        [JsonProperty("refCity")]
+        public string RefCity { get; set; }
+
+        [JsonProperty("directions")]
+        public string Directions { get; set; }
+
+        [JsonProperty("routePath")]
+        public string RoutePath { get; set; }
+
         [JsonProperty("items")]
         public List<AureumMapDropItem> Items { get; set; }
 
-        public string WarpCommand
+        public string MapCode
         {
-            get { return string.IsNullOrWhiteSpace(this.Warp) ? string.Empty : "@warp " + this.Warp.Trim(); }
+            get { return string.IsNullOrWhiteSpace(this.Warp) ? string.Empty : this.Warp.Trim(); }
+        }
+
+        public string ReferenceCity
+        {
+            get { return !string.IsNullOrWhiteSpace(this.RefCity) ? this.RefCity : (this.City ?? string.Empty); }
         }
     }
 

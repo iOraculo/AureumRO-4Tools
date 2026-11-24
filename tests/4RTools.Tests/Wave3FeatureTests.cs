@@ -1820,16 +1820,24 @@ namespace _4RTools.Tests
             Assert.True(AureumCatalog.GetCardCategories(catalog).Count >= 5);
             Assert.True(AureumCatalog.GetMapBonusCategories(catalog).Count >= 9);
 
-            // Every map must have a valid @warp code and categorized bonus (no "Outros").
+            // Every map must have a clean map code (no @warp prefix), reference city, directions, and categorized bonus (no "Outros").
             Assert.All(catalog.MapCollections, m =>
             {
                 Assert.False(string.IsNullOrWhiteSpace(m.Name));
                 Assert.False(string.IsNullOrWhiteSpace(m.City));
-                Assert.False(string.IsNullOrWhiteSpace(m.Warp));
-                Assert.StartsWith("@warp ", m.WarpCommand);
+                Assert.False(string.IsNullOrWhiteSpace(m.MapCode));
+                Assert.DoesNotContain("@warp", m.MapCode);
+                Assert.False(string.IsNullOrWhiteSpace(m.ReferenceCity));
+                Assert.False(string.IsNullOrWhiteSpace(m.Directions));
                 Assert.False(string.IsNullOrWhiteSpace(m.Bonus));
                 Assert.NotEqual("Outros", m.BonusCategory);
             });
+
+            AureumMapEntry prtMonk = catalog.MapCollections.FirstOrDefault(m => string.Equals(m.MapCode, "prt_monk", StringComparison.OrdinalIgnoreCase));
+            Assert.NotNull(prtMonk);
+            Assert.Equal("Prontera", prtMonk.ReferenceCity);
+            Assert.Contains("→", prtMonk.Directions);
+            Assert.Contains("↑", prtMonk.Directions);
 
             // Shared cards (e.g., Necromancer 4440 in collections 21 and 22) must track separately per collection.
             AureumProgressData progress = AureumProgressStore.Load();
