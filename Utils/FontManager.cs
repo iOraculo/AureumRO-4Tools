@@ -231,10 +231,27 @@ namespace _4RTools.Utils
                 Font current = control.Font;
                 if (current != null && ShouldUpgradeFont(current.FontFamily.Name))
                 {
-                    float boostedSize = current.SizeInPoints < 9.5F
-                        ? Math.Min(9.5F, current.SizeInPoints + 0.5F)
-                        : current.SizeInPoints;
-                    Font upgraded = Get(boostedSize, current.Style);
+                    float targetSize;
+                    Button btn = control as Button;
+                    if (btn != null && btn.Height <= 24)
+                    {
+                        // Keep compact action buttons at 8.5pt max so descenders (p, g, q, y) never clip.
+                        targetSize = Math.Min(8.5F, current.SizeInPoints);
+                    }
+                    else if (btn != null)
+                    {
+                        targetSize = current.SizeInPoints < 9F
+                            ? Math.Min(9F, current.SizeInPoints + 0.5F)
+                            : current.SizeInPoints;
+                    }
+                    else
+                    {
+                        targetSize = current.SizeInPoints < 9.5F
+                            ? Math.Min(9.5F, current.SizeInPoints + 0.5F)
+                            : current.SizeInPoints;
+                    }
+
+                    Font upgraded = Get(targetSize, current.Style);
                     if (!ReferenceEquals(current, upgraded))
                     {
                         control.Font = upgraded;

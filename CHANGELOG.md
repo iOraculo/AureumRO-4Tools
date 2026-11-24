@@ -1,5 +1,12 @@
 # Changelogs
 
+## [v2.39.2] - 2026-11-24 — Correção de Proporção em Botões (`25px`), `Perfis` Sem Sobreposição e `AutoScaleMode.None` em Todos os Formulários
+### Fixed
+- **Sobreposição em `Perfis, Backup e Diagnóstico` (`Forms/ProfileForm.cs`, `Forms/*.Designer.cs`)**: desativado `AutoScaleMode.Font` em todos os 12 formulários embutidos (`.Designer.cs`) para eliminar a divergência de escala entre controles do Designer e controles criados em código em telas com escala do Windows >100%, e redesenhado o layout de `ProfileForm` aproveitando toda a largura (`616×289`) sem nenhuma sobreposição.
+- **Texto cortado na parte inferior de botões (`Utils/FontManager.cs`, `Utils/ThemeManager.cs`, `Forms/SkillAutoBuffForm.cs`, `Forms/StuffAutoBuffForm.cs`, `Forms/MacroSwitchForm.cs`, `Forms/MacroSongForm.cs`, `Forms/ATKDEFForm.cs`, `Forms/MacrosHubForm.cs`, `Forms/SkillTimerForm.cs`, `Forms/MountForm.cs`, `Forms/UtilitiesForm.cs`, `Forms/GuideForm.cs`)**:
+  - Aumentada a altura dos botões de ação (`Limpar`, `Limpar Skills`, `Limpar Itens`, `+ Adicionar campo`, `Limpar DEF/ATK`, etc.) para **`25px`–`27px`** com proteção global no `FontManager` (`8.5pt` em botões ≤24px, `UseCompatibleTextRendering = false` no `ThemeManager`), evitando qualquer corte de letras com haste inferior (`p`, `g`, `q`, `y`).
+  - Cabeçalhos de `Auto-skill` e `Consumíveis` espaçados na largura total (`592px`) com folga limpa entre `Classe:`, `Filtrar:`, `SP%:`, `CD:` e o botão de limpar.
+
 ## [v2.39.1] - 2026-11-24 — Alinhamento Determinístico da Grade de Teclas do `Spammer` no Layout Ampliado
 ### Fixed
 - **Aba `Spammer` (`Forms/AHKForm.cs`)**: posicionamento determinístico das 9 colunas de teclas (`F1..F9`, `1..9`, `Q..O`, `A..L`, `Z..M`) e expansão dos blocos `Legenda`, `Limpar Teclas`, `Configuração do Spammer` e `Prioridade de Ações` para aproveitar a nova largura (`616px`), eliminando qualquer encosto da coluna `F9 / 9 / O / L` na caixa `Legenda` com a fonte `Google Sans` ampliada.

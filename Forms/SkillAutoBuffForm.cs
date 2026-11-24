@@ -85,9 +85,9 @@ namespace _4RTools.Forms
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 FormattingEnabled = true,
-                Location = new Point(52, 9),
+                Location = new Point(58, 8),
                 Name = "cbSkillClassFilter",
-                Size = new Size(148, 21),
+                Size = new Size(156, 23),
                 Tag = FormUtils.SKIP_RESET_TAG
             };
             this.cbClassFilter.SelectedIndexChanged += OnClassFilterChanged;
@@ -95,15 +95,15 @@ namespace _4RTools.Forms
             this.lblSearch = new Label
             {
                 AutoSize = true,
-                Location = new Point(208, 12),
+                Location = new Point(222, 12),
                 Name = "lblSkillSearch",
                 Text = "Filter:"
             };
 
             this.txtSearch = new TextBox
             {
-                Location = new Point(250, 9),
-                Size = new Size(116, 20),
+                Location = new Point(270, 9),
+                Size = new Size(134, 22),
                 Name = "txtSkillSearch",
                 Tag = FormUtils.SKIP_RESET_TAG
             };
@@ -112,15 +112,15 @@ namespace _4RTools.Forms
             this.lblMinSp = new Label
             {
                 AutoSize = true,
-                Location = new Point(374, 12),
+                Location = new Point(412, 12),
                 Name = "lblSkillMinSp",
                 Text = "SP%:"
             };
 
             this.numMinSp = new NumericUpDown
             {
-                Location = new Point(406, 9),
-                Size = new Size(42, 20),
+                Location = new Point(450, 9),
+                Size = new Size(46, 22),
                 Minimum = 0,
                 Maximum = 99,
                 Name = "numSkillMinSp",
@@ -131,15 +131,15 @@ namespace _4RTools.Forms
             this.lblCooldown = new Label
             {
                 AutoSize = true,
-                Location = new Point(456, 12),
+                Location = new Point(504, 12),
                 Name = "lblSkillCooldown",
                 Text = "CD:"
             };
 
             this.numCooldown = new NumericUpDown
             {
-                Location = new Point(482, 9),
-                Size = new Size(58, 20),
+                Location = new Point(534, 9),
+                Size = new Size(58, 22),
                 Minimum = 0,
                 Maximum = 30000,
                 Increment = 250,
@@ -153,7 +153,7 @@ namespace _4RTools.Forms
             {
                 AutoSize = true,
                 Cursor = Cursors.Hand,
-                Location = new Point(8, 38),
+                Location = new Point(8, 39),
                 Name = "cbPreRenewal",
                 Text = "Pre-Renewal Mode",
                 Checked = currentSettings.PreRenewalMode,
@@ -166,7 +166,7 @@ namespace _4RTools.Forms
             {
                 AutoSize = true,
                 Cursor = Cursors.Hand,
-                Location = new Point(146, 38),
+                Location = new Point(152, 39),
                 Name = "cbSkillPauseWhenSitting",
                 Text = "Pause when sitting",
                 Checked = true,
@@ -179,7 +179,7 @@ namespace _4RTools.Forms
             {
                 AutoSize = true,
                 Cursor = Cursors.Hand,
-                Location = new Point(272, 38),
+                Location = new Point(288, 39),
                 Name = "cbAutoSelfClick",
                 Text = "Auto-click self (target)",
                 Checked = true,
@@ -190,8 +190,8 @@ namespace _4RTools.Forms
 
             this.btnClearSkills = new Button
             {
-                Location = new Point(434, 34),
-                Size = new Size(106, 23),
+                Location = new Point(474, 35),
+                Size = new Size(118, 25),
                 Name = "btnClearSkills",
                 Text = "Clear Skills",
                 UseVisualStyleBackColor = true

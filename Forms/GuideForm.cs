@@ -146,9 +146,9 @@ namespace _4RTools.Forms
                 this.btnClearSearch = new Button
                 {
                     Cursor = Cursors.Hand,
-                    Location = new Point(518, 10),
+                    Location = new Point(518, 9),
                     Name = "btnClearGuideSearch",
-                    Size = new Size(68, 24),
+                    Size = new Size(68, 25),
                     Text = "Clear",
                     UseVisualStyleBackColor = true
                 };

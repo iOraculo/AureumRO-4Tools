@@ -402,6 +402,7 @@ namespace _4RTools.Utils
                     {
                         btn.Padding = Padding.Empty;
                         btn.TextAlign = ContentAlignment.MiddleCenter;
+                        btn.UseCompatibleTextRendering = false;
                     }
                     if (darkMode)
                     {
