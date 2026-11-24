@@ -1335,7 +1335,7 @@ namespace _4RTools.Tests
                 Assert.Same(gbPriority, lblYieldTitle.Parent);
                 Assert.Same(gbPriority, lblPriority.Parent);
                 Assert.Equal(new System.Drawing.Point(12, 38), lblPriority.Location);
-                Assert.Equal(new System.Drawing.Size(534, 19), lblPriority.Size);
+                Assert.Equal(new System.Drawing.Size(564, 19), lblPriority.Size);
                 Assert.Equal(7.75F, lblPriority.Font.Size);
                 Assert.Equal("1º Input do Jogador → 2º Fruto de Yggdrasil / Panaceia → 3º Consumíveis → 4º Auto-skills", lblPriority.Text);
                 LocalizationManager.SetLanguage(LocalizationManager.LANG_EN_US);
