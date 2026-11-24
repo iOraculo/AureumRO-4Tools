@@ -41,6 +41,6 @@ jobs:
       - name: Upload Release executable
         uses: actions/upload-artifact@v4
         with:
-          name: AureumRO-4Tools-Release
-          path: bin/Release/AureumRO 4Tools.exe
+          name: AureumTools-Release
+          path: bin/Release/AureumTools.exe
           if-no-files-found: error

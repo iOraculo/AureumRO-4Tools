@@ -53,7 +53,12 @@ namespace _4RTools.Model
             EffectStatusIDs.EFST_KYRIE,
             EffectStatusIDs.EFST_SUFFRAGIUM,
             EffectStatusIDs.IMPOSITIO,
-            EffectStatusIDs.ASPERSIO
+            EffectStatusIDs.ASPERSIO,
+            EffectStatusIDs.PROTECTARMOR,
+            EffectStatusIDs.EFST_KAAHI,
+            EffectStatusIDs.EFST_KAUPE,
+            EffectStatusIDs.EFST_KAITE,
+            EffectStatusIDs.EFST_KAIZEL
         };
 
         // Minimum recast guards for skills that have long cast time or no Pre-Renewal EFST icon (e.g. Basilica).

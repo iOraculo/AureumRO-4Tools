@@ -33,7 +33,7 @@ namespace _4RTools.Forms
             this.Opacity = 0.90;
             this.DoubleBuffered = true;
             this.ClientSize = new Size(236, 74);
-            this.Text = "AureumRO 4Tools Mini HUD";
+            this.Text = "AureumTools Mini HUD";
 
             this.badgeFont = new Font("Microsoft Sans Serif", 7.5F, FontStyle.Bold);
             this.headerFont = new Font("Microsoft Sans Serif", 8F, FontStyle.Bold);

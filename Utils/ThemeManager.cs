@@ -314,6 +314,10 @@ namespace _4RTools.Utils
                 {
                     ((SegmentedTabButton)control).ApplyTheme(darkMode);
                 }
+                else if (control is ThemeToggleButton)
+                {
+                    ((ThemeToggleButton)control).ApplyTheme(darkMode);
+                }
                 else if (control is ModernCardPanel)
                 {
                     ModernCardPanel card = (ModernCardPanel)control;

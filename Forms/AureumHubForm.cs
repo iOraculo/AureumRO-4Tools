@@ -1917,9 +1917,28 @@ namespace _4RTools.Forms
                 this.dgvMaps.Columns["colBonus"].HeaderText = LocalizationManager.T("aureum.col_bonus");
             }
 
+            this.hubToolTip.SetToolTip(this.btnSubVote, LocalizationManager.T("tooltip.aureum_sub_vote"));
+            this.hubToolTip.SetToolTip(this.btnSubCollection, LocalizationManager.T("tooltip.aureum_sub_collection"));
+            this.hubToolTip.SetToolTip(this.btnSubCards, LocalizationManager.T("tooltip.aureum_sub_cards"));
+            this.hubToolTip.SetToolTip(this.btnSubMaps, LocalizationManager.T("tooltip.aureum_sub_maps"));
+            this.hubToolTip.SetToolTip(this.btnOpenVotePage, LocalizationManager.T("tooltip.aureum_open_vote"));
+            this.hubToolTip.SetToolTip(this.btnMarkAllVoted, LocalizationManager.T("tooltip.aureum_mark_all_voted"));
+            this.hubToolTip.SetToolTip(this.btnRefreshTopsites, LocalizationManager.T("tooltip.aureum_sync_topsites"));
+            this.hubToolTip.SetToolTip(this.chkVoteReminder, LocalizationManager.T("tooltip.aureum_vote_reminder"));
+            this.hubToolTip.SetToolTip(this.chkVoteSound, LocalizationManager.T("tooltip.aureum_vote_sound"));
+            this.hubToolTip.SetToolTip(this.cbCardCategory, LocalizationManager.T("tooltip.aureum_card_cat"));
+            this.hubToolTip.SetToolTip(this.cbCardStatus, LocalizationManager.T("tooltip.aureum_card_status"));
             this.hubToolTip.SetToolTip(this.txtCardSearch, LocalizationManager.T("aureum.cards_search_tip"));
-            this.hubToolTip.SetToolTip(this.txtMapSearch, LocalizationManager.T("aureum.maps_search_tip"));
             this.hubToolTip.SetToolTip(this.btnCopyCardNpc, this.catalog.CardNpcNavi);
+            this.hubToolTip.SetToolTip(this.chkHideCollectedCards, LocalizationManager.T("tooltip.aureum_hide_cards"));
+            this.hubToolTip.SetToolTip(this.btnMarkVisibleCards, LocalizationManager.T("tooltip.aureum_mark_vis_cards"));
+            this.hubToolTip.SetToolTip(this.btnClearVisibleCards, LocalizationManager.T("tooltip.aureum_clear_vis_cards"));
+            this.hubToolTip.SetToolTip(this.cbMapGroupMode, LocalizationManager.T("tooltip.aureum_map_mode"));
+            this.hubToolTip.SetToolTip(this.cbMapGroupFilter, LocalizationManager.T("tooltip.aureum_map_filter"));
+            this.hubToolTip.SetToolTip(this.cbMapStatus, LocalizationManager.T("tooltip.aureum_map_status"));
+            this.hubToolTip.SetToolTip(this.txtMapSearch, LocalizationManager.T("aureum.maps_search_tip"));
+            this.hubToolTip.SetToolTip(this.btnMarkVisibleMaps, LocalizationManager.T("tooltip.aureum_mark_vis_maps"));
+            this.hubToolTip.SetToolTip(this.btnClearVisibleMaps, LocalizationManager.T("tooltip.aureum_clear_vis_maps"));
 
             PopulateCardFilters();
             PopulateMapFilters();

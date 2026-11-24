@@ -81,7 +81,7 @@ namespace _4RTools.Forms
             // notifyIconTray
             // 
             this.notifyIconTray.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIconTray.Icon")));
-            this.notifyIconTray.Text = "4ROTools";
+            this.notifyIconTray.Text = "AureumTools";
             this.notifyIconTray.Visible = true;
             this.notifyIconTray.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIconDoubleClick);
             // 

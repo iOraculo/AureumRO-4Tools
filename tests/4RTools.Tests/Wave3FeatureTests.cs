@@ -498,7 +498,8 @@ namespace _4RTools.Tests
             Assert.Equal("0x01602568", aureum.nameAddress);
             Assert.True(ClientUpdaterForm.IsExclusiveServer(aureum));
             Assert.False(ClientUpdaterForm.IsExclusiveServer(new ClientDTO("OtherRO", "Other", "0x01", "0x02")));
-            Assert.Contains("iOraculo/AureumRO-4Tools", AppConfig._4RClientsURL);
+            Assert.Equal("AureumTools", AppConfig.Name);
+            Assert.Contains("iOraculo/AureumTools", AppConfig._4RClientsURL);
         }
 
         [Fact]
@@ -965,8 +966,8 @@ namespace _4RTools.Tests
             Subject subject = new Subject();
             using (GuideForm guide = new GuideForm(subject))
             {
-                Assert.Equal(11, guide.TotalSectionCount);
-                Assert.Equal(11, guide.VisibleSectionCount);
+                Assert.Equal(12, guide.TotalSectionCount);
+                Assert.Equal(12, guide.VisibleSectionCount);
 
                 // Accent-insensitive Portuguese search for ATK x DEF / Macros
                 guide.ApplySearchFilter("musicas");
@@ -981,13 +982,17 @@ namespace _4RTools.Tests
                 guide.ApplySearchFilter("refresh");
                 Assert.True(guide.VisibleSectionCount >= 1);
 
+                // Search for Aureum Hub topic
+                guide.ApplySearchFilter("votacao");
+                Assert.True(guide.VisibleSectionCount >= 1);
+
                 // Nonsense search shows 0 cards
                 guide.ApplySearchFilter("zzzz_nao_existe_12345");
                 Assert.Equal(0, guide.VisibleSectionCount);
 
-                // Clearing filter restores all 11 cards
+                // Clearing filter restores all 12 cards
                 guide.ApplySearchFilter(string.Empty);
-                Assert.Equal(11, guide.VisibleSectionCount);
+                Assert.Equal(12, guide.VisibleSectionCount);
 
                 // Live language switch updates titles to English
                 LocalizationManager.SetLanguage(LocalizationManager.LANG_EN_US);
@@ -1941,6 +1946,95 @@ namespace _4RTools.Tests
 
                 hub.SetMapGroupFilter("Crítico");
                 Assert.Equal(9, hub.VisibleMapCount);
+            }
+        }
+
+        [Fact]
+        public void V237_RebrandNewSkillsClassFilterUnifiedAutopotAndThemeToggle()
+        {
+            Assert.Equal("AureumTools", AppConfig.Name);
+            Assert.Equal("https://github.com/iOraculo/AureumTools", AppConfig.GithubLink);
+
+            // Verify Assassin Cloaking & other new Pre-Renewal skills exist, have icons, and have PT-BR/EN-US translations
+            var expectedNewSkills = new[]
+            {
+                new { List = Buff.GetThiefSkills(), Id = EffectStatusIDs.EFST_CLOAKING, Raw = "Cloaking", Pt = "Furtividade" },
+                new { List = Buff.GetThiefSkills(), Id = EffectStatusIDs.EFST_CHASEWALK, Raw = "Chase Walk", Pt = "Túnel de Fuga" },
+                new { List = Buff.GetAcolyteSkills(), Id = EffectStatusIDs.EFST_STEELBODY, Raw = "Steel Body", Pt = "Corpo Fechado" },
+                new { List = Buff.GetAcolyteSkills(), Id = EffectStatusIDs.EFST_RUWACH, Raw = "Ruwach", Pt = "Revelação" },
+                new { List = Buff.GetMageSkills(), Id = EffectStatusIDs.EFST_SIGHT, Raw = "Sight", Pt = "Chama Reveladora" },
+                new { List = Buff.GetMerchantSkills(), Id = EffectStatusIDs.PROTECTARMOR, Raw = "Full Chemical Protection", Pt = "Proteção Química Total" },
+                new { List = Buff.GetTaekwonSkills(), Id = EffectStatusIDs.EFST_KAAHI, Raw = "Kaahi", Pt = "Kaahi" },
+                new { List = Buff.GetTaekwonSkills(), Id = EffectStatusIDs.EFST_KAUPE, Raw = "Kaupe", Pt = "Kaupe" },
+                new { List = Buff.GetTaekwonSkills(), Id = EffectStatusIDs.EFST_KAITE, Raw = "Kaite", Pt = "Kaite" },
+                new { List = Buff.GetTaekwonSkills(), Id = EffectStatusIDs.EFST_KAIZEL, Raw = "Kaizel", Pt = "Kaizel" }
+            };
+
+            LocalizationManager.SetLanguage(LocalizationManager.LANG_PT_BR);
+            foreach (var item in expectedNewSkills)
+            {
+                Buff found = item.List.FirstOrDefault(b => b.effectStatusID == item.Id);
+                Assert.NotNull(found);
+                Assert.NotNull(found.icon);
+                Assert.True(found.IsPreRenewal);
+                Assert.True(LocalizationManager.HasBuffTranslation(found.name));
+                Assert.Equal(item.Pt, LocalizationManager.GetBuffShortDisplayName(found.name));
+            }
+
+            // Self-target skills include Full Chemical Protection & Soul Linker Ka skills
+            Assert.True(AutoBuff.RequiresSelfTargetClick(EffectStatusIDs.PROTECTARMOR));
+            Assert.True(AutoBuff.RequiresSelfTargetClick(EffectStatusIDs.EFST_KAAHI));
+            Assert.True(AutoBuff.RequiresSelfTargetClick(EffectStatusIDs.EFST_KAUPE));
+            Assert.True(AutoBuff.RequiresSelfTargetClick(EffectStatusIDs.EFST_KAITE));
+            Assert.True(AutoBuff.RequiresSelfTargetClick(EffectStatusIDs.EFST_KAIZEL));
+
+            // New White & Blue Potion icons exist
+            Assert.NotNull(_4RTools.Resources._4RTools.Icons.white_potion);
+            Assert.NotNull(_4RTools.Resources._4RTools.Icons.blue_potion);
+
+            // SkillAutoBuffForm class filter dropdown filters visible class groups
+            Subject subject = new Subject();
+            using (SkillAutoBuffForm skillForm = new SkillAutoBuffForm(subject))
+            {
+                skillForm.Show();
+                System.Windows.Forms.Control[] classBoxes = skillForm.Controls.Find("cbSkillClassFilter", true);
+                Assert.Single(classBoxes);
+                System.Windows.Forms.ComboBox cbClass = (System.Windows.Forms.ComboBox)classBoxes[0];
+                Assert.True(cbClass.Items.Count >= 9);
+
+                // Select Thief class
+                int thiefIdx = -1;
+                for (int i = 0; i < cbClass.Items.Count; i++)
+                {
+                    if (cbClass.Items[i].ToString().IndexOf("Gatuno", StringComparison.OrdinalIgnoreCase) >= 0
+                        || cbClass.Items[i].ToString().IndexOf("Thief", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        thiefIdx = i;
+                        break;
+                    }
+                }
+                Assert.True(thiefIdx > 0);
+                cbClass.SelectedIndex = thiefIdx;
+
+                System.Windows.Forms.Control thiefGp = skillForm.Controls.Find("ThiefSkillsGP", true)[0];
+                System.Windows.Forms.Control archerGp = skillForm.Controls.Find("ArcherSkillsGP", true)[0];
+                Assert.True(thiefGp.Visible);
+                Assert.False(archerGp.Visible);
+
+                // Reset back to All Classes
+                cbClass.SelectedIndex = 0;
+                Assert.True(thiefGp.Visible);
+                Assert.True(archerGp.Visible);
+            }
+
+            // ThemeToggleButton & "Use in town?" translation
+            Assert.Equal("Usar na cidade?", LocalizationManager.TranslateText("Use in town?"));
+            using (ThemeToggleButton toggle = new ThemeToggleButton())
+            {
+                toggle.IsDarkMode = true;
+                Assert.True(toggle.IsDarkMode);
+                toggle.IsDarkMode = false;
+                Assert.False(toggle.IsDarkMode);
             }
         }
     }

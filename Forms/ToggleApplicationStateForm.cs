@@ -16,9 +16,12 @@ namespace _4RTools.Forms
         private MenuItem menuItem;
         private CheckBox cbFocusOnly;
         private CheckBox cbChatPause;
+        private CheckBox cbMiniHud;
         private ToolTip optionsToolTip;
         private SoundPlayer soundOnPlayer;
         private SoundPlayer soundOffPlayer;
+
+        public event Action<bool> MiniHudCheckedChanged;
 
         // Store key used for last profile so it can be cleanly removed when switching profiles.
         private Keys lastKey = Keys.None;
@@ -45,10 +48,21 @@ namespace _4RTools.Forms
                 this.notifyIconTray.Visible = false;
             }
 
-            // Center status prompt across the groupbox so translated PT-BR strings never clip.
+            // Layout: ON/OFF button & hotkey on the left; all 4 option checkboxes stacked cleanly on the right.
+            this.groupBox1.Size = new Size(230, 110);
+            this.btnStatusToggle.Location = new Point(12, 18);
+            this.btnStatusToggle.Size = new Size(100, 32);
+            this.txtStatusToggleKey.Location = new Point(12, 55);
+            this.txtStatusToggleKey.Size = new Size(100, 23);
+
+            this.cbAudio.Location = new Point(128, 14);
+            this.cbAudio.Cursor = Cursors.Hand;
+
+            // Center status prompt across the bottom of the groupbox so translated PT-BR strings never clip.
+            this.lblStatusToggle.MaximumSize = Size.Empty;
             this.lblStatusToggle.AutoSize = false;
-            this.lblStatusToggle.Location = new Point(6, 80);
-            this.lblStatusToggle.Size = new Size(210, 17);
+            this.lblStatusToggle.Location = new Point(6, 87);
+            this.lblStatusToggle.Size = new Size(218, 17);
             this.lblStatusToggle.TextAlign = ContentAlignment.MiddleCenter;
 
             this.subject = subject;
@@ -101,6 +115,25 @@ namespace _4RTools.Forms
             }
         }
 
+        public void SetMiniHudChecked(bool isChecked)
+        {
+            if (this.cbMiniHud == null)
+            {
+                return;
+            }
+
+            bool prevUpdating = this.isUpdatingUi;
+            this.isUpdatingUi = true;
+            try
+            {
+                this.cbMiniHud.Checked = isChecked;
+            }
+            finally
+            {
+                this.isUpdatingUi = prevUpdating;
+            }
+        }
+
         private void InitializeOptionCheckboxes()
         {
             this.optionsToolTip = FormUtils.CreateHelpToolTip(this.components);
@@ -108,7 +141,8 @@ namespace _4RTools.Forms
             this.cbFocusOnly = new CheckBox
             {
                 AutoSize = true,
-                Location = new Point(156, 53),
+                Cursor = Cursors.Hand,
+                Location = new Point(128, 32),
                 Name = "cbFocusOnly",
                 Text = "Focus",
                 UseVisualStyleBackColor = true,
@@ -120,7 +154,8 @@ namespace _4RTools.Forms
             this.cbChatPause = new CheckBox
             {
                 AutoSize = true,
-                Location = new Point(10, 53),
+                Cursor = Cursors.Hand,
+                Location = new Point(128, 50),
                 Name = "cbChatPause",
                 Text = "Chat",
                 UseVisualStyleBackColor = true,
@@ -129,7 +164,34 @@ namespace _4RTools.Forms
             this.cbChatPause.CheckedChanged += OnChatPauseCheckedChanged;
             this.groupBox1.Controls.Add(this.cbChatPause);
 
+            this.cbMiniHud = new CheckBox
+            {
+                AutoSize = true,
+                Cursor = Cursors.Hand,
+                Location = new Point(128, 68),
+                Name = "cbMiniHud",
+                Text = "Mini HUD",
+                UseVisualStyleBackColor = true,
+                Tag = FormUtils.SKIP_RESET_TAG
+            };
+            this.cbMiniHud.CheckedChanged += OnMiniHudCheckedChanged;
+            this.groupBox1.Controls.Add(this.cbMiniHud);
+
             RefreshLocalizedTooltipsAndMenu();
+        }
+
+        private void OnMiniHudCheckedChanged(object sender, EventArgs e)
+        {
+            if (this.isUpdatingUi || this.cbMiniHud == null)
+            {
+                return;
+            }
+
+            Action<bool> handler = this.MiniHudCheckedChanged;
+            if (handler != null)
+            {
+                handler(this.cbMiniHud.Checked);
+            }
         }
 
         private void RefreshLocalizedTooltipsAndMenu()
@@ -146,6 +208,10 @@ namespace _4RTools.Forms
                 if (this.cbChatPause != null)
                 {
                     this.optionsToolTip.SetToolTip(this.cbChatPause, LocalizationManager.T("tooltip.chat_pause"));
+                }
+                if (this.cbMiniHud != null)
+                {
+                    this.optionsToolTip.SetToolTip(this.cbMiniHud, LocalizationManager.T("tooltip.mini_hud"));
                 }
             }
 

@@ -561,4 +561,116 @@ namespace _4RTools.Utils
             }
         }
     }
+
+    /// <summary>
+    /// Compact vector Sun / Moon icon toggle button for switching Light & Dark themes.
+    /// </summary>
+    public class ThemeToggleButton : Control
+    {
+        private bool isDarkMode;
+        private bool isHovered;
+
+        public bool IsDarkMode
+        {
+            get { return this.isDarkMode; }
+            set
+            {
+                if (this.isDarkMode != value)
+                {
+                    this.isDarkMode = value;
+                    Invalidate();
+                }
+            }
+        }
+
+        public ThemeToggleButton()
+        {
+            this.DoubleBuffered = true;
+            this.ResizeRedraw = true;
+            this.Cursor = Cursors.Hand;
+            this.Size = new Size(34, 26);
+            this.Tag = ThemeManager.PRESERVE_COLORS_TAG;
+        }
+
+        public void ApplyTheme(bool darkMode)
+        {
+            this.isDarkMode = darkMode;
+            Invalidate();
+        }
+
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            this.isHovered = true;
+            Invalidate();
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+            this.isHovered = false;
+            Invalidate();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            Color parentBg = this.isDarkMode ? Color.FromArgb(18, 12, 3) : Color.FromArgb(250, 244, 224);
+            Color fill = this.isDarkMode
+                ? (this.isHovered ? Color.FromArgb(56, 39, 12) : Color.FromArgb(36, 25, 7))
+                : (this.isHovered ? Color.FromArgb(240, 226, 188) : Color.FromArgb(253, 248, 232));
+            Color border = this.isDarkMode
+                ? (this.isHovered ? Color.FromArgb(244, 217, 122) : Color.FromArgb(128, 96, 30))
+                : (this.isHovered ? Color.FromArgb(160, 129, 35) : Color.FromArgb(204, 180, 132));
+            Color iconColor = this.isDarkMode ? Color.FromArgb(244, 217, 122) : Color.FromArgb(118, 86, 22);
+
+            using (SolidBrush bgOuter = new SolidBrush(parentBg))
+            {
+                g.FillRectangle(bgOuter, 0, 0, this.Width, this.Height);
+            }
+
+            using (GraphicsPath pill = SidebarNavButton.CreateRoundedRect(new Rectangle(0, 0, this.Width - 1, this.Height - 1), 6))
+            using (SolidBrush fillBrush = new SolidBrush(fill))
+            using (Pen borderPen = new Pen(border, 1))
+            {
+                g.FillPath(fillBrush, pill);
+                g.DrawPath(borderPen, pill);
+            }
+
+            float cx = this.Width / 2.0F;
+            float cy = this.Height / 2.0F;
+
+            if (this.isDarkMode)
+            {
+                // Draw golden Sun icon (clicking switches to Light Mode)
+                using (SolidBrush sunBrush = new SolidBrush(iconColor))
+                using (Pen rayPen = new Pen(iconColor, 1.5F))
+                {
+                    g.FillEllipse(sunBrush, cx - 3.6F, cy - 3.6F, 7.2F, 7.2F);
+                    for (int i = 0; i < 8; i++)
+                    {
+                        double rad = i * Math.PI / 4.0;
+                        float x1 = cx + (float)(Math.Cos(rad) * 5.6);
+                        float y1 = cy + (float)(Math.Sin(rad) * 5.6);
+                        float x2 = cx + (float)(Math.Cos(rad) * 8.2);
+                        float y2 = cy + (float)(Math.Sin(rad) * 8.2);
+                        g.DrawLine(rayPen, x1, y1, x2, y2);
+                    }
+                }
+            }
+            else
+            {
+                // Draw crescent Moon icon (clicking switches to Dark Mode)
+                using (SolidBrush moonBrush = new SolidBrush(iconColor))
+                using (SolidBrush cutoutBrush = new SolidBrush(fill))
+                {
+                    g.FillEllipse(moonBrush, cx - 6.0F, cy - 6.0F, 12.0F, 12.0F);
+                    g.FillEllipse(cutoutBrush, cx - 2.0F, cy - 7.0F, 10.5F, 10.5F);
+                }
+            }
+        }
+    }
 }

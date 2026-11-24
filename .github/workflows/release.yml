@@ -45,13 +45,13 @@ jobs:
         run: |
           $tag = "${{ github.ref_name }}"
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item "bin/Release/AureumRO 4Tools.exe" "dist/AureumRO 4Tools.exe"
-          Compress-Archive -Path "dist/AureumRO 4Tools.exe" -DestinationPath "dist/AureumRO-4Tools-$tag.zip" -Force
-          $exeHash = (Get-FileHash "dist/AureumRO 4Tools.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
-          $zipHash = (Get-FileHash "dist/AureumRO-4Tools-$tag.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+          Copy-Item "bin/Release/AureumTools.exe" "dist/AureumTools.exe"
+          Compress-Archive -Path "dist/AureumTools.exe" -DestinationPath "dist/AureumTools-$tag.zip" -Force
+          $exeHash = (Get-FileHash "dist/AureumTools.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
+          $zipHash = (Get-FileHash "dist/AureumTools-$tag.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
           @(
-            "$zipHash  AureumRO-4Tools-$tag.zip"
-            "$exeHash  AureumRO 4Tools.exe"
+            "$zipHash  AureumTools-$tag.zip"
+            "$exeHash  AureumTools.exe"
           ) | Set-Content -Path "dist/SHA256SUMS.txt" -Encoding UTF8
 
       - name: Publish GitHub Release
@@ -63,11 +63,11 @@ jobs:
           $tag = "${{ github.ref_name }}"
           $isPrerelease = $tag.Contains("-")
           $notes = @(
-            ('Automated Windows Release build for **AureumRO 4Tools {0}** (desenvolvido por Oráculo).' -f $tag),
+            ('Automated Windows Release build for **AureumTools {0}**.' -f $tag),
             '',
             '### Como executar / How to run',
-            ('1. Download `AureumRO-4Tools-{0}.zip` (recomendado) ou `AureumRO 4Tools.exe`.' -f $tag),
-            '2. Extraia e execute `AureumRO 4Tools.exe` (Windows 10/11 com .NET Framework 4.7.2+).',
+            ('1. Download `AureumTools-{0}.zip` (recomendado) ou `AureumTools.exe`.' -f $tag),
+            '2. Extraia e execute `AureumTools.exe` (Windows 10/11 com .NET Framework 4.7.2+).',
             '3. Execute como Administrador caso o cliente do Ragnarok rode elevado.',
             '',
             '### SHA-256 Checksums',
@@ -80,10 +80,10 @@ jobs:
 
           $argsList = @(
             "release", "create", $tag,
-            "dist/AureumRO-4Tools-$tag.zip",
-            "dist/AureumRO 4Tools.exe",
+            "dist/AureumTools-$tag.zip",
+            "dist/AureumTools.exe",
             "dist/SHA256SUMS.txt",
-            "--title", "AureumRO 4Tools $tag",
+            "--title", "AureumTools $tag",
             "--notes-file", $notesPath
           )
           if ($isPrerelease) {

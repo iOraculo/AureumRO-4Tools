@@ -9,7 +9,7 @@ using _4RTools.Utils;
 namespace _4RTools.Forms
 {
     /// <summary>
-    /// Top-level 3-in-1 multi-account shell window that hosts 3 independent AureumRO 4Tools
+    /// Top-level 3-in-1 multi-account shell window that hosts 3 independent AureumTools
     /// sessions (Account 1, Account 2, Account 3) in a single window with live status pills.
     /// </summary>
     public class MultiAccountShellForm : Form

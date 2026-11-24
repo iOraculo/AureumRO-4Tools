@@ -22,9 +22,8 @@ namespace _4RTools.Forms
 
         private AppSettings appSettings;
         private ToggleApplicationStateForm toggleForm;
-        private CheckBox cbDarkMode;
+        private ThemeToggleButton btnThemeToggle;
         private CheckBox cbUseBuffsInTown;
-        private CheckBox cbMiniHud;
         private ComboBox cbLanguage;
         private VitalBar hpBar;
         private VitalBar spBar;
@@ -60,9 +59,8 @@ namespace _4RTools.Forms
         private Label lblSessionProfile;
         private Label lblSessionClient;
         private ModernCardPanel cardAutopot;
-        private SegmentedTabButton btnTabAutopot;
-        private SegmentedTabButton btnTabYgg;
         private Panel autopotHostPanel;
+        private Panel autopotYggHostPanel;
         private AutopotForm autopotForm;
         private AutopotForm autopotYggForm;
         private ModernCardPanel cardStatus;
@@ -126,7 +124,6 @@ namespace _4RTools.Forms
                 SetToggleApplicationStateWindow();
                 SetAutopotWindow();
                 SetAutopotYggWindow();
-                SelectAutopotTab(false);
 
                 SetAHKWindow();
                 SetDebuffRecoveryWindow();
@@ -162,9 +159,9 @@ namespace _4RTools.Forms
                 try
                 {
                     this.appSettings.DarkMode = darkMode;
-                    if (this.cbDarkMode != null)
+                    if (this.btnThemeToggle != null)
                     {
-                        this.cbDarkMode.Checked = darkMode;
+                        this.btnThemeToggle.IsDarkMode = darkMode;
                     }
                     ThemeManager.ApplyTheme(this, darkMode);
                     if (this.aureumHubForm != null && !this.aureumHubForm.IsDisposed)
@@ -321,9 +318,23 @@ namespace _4RTools.Forms
                     Font = brandVersionFont,
                     Location = new Point(55, 34),
                     Name = "lblBrandVersion",
-                    Text = AppConfig.Version + " · Oráculo",
+                    Text = AppConfig.Version,
                     Tag = ThemeManager.TAG_MUTED_TEXT
                 };
+
+                this.cbLanguage = new ComboBox
+                {
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    Font = uiRegularFont,
+                    FormattingEnabled = true,
+                    Location = new Point(108, 30),
+                    Name = "cbLanguage",
+                    Size = new Size(64, 21),
+                    Tag = FormUtils.SKIP_RESET_TAG
+                };
+                this.cbLanguage.Items.Add("PT-BR");
+                this.cbLanguage.Items.Add("EN");
+                this.cbLanguage.SelectedIndexChanged += OnLanguageSelectedIndexChanged;
 
                 // Reparent client selector controls
                 this.lblProcessName.Font = uiBoldFont;
@@ -332,89 +343,57 @@ namespace _4RTools.Forms
                 this.processCB.DropDownStyle = ComboBoxStyle.DropDownList;
                 this.processCB.Font = uiRegularFont;
                 this.processCB.Location = new Point(216, 25);
-                this.processCB.Size = new Size(170, 23);
+                this.processCB.Size = new Size(188, 23);
 
                 this.btnRefresh.Cursor = Cursors.Hand;
                 this.btnRefresh.ImageAlign = ContentAlignment.MiddleCenter;
-                this.btnRefresh.Location = new Point(390, 24);
+                this.btnRefresh.Location = new Point(408, 24);
                 this.btnRefresh.Size = new Size(26, 24);
 
                 // Reparent profile selector controls
                 this.labelProfile.Font = uiBoldFont;
-                this.labelProfile.Location = new Point(426, 7);
+                this.labelProfile.Location = new Point(446, 7);
 
                 this.profileCB.DropDownStyle = ComboBoxStyle.DropDownList;
                 this.profileCB.Font = uiRegularFont;
-                this.profileCB.Location = new Point(426, 25);
-                this.profileCB.Size = new Size(156, 23);
+                this.profileCB.Location = new Point(446, 25);
+                this.profileCB.Size = new Size(164, 23);
 
-                // Preferences block
-                this.cbDarkMode = new CheckBox
-                {
-                    AutoSize = true,
-                    Cursor = Cursors.Hand,
-                    Font = uiRegularFont,
-                    Location = new Point(594, 9),
-                    Name = "cbDarkMode",
-                    Text = "Dark Mode",
-                    UseVisualStyleBackColor = true,
-                    Tag = FormUtils.SKIP_RESET_TAG
-                };
-                this.cbDarkMode.CheckedChanged += OnDarkModeCheckedChanged;
-
-                this.cbMiniHud = new CheckBox
-                {
-                    AutoSize = true,
-                    Cursor = Cursors.Hand,
-                    Font = uiRegularFont,
-                    Location = new Point(708, 9),
-                    Name = "cbMiniHud",
-                    Text = "Mini HUD",
-                    UseVisualStyleBackColor = true,
-                    Tag = FormUtils.SKIP_RESET_TAG
-                };
-                this.cbMiniHud.CheckedChanged += OnMiniHudCheckedChanged;
-
+                // Compact preferences block
                 this.cbUseBuffsInTown = new CheckBox
                 {
                     AutoSize = true,
                     Cursor = Cursors.Hand,
                     Font = uiRegularFont,
-                    Location = new Point(594, 32),
+                    Location = new Point(624, 20),
                     Name = "cbUseBuffsInTown",
-                    Text = "Use buffs in town?",
+                    Text = "Use in town?",
                     UseVisualStyleBackColor = true,
                     Tag = FormUtils.SKIP_RESET_TAG
                 };
                 this.cbUseBuffsInTown.CheckedChanged += OnUseBuffsInTownCheckedChanged;
 
-                this.cbLanguage = new ComboBox
+                this.btnThemeToggle = new ThemeToggleButton
                 {
-                    DropDownStyle = ComboBoxStyle.DropDownList,
-                    Font = uiRegularFont,
-                    FormattingEnabled = true,
-                    Location = new Point(750, 30),
-                    Name = "cbLanguage",
-                    Size = new Size(64, 22),
+                    Location = new Point(776, 15),
+                    Name = "btnThemeToggle",
+                    Size = new Size(32, 30),
                     Tag = FormUtils.SKIP_RESET_TAG
                 };
-                this.cbLanguage.Items.Add("PT-BR");
-                this.cbLanguage.Items.Add("EN");
-                this.cbLanguage.SelectedIndexChanged += OnLanguageSelectedIndexChanged;
+                this.btnThemeToggle.Click += OnThemeToggleClicked;
 
                 this.panelTopBar.Controls.Add(this.pbBrandLogo);
                 this.panelTopBar.Controls.Add(this.lblBrandTitle);
                 this.panelTopBar.Controls.Add(this.lblBrandVersion);
+                this.panelTopBar.Controls.Add(this.cbLanguage);
                 this.panelTopBar.Controls.Add(CreateDivider(new Point(203, 10), new Size(1, 40)));
                 this.panelTopBar.Controls.Add(this.lblProcessName);
                 this.panelTopBar.Controls.Add(this.processCB);
                 this.panelTopBar.Controls.Add(this.btnRefresh);
                 this.panelTopBar.Controls.Add(this.labelProfile);
                 this.panelTopBar.Controls.Add(this.profileCB);
-                this.panelTopBar.Controls.Add(this.cbDarkMode);
-                this.panelTopBar.Controls.Add(this.cbMiniHud);
                 this.panelTopBar.Controls.Add(this.cbUseBuffsInTown);
-                this.panelTopBar.Controls.Add(this.cbLanguage);
+                this.panelTopBar.Controls.Add(this.btnThemeToggle);
                 this.panelTopBar.Controls.Add(CreateDivider(new Point(0, 59), new Size(824, 1)));
 
                 // 2. Left Sidebar (0, 60, 204 x 556)
@@ -522,7 +501,7 @@ namespace _4RTools.Forms
                 this.panelSidebar.Controls.Add(this.cardQuickStatus);
                 this.panelSidebar.Controls.Add(CreateDivider(new Point(203, 0), new Size(1, 556)));
 
-                // 3. Dashboard Row - Card 1: Autopot / Yggdrasil (218, 72, 324 x 190)
+                // 3. Dashboard Row - Card 1: Unified Autopot & Yggdrasil (218, 72, 324 x 190)
                 this.cardAutopot = new ModernCardPanel
                 {
                     Location = new Point(218, 72),
@@ -530,35 +509,23 @@ namespace _4RTools.Forms
                     Size = new Size(324, 190)
                 };
 
-                this.btnTabAutopot = new SegmentedTabButton("Autopot")
-                {
-                    Location = new Point(10, 8),
-                    Name = "btnTabAutopot",
-                    Size = new Size(148, 26),
-                    IsActive = true
-                };
-                this.btnTabAutopot.Click += delegate { SelectAutopotTab(false); };
-
-                this.btnTabYgg = new SegmentedTabButton("Yggdrasil")
-                {
-                    Location = new Point(164, 8),
-                    Name = "btnTabYgg",
-                    Size = new Size(148, 26),
-                    IsActive = false
-                };
-                this.btnTabYgg.Click += delegate { SelectAutopotTab(true); };
-
                 this.autopotHostPanel = new Panel
                 {
-                    Location = new Point(8, 44),
+                    Location = new Point(8, 4),
                     Name = "autopotHostPanel",
-                    Size = new Size(308, 140)
+                    Size = new Size(308, 88)
                 };
 
-                this.cardAutopot.Controls.Add(this.btnTabAutopot);
-                this.cardAutopot.Controls.Add(this.btnTabYgg);
-                this.cardAutopot.Controls.Add(CreateDivider(new Point(1, 40), new Size(322, 1)));
+                this.autopotYggHostPanel = new Panel
+                {
+                    Location = new Point(8, 99),
+                    Name = "autopotYggHostPanel",
+                    Size = new Size(308, 88)
+                };
+
                 this.cardAutopot.Controls.Add(this.autopotHostPanel);
+                this.cardAutopot.Controls.Add(CreateDivider(new Point(12, 95), new Size(300, 1)));
+                this.cardAutopot.Controls.Add(this.autopotYggHostPanel);
 
                 // 4. Dashboard Row - Card 2: ON/OFF & Live Vitals (552, 72, 258 x 190)
                 this.cardStatus = new ModernCardPanel
@@ -568,8 +535,8 @@ namespace _4RTools.Forms
                     Size = new Size(258, 190)
                 };
 
-                this.OnOffPanel.Location = new Point(17, 5);
-                this.OnOffPanel.Size = new Size(224, 112);
+                this.OnOffPanel.Location = new Point(12, 5);
+                this.OnOffPanel.Size = new Size(234, 112);
 
                 this.statusDot = new StatusDot
                 {
@@ -810,30 +777,6 @@ namespace _4RTools.Forms
             }
         }
 
-        private void SelectAutopotTab(bool showYgg)
-        {
-            this.btnTabAutopot.IsActive = !showYgg;
-            this.btnTabYgg.IsActive = showYgg;
-
-            if (this.autopotForm != null)
-            {
-                this.autopotForm.Visible = !showYgg;
-                if (!showYgg)
-                {
-                    this.autopotForm.BringToFront();
-                }
-            }
-
-            if (this.autopotYggForm != null)
-            {
-                this.autopotYggForm.Visible = showYgg;
-                if (showYgg)
-                {
-                    this.autopotYggForm.BringToFront();
-                }
-            }
-        }
-
         private void UpdateSectionHeader()
         {
             if (this.lblSectionTitle == null || this.lblSectionSubtitle == null)
@@ -930,9 +873,15 @@ namespace _4RTools.Forms
             {
                 LocalizationManager.SetLanguage(this.appSettings.Language);
                 this.cbLanguage.SelectedItem = LocalizationManager.IsPortuguese ? "PT-BR" : "EN";
-                this.cbDarkMode.Checked = this.appSettings.DarkMode;
+                if (this.btnThemeToggle != null)
+                {
+                    this.btnThemeToggle.IsDarkMode = this.appSettings.DarkMode;
+                }
                 this.cbUseBuffsInTown.Checked = this.appSettings.UseBuffsInTown;
-                this.cbMiniHud.Checked = this.appSettings.ShowMiniHud;
+                if (this.toggleForm != null)
+                {
+                    this.toggleForm.SetMiniHudChecked(this.appSettings.ShowMiniHud);
+                }
                 Client.AllowBuffsInTown = this.appSettings.UseBuffsInTown;
                 ApplyLanguageToUi();
                 ThemeManager.ApplyTheme(this, this.appSettings.DarkMode);
@@ -983,9 +932,9 @@ namespace _4RTools.Forms
             }
 
             this.headerToolTip.SetToolTip(this.processCB, LocalizationManager.T("tooltip.process_select"));
+            this.headerToolTip.SetToolTip(this.lblProcessName, LocalizationManager.T("tooltip.process_select"));
             this.headerToolTip.SetToolTip(this.profileCB, LocalizationManager.T("tooltip.profile_select"));
-            this.headerToolTip.SetToolTip(this.btnTabAutopot, LocalizationManager.T("tooltip.tab_autopot"));
-            this.headerToolTip.SetToolTip(this.btnTabYgg, LocalizationManager.T("tooltip.tab_ygg"));
+            this.headerToolTip.SetToolTip(this.labelProfile, LocalizationManager.T("tooltip.profile_select"));
             if (this.hpBar != null)
             {
                 this.headerToolTip.SetToolTip(this.hpBar, LocalizationManager.T("tooltip.vital_hp"));
@@ -1008,8 +957,10 @@ namespace _4RTools.Forms
                 this.headerToolTip.SetToolTip(nav.Value, LocalizationManager.T("tooltip.nav_" + nav.Key));
             }
 
-            this.headerToolTip.SetToolTip(this.cbDarkMode, LocalizationManager.T("tooltip.dark_mode"));
-            this.headerToolTip.SetToolTip(this.cbMiniHud, LocalizationManager.T("tooltip.mini_hud"));
+            if (this.btnThemeToggle != null)
+            {
+                this.headerToolTip.SetToolTip(this.btnThemeToggle, LocalizationManager.T("tooltip.dark_mode"));
+            }
             this.headerToolTip.SetToolTip(this.cbUseBuffsInTown, LocalizationManager.T("tooltip.use_buffs_in_town"));
             this.headerToolTip.SetToolTip(this.cbLanguage, LocalizationManager.T("tooltip.language"));
             this.headerToolTip.SetToolTip(this.btnRefresh, LocalizationManager.T("tooltip.refresh_clients"));
@@ -1065,14 +1016,15 @@ namespace _4RTools.Forms
             this.subject.Notify(new Utils.Message(MessageCode.SERVER_LIST_CHANGED, "Servers Restored"));
         }
 
-        private void OnDarkModeCheckedChanged(object sender, EventArgs e)
+        private void OnThemeToggleClicked(object sender, EventArgs e)
         {
-            if (this.isApplyingSettings)
+            if (this.isApplyingSettings || this.btnThemeToggle == null)
             {
                 return;
             }
 
-            this.appSettings.DarkMode = this.cbDarkMode.Checked;
+            this.appSettings.DarkMode = !this.appSettings.DarkMode;
+            this.btnThemeToggle.IsDarkMode = this.appSettings.DarkMode;
             ThemeManager.ApplyTheme(this, this.appSettings.DarkMode);
             if (this.aureumHubForm != null && !this.aureumHubForm.IsDisposed)
             {
@@ -1108,14 +1060,14 @@ namespace _4RTools.Forms
             }
         }
 
-        private void OnMiniHudCheckedChanged(object sender, EventArgs e)
+        private void OnMiniHudToggled(bool isVisible)
         {
             if (this.isApplyingSettings)
             {
                 return;
             }
 
-            this.appSettings.ShowMiniHud = this.cbMiniHud.Checked;
+            this.appSettings.ShowMiniHud = isVisible;
             SetMiniHudVisible(this.appSettings.ShowMiniHud);
             AppSettings.Save(this.appSettings);
         }
@@ -1155,7 +1107,11 @@ namespace _4RTools.Forms
                 return;
             }
 
-            this.cbMiniHud.Checked = false;
+            if (this.toggleForm != null && !this.toggleForm.IsDisposed)
+            {
+                this.toggleForm.SetMiniHudChecked(false);
+            }
+            OnMiniHudToggled(false);
         }
 
         private void OnMiniHudPositionChanged(object sender, EventArgs e)
@@ -1852,6 +1808,7 @@ namespace _4RTools.Forms
             frm.TopLevel = false;
             frm.FormBorderStyle = FormBorderStyle.None;
             frm.Dock = DockStyle.Fill;
+            frm.MiniHudCheckedChanged += OnMiniHudToggled;
             this.toggleForm = frm;
             this.OnOffPanel.Controls.Add(frm);
             frm.Show();
@@ -1875,9 +1832,8 @@ namespace _4RTools.Forms
             frm.FormBorderStyle = FormBorderStyle.None;
             frm.Dock = DockStyle.Fill;
             this.autopotYggForm = frm;
-            this.autopotHostPanel.Controls.Add(frm);
+            this.autopotYggHostPanel.Controls.Add(frm);
             frm.Show();
-            frm.Visible = false;
         }
 
         public void SetSkillTimerWindow()

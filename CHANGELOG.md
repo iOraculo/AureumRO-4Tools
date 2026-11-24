@@ -1,5 +1,34 @@
 # Changelogs
 
+## [v2.37.0] - 2026-11-24 — Rebrand Completo para **AureumTools**, Painel Unificado Autopot/Yggdrasil, Filtro de Classe + Furtividade & Novo Guia Visual
+### Changed
+- **Rebrand Completo para `AureumTools`** (`Utils/AppConfig.cs`, `Properties/AssemblyInfo.cs`, `4RTools.csproj`, `Utils/LocalizationManager.cs`, `.github/workflows/`, `README.md`):
+  - Projeto, repositório GitHub (`iOraculo/AureumTools`), executável (`AureumTools.exe`), pacote de release (`AureumTools-v2.37.0.zip`), janelas, textos e documentação atualizados de `AureumRO 4Tools` para **`AureumTools`**.
+- **Barra Superior e Bloco `LIGAR / DESLIGAR` Mais Limpos** (`Forms/Container.cs`, `Forms/ToggleApplicationStateForm.cs`, `Utils/ModernControls.cs`):
+  - Removido `· Oráculo` ao lado da versão sob o logo e movido o seletor de idioma (**`PT-BR` / `EN`**) diretamente para esse espaço.
+  - Renomeado `"Usar buffs na cidade?"` para **`"Usar na cidade?"`** (`"Use in town?"`).
+  - Substituída a caixa `"Modo Escuro"` por um **botão vetorial de Sol/Lua** (`ThemeToggleButton`) no canto superior direito.
+  - No card **`LIGAR / DESLIGAR`**, todos os 4 toggles (`Som`, `Foco`, `Chat` e **`Mini HUD`**) foram alinhados à direita, movendo o `Mini HUD` da barra superior para esse espaço.
+- **Autopot & Yggdrasil Unificados + Sprites Autênticos** (`Forms/AutopotForm.cs`, `Forms/Container.cs`, `Resources/4RTools/Icons.resx`):
+  - Removidas as abas `Autopot | Yggdrasil` — agora ambos aparecem **simultaneamente no mesmo card** do dashboard!
+  - Substituídos os ícones de HP/SP do Autopot pelos sprites oficiais de **Poção Branca (`504`)** e **Poção Azul (`505`)** do jogo.
+- **Auditoria de Ícones de Consumíveis** (`assets/images/potions/g_med_life_potion.png`):
+  - Auditados todos os 53 consumíveis Pré-Renewal — corrigido o sprite incorreto da **Poção Média de Vida (`True Medium Life Potion`)** com o ícone oficial do item `12419`.
+- **Novo `Guia / Ajuda` Lúdico e Espaçoso** (`Forms/GuideForm.cs`):
+  - Redesenhado completamente em **12 cards modernos** (incluindo o novo card dedicado ao **`Aureum Hub`**) com barra lateral colorida, ícone temático, subtítulo, tópicos separados com títulos destacados e caixa de **Dica rápida** ao final de cada card.
+- **Revisão Geral de Tooltips (Pop-ups)** (`Forms/AureumHubForm.cs`, `Forms/Container.cs`, `Forms/AutopotForm.cs`, `Forms/ToggleApplicationStateForm.cs`, `Forms/SkillAutoBuffForm.cs`):
+  - Adicionados pop-ups explicativos em todos os controles do **`Aureum Hub`**, barra superior, Autopot/Yggdrasil, Ligar/Desligar e Auto-skill.
+
+### Added
+- **Filtro por Classe & 10 Novas Skills Pré-Renewal no `Auto-skill`** (`Forms/SkillAutoBuffForm.cs`, `Model/BuffRenderer.cs`, `Model/Buff.cs`, `Utils/EffectStatusIDs.cs`, `Model/AutoBuff.cs`):
+  - Adicionado seletor **`Classe:`** (`Todas as Classes` + cada classe visível no modo atual) trabalhando em conjunto com a busca bilíngue e o Modo Pré-Renewal.
+  - Adicionadas 10 novas skills Pré-Renewal com sprites oficiais do jogo e tradução PT-BR / EN-US:
+    - **Gatuno / Algoz / Desordeiro:** **Furtividade (`Cloaking`)** e **Túnel de Fuga (`Chase Walk`)**
+    - **Noviço / Monge / Mestre:** **Corpo Fechado (`Steel Body`)** e **Revelação (`Ruwach`)**
+    - **Mago / Bruxo / Sábio:** **Chama Reveladora (`Sight`)**
+    - **Mercador / Criador:** **Proteção Química Total (`Full Chemical Protection`, com auto-clique em si)**
+    - **Espiritualista (Soul Linker):** **`Kaahi`**, **`Kaupe`**, **`Kaite`** e **`Kaizel`** (com auto-clique em si)
+
 ## [v2.36.2] - 2026-11-23 — Horário Manual da Última Votação e Painel Completo de Itens/Drops na Coleção de Mapas
 ### Changed
 - **Hora da Votação (`Forms/AureumHubForm.cs`, `Utils/AureumProgressStore.cs`)**:
