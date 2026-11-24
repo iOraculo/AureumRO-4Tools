@@ -377,9 +377,9 @@ namespace _4RTools.Forms
                         new GuideStepData
                         {
                             HeadingPt = "▸ Ligar / Desligar (ON/OFF), Mini HUD e Barra Superior",
-                            DescPt = "Aperte sua tecla global (padrão: End) ou clique em ON/OFF. As opções Som, Foco, Chat e Mini HUD ficam organizadas no bloco LIGAR/DESLIGAR; no topo ficam Idioma, 'Usar na cidade?' e o botão Sol/Lua do tema.",
+                            DescPt = "Aperte sua tecla global (padrão: End) ou clique em ON/OFF. As opções Som, Foco, Chat e Mini HUD ficam organizadas no bloco LIGAR/DESLIGAR; no topo ficam Idioma, 'Pausar em cidades' (marcado por padrão) e o botão Sol/Lua do tema.",
                             HeadingEn = "▸ Toggle ON / OFF, Mini HUD & Top Bar",
-                            DescEn = "Press your global hotkey (default: End) or click ON/OFF. Sound, Focus, Chat, and Mini HUD sit neatly in ON/OFF; Language, 'Use in town?', and the Sun/Moon theme icon sit on the top bar."
+                            DescEn = "Press your global hotkey (default: End) or click ON/OFF. Sound, Focus, Chat, and Mini HUD sit neatly in ON/OFF; Language, 'Pause in towns' (checked by default), and the Sun/Moon theme icon sit on the top bar."
                         }
                     }
                 },
@@ -514,9 +514,9 @@ namespace _4RTools.Forms
                         new GuideStepData
                         {
                             HeadingPt = "▸ Economia Automática",
-                            DescPt = "'Pausar ao sentar' e 'Usar na cidade?' evitam queimar comidas, conversores e pergaminhos caros enquanto você descansa ou conversa em Prontera.",
+                            DescPt = "'Pausar ao sentar' e 'Pausar em cidades' evitam queimar comidas, conversores e pergaminhos caros enquanto você descansa ou conversa em Prontera.",
                             HeadingEn = "▸ Automatic Item Savings",
-                            DescEn = "'Pause when sitting' and 'Use in town?' keep expensive foods, converters, and scrolls from firing while resting or idling in town."
+                            DescEn = "'Pause when sitting' and 'Pause in towns' keep expensive foods, converters, and scrolls from firing while resting or idling in town."
                         }
                     }
                 },

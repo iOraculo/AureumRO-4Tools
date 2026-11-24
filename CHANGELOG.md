@@ -1,5 +1,11 @@
 # Changelogs
 
+## [v2.37.1] - 2026-11-24 — Botão `Pausar em cidades` Centralizado (Marcado por Padrão)
+### Changed
+- **Barra superior (`Forms/Container.cs`, `Utils/LocalizationManager.cs`)**:
+  - Renomeado `"Usar na cidade?"` para **`"Pausar em cidades"`** (`"Pause in towns"`), agora **marcado por padrão** (marcado = pausa Autopot, Auto-skill, Consumíveis, Temporizadores e Anti-debuffs em cidades; desmarcado = mantém tudo ativo).
+  - Centralizado perfeitamente no espaço entre o seletor **`Perfil`** e o botão de tema (**Sol/Lua**), com alinhamento horizontal uniforme em toda a barra superior.
+
 ## [v2.37.0] - 2026-11-24 — Rebrand Completo para **AureumTools**, Painel Unificado Autopot/Yggdrasil, Filtro de Classe + Furtividade & Novo Guia Visual
 ### Changed
 - **Rebrand Completo para `AureumTools`** (`Utils/AppConfig.cs`, `Properties/AssemblyInfo.cs`, `4RTools.csproj`, `Utils/LocalizationManager.cs`, `.github/workflows/`, `README.md`):

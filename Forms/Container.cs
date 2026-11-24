@@ -213,7 +213,7 @@ namespace _4RTools.Forms
                     Client.AllowBuffsInTown = allowInTown;
                     if (this.cbUseBuffsInTown != null)
                     {
-                        this.cbUseBuffsInTown.Checked = allowInTown;
+                        this.cbUseBuffsInTown.Checked = !allowInTown;
                     }
                     UpdateSessionSummaryUi();
                 }
@@ -363,11 +363,12 @@ namespace _4RTools.Forms
                 this.cbUseBuffsInTown = new CheckBox
                 {
                     AutoSize = true,
+                    Checked = true,
                     Cursor = Cursors.Hand,
                     Font = uiRegularFont,
-                    Location = new Point(624, 20),
+                    Location = new Point(632, 28),
                     Name = "cbUseBuffsInTown",
-                    Text = "Use in town?",
+                    Text = "Pause in towns",
                     UseVisualStyleBackColor = true,
                     Tag = FormUtils.SKIP_RESET_TAG
                 };
@@ -375,12 +376,13 @@ namespace _4RTools.Forms
 
                 this.btnThemeToggle = new ThemeToggleButton
                 {
-                    Location = new Point(776, 15),
+                    Location = new Point(776, 21),
                     Name = "btnThemeToggle",
                     Size = new Size(32, 30),
                     Tag = FormUtils.SKIP_RESET_TAG
                 };
                 this.btnThemeToggle.Click += OnThemeToggleClicked;
+                CenterPauseInTownCheckbox();
 
                 this.panelTopBar.Controls.Add(this.pbBrandLogo);
                 this.panelTopBar.Controls.Add(this.lblBrandTitle);
@@ -877,7 +879,7 @@ namespace _4RTools.Forms
                 {
                     this.btnThemeToggle.IsDarkMode = this.appSettings.DarkMode;
                 }
-                this.cbUseBuffsInTown.Checked = this.appSettings.UseBuffsInTown;
+                this.cbUseBuffsInTown.Checked = !this.appSettings.UseBuffsInTown;
                 if (this.toggleForm != null)
                 {
                     this.toggleForm.SetMiniHudChecked(this.appSettings.ShowMiniHud);
@@ -900,6 +902,7 @@ namespace _4RTools.Forms
         private void ApplyLanguageToUi()
         {
             LocalizationManager.ApplyToControlTree(this);
+            CenterPauseInTownCheckbox();
             UpdateSectionHeader();
             UpdateSessionSummaryUi();
             PositionCharacterNameLabel();
@@ -1042,6 +1045,21 @@ namespace _4RTools.Forms
             }
         }
 
+        private void CenterPauseInTownCheckbox()
+        {
+            if (this.cbUseBuffsInTown == null || this.profileCB == null || this.btnThemeToggle == null)
+            {
+                return;
+            }
+
+            Size pref = this.cbUseBuffsInTown.PreferredSize;
+            int leftBound = this.profileCB.Right;
+            int rightBound = this.btnThemeToggle.Left;
+            int centeredX = leftBound + Math.Max(6, (rightBound - leftBound - pref.Width) / 2);
+            int centeredY = this.profileCB.Top + ((this.profileCB.Height - pref.Height) / 2);
+            this.cbUseBuffsInTown.Location = new Point(centeredX, centeredY);
+        }
+
         private void OnUseBuffsInTownCheckedChanged(object sender, EventArgs e)
         {
             if (this.isApplyingSettings)
@@ -1049,7 +1067,7 @@ namespace _4RTools.Forms
                 return;
             }
 
-            this.appSettings.UseBuffsInTown = this.cbUseBuffsInTown.Checked;
+            this.appSettings.UseBuffsInTown = !this.cbUseBuffsInTown.Checked;
             Client.AllowBuffsInTown = this.appSettings.UseBuffsInTown;
             UpdateSessionSummaryUi();
             AppSettings.Save(this.appSettings);

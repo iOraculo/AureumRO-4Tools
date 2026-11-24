@@ -2027,8 +2027,8 @@ namespace _4RTools.Tests
                 Assert.True(archerGp.Visible);
             }
 
-            // ThemeToggleButton & "Use in town?" translation
-            Assert.Equal("Usar na cidade?", LocalizationManager.TranslateText("Use in town?"));
+            // ThemeToggleButton & "Pause in towns" translation
+            Assert.Equal("Pausar em cidades", LocalizationManager.TranslateText("Pause in towns"));
             using (ThemeToggleButton toggle = new ThemeToggleButton())
             {
                 toggle.IsDarkMode = true;
