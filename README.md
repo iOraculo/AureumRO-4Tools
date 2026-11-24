@@ -86,6 +86,11 @@ O **AureumTools** segue fielmente a estética oficial de [**aureumro.com**](http
 | **Obsidiana & Ouro Real** *(Padrão / Escuro)* | `#0B0701` • `#120C03` • `#1B1304` | `#F4D97A` • `#ECC861` • `#A67E1A` |
 | **Pergaminho & Ouro Antigo** *(Claro)* | `#F2E8CC` • `#FAF4E0` • `#FDF8E8` | `#D4C098` • `#A08123` • `#2A1E0E` |
 
+### 📸 Prévias da Interface (`v2.37.0`)
+| Painel Principal & Autopot/Ygg Unificados | Auto-skill com Filtro por Classe | Novo Guia Visual Interativo |
+| :---: | :---: | :---: |
+| ![Dashboard](docs/previews/v2.37.0_dashboard_dark.png) | ![Auto-skill](docs/previews/v2.37.0_autoskill_class.png) | ![Guia](docs/previews/v2.37.0_guide_ludic.png) |
+
 ---
 
 ## 🛠️ Compilação e Testes
