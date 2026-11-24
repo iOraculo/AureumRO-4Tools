@@ -218,13 +218,27 @@ namespace _4RTools.Utils
                 return;
             }
 
-            Font current = control.Font;
-            if (current != null && ShouldUpgradeFont(current.FontFamily.Name))
+            // Prevent WinForms AutoScaleMode.Font from rescaling coordinates/heights when switching
+            // from Microsoft Sans Serif / Segoe UI to Google Sans (which has taller typographic metrics).
+            ContainerControl containerCtrl = control as ContainerControl;
+            if (containerCtrl != null && containerCtrl.AutoScaleMode == AutoScaleMode.Font)
             {
-                Font upgraded = Get(current.SizeInPoints, current.Style);
-                if (!ReferenceEquals(current, upgraded))
+                containerCtrl.AutoScaleMode = AutoScaleMode.None;
+            }
+
+            if (!(control is Form))
+            {
+                Font current = control.Font;
+                if (current != null && ShouldUpgradeFont(current.FontFamily.Name))
                 {
-                    control.Font = upgraded;
+                    float targetSize = control is TextBox || control is NumericUpDown || control is ComboBox
+                        ? Math.Max(7.5F, current.SizeInPoints * 0.92F)
+                        : current.SizeInPoints;
+                    Font upgraded = Get(targetSize, current.Style);
+                    if (!ReferenceEquals(current, upgraded))
+                    {
+                        control.Font = upgraded;
+                    }
                 }
             }
 

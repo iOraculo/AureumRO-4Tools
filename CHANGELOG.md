@@ -1,5 +1,9 @@
 # Changelogs
 
+## [v2.38.1] - 2026-11-24 — Correção de Escala de Layout WinForms (`AutoScaleMode.Font`) com Google Sans
+### Fixed
+- **Layout 100% proporcional com Google Sans (`Utils/FontManager.cs`)**: desativado `AutoScaleMode.Font` nos containers WinForms antes de aplicar a tipografia `Google Sans`, impedindo o esticamento vertical automático que empurrava os cards para baixo, e ajustada a escala em caixas de texto/seletores para alinhamento perfeito.
+
 ## [v2.38.0] - 2026-11-24 — Fonte **Google Sans** Embutida, Novo Visual **Antigravity Obsidian + Ouro Real** e 4 Otimizações de Desempenho
 ### Changed
 - **Tipografia Oficial `Google Sans` Embutida (`Utils/FontManager.cs`, `Resources/Fonts/GoogleSans-Regular.ttf`, `Resources/Fonts/GoogleSans-Bold.ttf`)**:
