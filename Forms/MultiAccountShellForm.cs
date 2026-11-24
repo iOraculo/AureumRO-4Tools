@@ -19,12 +19,10 @@ namespace _4RTools.Forms
 
         private sealed class AccountTabButton : Control
         {
-            private readonly Font regularFont;
-            private readonly Font activeFont;
             private bool isActive;
             private bool isHovered;
             private bool isDarkMode;
-            private Color dotColor = Color.FromArgb(158, 140, 102);
+            private Color dotColor = Color.FromArgb(140, 140, 152);
 
             public int SlotIndex { get; private set; }
 
@@ -61,8 +59,6 @@ namespace _4RTools.Forms
                 this.ResizeRedraw = true;
                 this.Cursor = Cursors.Hand;
                 this.Size = new Size(210, 30);
-                this.regularFont = new Font("Segoe UI", 8.5F, FontStyle.Regular);
-                this.activeFont = new Font("Segoe UI", 8.5F, FontStyle.Bold);
             }
 
             public void ApplyTheme(bool darkMode)
@@ -97,17 +93,17 @@ namespace _4RTools.Forms
                 Graphics g = e.Graphics;
                 g.SmoothingMode = SmoothingMode.AntiAlias;
 
-                Color barBg = this.isDarkMode ? Color.FromArgb(14, 9, 2) : Color.FromArgb(245, 236, 212);
-                Color idleFill = this.isDarkMode ? Color.FromArgb(24, 16, 4) : Color.FromArgb(250, 244, 226);
-                Color hoverFill = this.isDarkMode ? Color.FromArgb(42, 29, 8) : Color.FromArgb(242, 229, 194);
-                Color activeFill = this.isDarkMode ? Color.FromArgb(56, 39, 10) : Color.FromArgb(255, 251, 238);
+                Color barBg = this.isDarkMode ? Color.FromArgb(14, 14, 17) : Color.FromArgb(250, 250, 252);
+                Color idleFill = this.isDarkMode ? Color.FromArgb(20, 20, 24) : Color.FromArgb(244, 244, 247);
+                Color hoverFill = this.isDarkMode ? Color.FromArgb(30, 30, 38) : Color.FromArgb(236, 236, 242);
+                Color activeFill = this.isDarkMode ? Color.FromArgb(34, 29, 17) : Color.FromArgb(255, 252, 242);
                 Color border = this.isActive
-                    ? (this.isDarkMode ? Color.FromArgb(212, 175, 55) : Color.FromArgb(166, 124, 0))
-                    : (this.isDarkMode ? Color.FromArgb(72, 52, 16) : Color.FromArgb(212, 192, 152));
-                Color accent = this.isDarkMode ? Color.FromArgb(244, 217, 122) : Color.FromArgb(160, 129, 35);
+                    ? (this.isDarkMode ? Color.FromArgb(216, 178, 72) : Color.FromArgb(166, 126, 24))
+                    : (this.isDarkMode ? Color.FromArgb(40, 40, 49) : Color.FromArgb(222, 222, 230));
+                Color accent = this.isDarkMode ? Color.FromArgb(232, 195, 90) : Color.FromArgb(158, 122, 25);
                 Color textColor = this.isActive
-                    ? (this.isDarkMode ? Color.FromArgb(255, 244, 207) : Color.FromArgb(52, 36, 8))
-                    : (this.isDarkMode ? Color.FromArgb(206, 192, 158) : Color.FromArgb(88, 68, 36));
+                    ? (this.isDarkMode ? Color.FromArgb(250, 246, 236) : Color.FromArgb(28, 22, 8))
+                    : (this.isDarkMode ? Color.FromArgb(172, 172, 184) : Color.FromArgb(88, 88, 100));
 
                 using (SolidBrush bgOuter = new SolidBrush(barBg))
                 {
@@ -115,7 +111,7 @@ namespace _4RTools.Forms
                 }
 
                 Color fill = this.isActive ? activeFill : (this.isHovered ? hoverFill : idleFill);
-                using (GraphicsPath pill = SidebarNavButton.CreateRoundedRect(new Rectangle(0, 1, this.Width - 1, this.Height - 2), 6))
+                using (GraphicsPath pill = SidebarNavButton.CreateRoundedRect(new Rectangle(0, 1, this.Width - 1, this.Height - 2), 8))
                 using (SolidBrush fillBrush = new SolidBrush(fill))
                 using (Pen borderPen = new Pen(border, 1))
                 {
@@ -127,7 +123,7 @@ namespace _4RTools.Forms
                 {
                     using (SolidBrush accentBrush = new SolidBrush(accent))
                     {
-                        g.FillRectangle(accentBrush, 8, this.Height - 3, this.Width - 16, 2);
+                        g.FillRectangle(accentBrush, 10, this.Height - 3, this.Width - 20, 2);
                     }
                 }
 
@@ -140,20 +136,10 @@ namespace _4RTools.Forms
                 TextRenderer.DrawText(
                     g,
                     this.Text,
-                    this.isActive ? this.activeFont : this.regularFont,
+                    this.isActive ? FontManager.Bold(8.5F) : FontManager.Regular(8.5F),
                     textRect,
                     textColor,
                     TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine);
-            }
-
-            protected override void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    this.regularFont.Dispose();
-                    this.activeFont.Dispose();
-                }
-                base.Dispose(disposing);
             }
         }
 
@@ -246,7 +232,7 @@ namespace _4RTools.Forms
             this.btnStartAll = new Button
             {
                 Cursor = Cursors.Hand,
-                Font = new Font("Segoe UI", 8F, FontStyle.Bold),
+                Font = FontManager.Bold(8F),
                 Location = new Point(658, 6),
                 Name = "btnStartAllAccounts",
                 Size = new Size(76, 25),
@@ -258,7 +244,7 @@ namespace _4RTools.Forms
             this.btnStopAll = new Button
             {
                 Cursor = Cursors.Hand,
-                Font = new Font("Segoe UI", 8F, FontStyle.Bold),
+                Font = FontManager.Bold(8F),
                 Location = new Point(740, 6),
                 Name = "btnStopAllAccounts",
                 Size = new Size(76, 25),

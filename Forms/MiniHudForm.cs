@@ -35,9 +35,9 @@ namespace _4RTools.Forms
             this.ClientSize = new Size(236, 74);
             this.Text = "AureumTools Mini HUD";
 
-            this.badgeFont = new Font("Microsoft Sans Serif", 7.5F, FontStyle.Bold);
-            this.headerFont = new Font("Microsoft Sans Serif", 8F, FontStyle.Bold);
-            this.closeFont = new Font("Microsoft Sans Serif", 8F, FontStyle.Bold);
+            this.badgeFont = FontManager.Bold(7.5F);
+            this.headerFont = FontManager.Bold(8F);
+            this.closeFont = FontManager.Bold(8F);
 
             this.lblStatusBadge = new Label
             {
@@ -259,7 +259,7 @@ namespace _4RTools.Forms
             }
 
             ThemeManager.ApplyTheme(this, darkMode);
-            this.borderColor = darkMode ? Color.FromArgb(180, 138, 44) : Color.FromArgb(168, 145, 105);
+            this.borderColor = darkMode ? Color.FromArgb(52, 52, 64) : Color.FromArgb(212, 212, 220);
             this.btnClose.FlatStyle = FlatStyle.Flat;
             this.btnClose.FlatAppearance.BorderSize = 0;
             this.btnClose.BackColor = this.BackColor;
@@ -277,22 +277,6 @@ namespace _4RTools.Forms
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                if (this.badgeFont != null)
-                {
-                    this.badgeFont.Dispose();
-                }
-                if (this.headerFont != null)
-                {
-                    this.headerFont.Dispose();
-                }
-                if (this.closeFont != null)
-                {
-                    this.closeFont.Dispose();
-                }
-            }
-
             base.Dispose(disposing);
         }
     }

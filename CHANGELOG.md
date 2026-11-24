@@ -1,5 +1,21 @@
 # Changelogs
 
+## [v2.38.0] - 2026-11-24 — Fonte **Google Sans** Embutida, Novo Visual **Antigravity Obsidian + Ouro Real** e 4 Otimizações de Desempenho
+### Changed
+- **Tipografia Oficial `Google Sans` Embutida (`Utils/FontManager.cs`, `Resources/Fonts/GoogleSans-Regular.ttf`, `Resources/Fonts/GoogleSans-Bold.ttf`)**:
+  - Fontes oficiais **Google Sans Regular & Bold** embutidas diretamente no executável via `PrivateFontCollection` + `AddFontMemResourceEx` (funciona em 100% dos controles WinForms sem precisar instalar nenhuma fonte no Windows), com cache global de instâncias `Font` eliminando vazamentos GDI.
+- **Novo Visual Estilo Antigravity Settings + Destaque Dourado AureumRO (`Utils/ThemeManager.cs`, `Utils/ModernControls.cs`, `Utils/VitalBar.cs`, `Forms/MultiAccountShellForm.cs`, `Forms/Container.cs`, `Forms/GuideForm.cs`, `Forms/AureumHubForm.cs`, `Forms/MiniHudForm.cs`)**:
+  - Paleta **Antigravity Obsidian** (`#09090B` / `#0E0E11` / `#141418` com bordas finas `#282831`, texto branco nítido `#F4F4F6` e secundário `#9A9AA6`) combinada ao destaque **Ouro Real** (`#E8C35A`), além de modo claro limpo (`#F5F5F7` / `#FFFFFF` + Ouro Antigo `#9E7A19`).
+  - **Cards com cantos arredondados anti-aliased (`10px`)**, abas em pílula (`SegmentedTabButton`, `SidebarNavButton`, `AccountTabButton`), barras vitais arredondadas (`VitalBar`) e botão Sol/Lua minimalista.
+
+### Performance & Stability
+- **Zero alocações nos loops quentes (`Model/AHK.cs`, `Model/Macro.cs`, `Model/Autobuff.cs`)**:
+  - `AHK` agora usa snapshot imutável cacheado (reconstruído apenas ao alterar teclas), eliminando `.Values.ToArray()` a cada tick (~200 alocações/s).
+  - `Macro` avalia gatilhos sem clonar dicionários/listas quando ocioso (alocando apenas no instante em que uma cadeia dispara).
+  - `AutoBuff` reutiliza `HashSet` e `Dictionary` pré-alocados entre ciclos.
+- **Cache de 250ms para `HasExited` e `MainWindowHandle` (`Model/Client.cs`)**: reduz em >10× as chamadas de kernel Win32 feitas pelas múltiplas threads em segundo plano.
+- **Eliminação de vazamentos de `Font` (`Utils/FontManager.cs`, `Forms/AutopotForm.cs`, `Forms/DebuffRecoveryForm.cs`, `Forms/MultiAccountShellForm.cs`, `Forms/MiniHudForm.cs`)**: todas as fontes compartilhadas são servidas pelo cache central do `FontManager`.
+
 ## [v2.37.1] - 2026-11-24 — Botão `Pausar em cidades` Centralizado (Marcado por Padrão)
 ### Changed
 - **Barra superior (`Forms/Container.cs`, `Utils/LocalizationManager.cs`)**:

@@ -16,36 +16,46 @@ namespace _4RTools.Utils
         public const string TAG_MUTED_TEXT = "themeMuted";
         public const string TAG_ACCENT_TEXT = "themeAccent";
 
-        // AureumRO Light Mode — Warm Parchment & Antique Gold (aureumro.com :root tokens)
-        private static readonly Color LightBackground = Color.FromArgb(253, 248, 232);   // #FDF8E8 (--bg-card)
-        private static readonly Color LightCanvas = Color.FromArgb(242, 232, 204);       // #F2E8CC (--bg-deepest)
-        private static readonly Color LightSidebar = Color.FromArgb(250, 244, 224);      // #FAF4E0 (--bg-base)
-        private static readonly Color LightSurface = Color.FromArgb(248, 238, 209);      // #F8EED1 (--bg-card-hover)
-        private static readonly Color LightInputBack = Color.FromArgb(255, 251, 237);    // #FFFBED (--bg-elevated)
-        private static readonly Color LightButtonBack = Color.FromArgb(248, 238, 209);   // #F8EED1
-        private static readonly Color LightButtonHover = Color.FromArgb(239, 224, 180);  // #EFE0B4
-        private static readonly Color LightButtonBorder = Color.FromArgb(168, 145, 105); // #A89169 (--border-bright)
-        private static readonly Color LightCardBorder = Color.FromArgb(212, 192, 152);   // #D4C098 (--border)
-        private static readonly Color LightText = Color.FromArgb(42, 30, 14);            // #2A1E0E (--text-soft)
-        private static readonly Color LightMutedText = Color.FromArgb(113, 90, 59);      // #715A3B (--text-muted)
-        private static readonly Color LightAccent = Color.FromArgb(160, 129, 35);        // #A08123 (--gold)
-        private static readonly Color LightDivider = Color.FromArgb(212, 192, 152);      // #D4C098
+        // Antigravity Clean Light + Antique Gold accent
+        private static readonly Color LightBackground = Color.FromArgb(255, 255, 255);   // #FFFFFF (card)
+        private static readonly Color LightCanvas = Color.FromArgb(245, 245, 247);       // #F5F5F7 (canvas)
+        private static readonly Color LightSidebar = Color.FromArgb(250, 250, 252);      // #FAFAFC (sidebar)
+        private static readonly Color LightSurface = Color.FromArgb(250, 250, 252);      // #FAFAFC (topbar/footer)
+        private static readonly Color LightInputBack = Color.FromArgb(244, 244, 247);    // #F4F4F7
+        private static readonly Color LightButtonBack = Color.FromArgb(244, 244, 247);   // #F4F4F7
+        private static readonly Color LightButtonHover = Color.FromArgb(234, 234, 240);  // #EAEAF0
+        private static readonly Color LightButtonBorder = Color.FromArgb(212, 212, 220); // #D4D4DC
+        private static readonly Color LightCardBorder = Color.FromArgb(228, 228, 234);   // #E4E4EA
+        private static readonly Color LightText = Color.FromArgb(20, 20, 24);            // #141418
+        private static readonly Color LightMutedText = Color.FromArgb(110, 110, 122);    // #6E6E7A
+        private static readonly Color LightAccent = Color.FromArgb(158, 122, 25);        // #9E7A19 (antique gold)
+        private static readonly Color LightDivider = Color.FromArgb(230, 230, 236);      // #E6E6EC
 
-        // AureumRO Dark Mode — Obsidian & Royal Gold (aureumro.com homepage theme)
-        private static readonly Color DarkBackground = Color.FromArgb(30, 21, 6);        // #1E1506
-        private static readonly Color DarkCanvas = Color.FromArgb(11, 7, 1);             // #0B0701 (home-body)
-        private static readonly Color DarkSidebar = Color.FromArgb(18, 12, 3);           // #120C03
-        private static readonly Color DarkSurface = Color.FromArgb(27, 19, 4);           // #1B1304 (topnav)
-        private static readonly Color DarkInputBack = Color.FromArgb(42, 29, 8);         // #2A1D08
-        private static readonly Color DarkButtonBack = Color.FromArgb(46, 32, 9);        // #2E2009
-        private static readonly Color DarkButtonHover = Color.FromArgb(74, 52, 14);      // #4A340E
-        private static readonly Color DarkButtonBorder = Color.FromArgb(138, 104, 32);   // #8A6820
-        private static readonly Color DarkCardBorder = Color.FromArgb(89, 66, 20);       // #594214
-        private static readonly Color DarkText = Color.FromArgb(243, 234, 208);          // #F3EAD0
-        private static readonly Color DarkMutedText = Color.FromArgb(179, 160, 121);     // #B3A079
-        private static readonly Color DarkAccent = Color.FromArgb(244, 217, 122);        // #F4D97A
-        private static readonly Color DarkDivider = Color.FromArgb(71, 52, 15);          // #47340F
-        private static readonly Color DarkLink = Color.FromArgb(244, 217, 122);          // #F4D97A
+        // Antigravity Settings Obsidian + AureumRO Royal Gold accent
+        private static readonly Color DarkBackground = Color.FromArgb(20, 20, 24);       // #141418 (card)
+        private static readonly Color DarkCanvas = Color.FromArgb(9, 9, 11);             // #09090B (deepest canvas)
+        private static readonly Color DarkSidebar = Color.FromArgb(14, 14, 17);          // #0E0E11 (sidebar)
+        private static readonly Color DarkSurface = Color.FromArgb(14, 14, 17);          // #0E0E11 (topbar/footer)
+        private static readonly Color DarkInputBack = Color.FromArgb(26, 26, 32);        // #1A1A20 (inputs)
+        private static readonly Color DarkButtonBack = Color.FromArgb(30, 30, 37);       // #1E1E25 (pills/buttons)
+        private static readonly Color DarkButtonHover = Color.FromArgb(42, 42, 52);      // #2A2A34
+        private static readonly Color DarkButtonBorder = Color.FromArgb(54, 54, 66);     // #363642
+        private static readonly Color DarkCardBorder = Color.FromArgb(40, 40, 49);       // #282831 (hairline border)
+        private static readonly Color DarkText = Color.FromArgb(244, 244, 246);          // #F4F4F6
+        private static readonly Color DarkMutedText = Color.FromArgb(154, 154, 166);     // #9A9AA6
+        private static readonly Color DarkAccent = Color.FromArgb(232, 195, 90);         // #E8C35A (royal gold)
+        private static readonly Color DarkDivider = Color.FromArgb(34, 34, 42);          // #22222A
+        private static readonly Color DarkLink = Color.FromArgb(232, 195, 90);           // #E8C35A
+
+        public static Color GetCanvasColor(bool darkMode)
+        {
+            return darkMode ? DarkCanvas : LightCanvas;
+        }
+
+        public static Color GetCardColor(bool darkMode)
+        {
+            return darkMode ? DarkBackground : LightBackground;
+        }
 
         public static bool IsDarkMode { get; private set; }
 
@@ -282,6 +292,7 @@ namespace _4RTools.Utils
             root.SuspendLayout();
             try
             {
+                FontManager.ApplyFontTree(root);
                 ApplyControlTheme(root, darkMode);
             }
             finally

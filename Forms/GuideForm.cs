@@ -85,11 +85,11 @@ namespace _4RTools.Forms
             this.Size = new Size(584, 281);
 
             this.badgeFont = new Font("Segoe UI Symbol", 13F, FontStyle.Bold);
-            this.cardTitleFont = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            this.cardTaglineFont = new Font("Segoe UI", 8F, FontStyle.Italic);
-            this.stepHeadingFont = new Font("Segoe UI", 8.5F, FontStyle.Bold);
-            this.stepBodyFont = new Font("Segoe UI", 8.5F, FontStyle.Regular);
-            this.tipFont = new Font("Segoe UI", 8.2F, FontStyle.Regular);
+            this.cardTitleFont = FontManager.Bold(9.5F);
+            this.cardTaglineFont = FontManager.Italic(8F);
+            this.stepHeadingFont = FontManager.Bold(8.5F);
+            this.stepBodyFont = FontManager.Regular(8.5F);
+            this.tipFont = FontManager.Regular(8.2F);
 
             this.guideToolTip = FormUtils.CreateHelpToolTip();
 
@@ -335,11 +335,12 @@ namespace _4RTools.Forms
             g.SmoothingMode = SmoothingMode.AntiAlias;
             bool dark = ThemeManager.IsDarkMode;
             Color borderColor = dark
-                ? Color.FromArgb(88, 66, 26)
-                : Color.FromArgb(212, 194, 152);
+                ? Color.FromArgb(44, 44, 54)
+                : Color.FromArgb(226, 226, 234);
+            using (GraphicsPath path = SidebarNavButton.CreateRoundedRect(new Rectangle(0, 0, panel.Width - 1, panel.Height - 1), 8))
             using (Pen pen = new Pen(borderColor, 1f))
             {
-                g.DrawRectangle(pen, 0, 0, panel.Width - 1, panel.Height - 1);
+                g.DrawPath(pen, path);
             }
         }
 
@@ -871,14 +872,14 @@ namespace _4RTools.Forms
         private void ApplyCustomThemeStyling()
         {
             bool dark = ThemeManager.IsDarkMode;
-            Color cardBg = dark ? Color.FromArgb(30, 21, 7) : Color.FromArgb(255, 253, 246);
-            Color headerBg = dark ? Color.FromArgb(44, 31, 10) : Color.FromArgb(247, 238, 212);
-            Color titleColor = dark ? Color.FromArgb(250, 240, 212) : Color.FromArgb(46, 33, 12);
-            Color taglineColor = dark ? Color.FromArgb(196, 178, 138) : Color.FromArgb(115, 96, 68);
-            Color headingColor = dark ? Color.FromArgb(244, 214, 118) : Color.FromArgb(138, 94, 14);
-            Color bodyColor = dark ? Color.FromArgb(228, 219, 194) : Color.FromArgb(58, 45, 22);
-            Color tipBg = dark ? Color.FromArgb(42, 32, 12) : Color.FromArgb(250, 243, 222);
-            Color tipFg = dark ? Color.FromArgb(248, 226, 152) : Color.FromArgb(108, 74, 14);
+            Color cardBg = dark ? Color.FromArgb(22, 22, 27) : Color.FromArgb(255, 255, 255);
+            Color headerBg = dark ? Color.FromArgb(28, 28, 34) : Color.FromArgb(248, 248, 251);
+            Color titleColor = dark ? Color.FromArgb(244, 244, 246) : Color.FromArgb(20, 20, 24);
+            Color taglineColor = dark ? Color.FromArgb(154, 154, 166) : Color.FromArgb(110, 110, 122);
+            Color headingColor = dark ? Color.FromArgb(232, 195, 90) : Color.FromArgb(158, 122, 25);
+            Color bodyColor = dark ? Color.FromArgb(214, 214, 224) : Color.FromArgb(46, 46, 56);
+            Color tipBg = dark ? Color.FromArgb(30, 27, 18) : Color.FromArgb(250, 246, 234);
+            Color tipFg = dark ? Color.FromArgb(242, 218, 138) : Color.FromArgb(112, 82, 14);
 
             foreach (GuideCardUi card in this.cards)
             {
@@ -949,11 +950,6 @@ namespace _4RTools.Forms
                     this.guideToolTip = null;
                 }
                 if (this.badgeFont != null) { this.badgeFont.Dispose(); this.badgeFont = null; }
-                if (this.cardTitleFont != null) { this.cardTitleFont.Dispose(); this.cardTitleFont = null; }
-                if (this.cardTaglineFont != null) { this.cardTaglineFont.Dispose(); this.cardTaglineFont = null; }
-                if (this.stepHeadingFont != null) { this.stepHeadingFont.Dispose(); this.stepHeadingFont = null; }
-                if (this.stepBodyFont != null) { this.stepBodyFont.Dispose(); this.stepBodyFont = null; }
-                if (this.tipFont != null) { this.tipFont.Dispose(); this.tipFont = null; }
             }
 
             base.Dispose(disposing);

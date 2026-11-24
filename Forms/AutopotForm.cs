@@ -23,7 +23,7 @@ namespace _4RTools.Forms
             this.ClientSize = new Size(308, 86);
             this.helpToolTip = FormUtils.CreateHelpToolTip(this.components);
 
-            this.sectionFont = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            this.sectionFont = FontManager.Bold(8.5F);
             this.lblSectionTitle = new Label
             {
                 AutoSize = true,
@@ -54,16 +54,16 @@ namespace _4RTools.Forms
 
             // Compact unified layout so Autopot and Yggdrasil sit stacked in a single dashboard card.
             this.label2.AutoSize = false;
-            this.label2.Font = new Font("Segoe UI", 8.2F, FontStyle.Regular);
+            this.label2.Font = FontManager.Regular(8.2F);
             this.label2.Location = new Point(146, 4);
             this.label2.Size = new Size(64, 18);
             this.label2.TextAlign = ContentAlignment.MiddleRight;
 
-            this.txtAutopotDelay.Font = new Font("Segoe UI", 8.5F, FontStyle.Regular);
+            this.txtAutopotDelay.Font = FontManager.Regular(8.5F);
             this.txtAutopotDelay.Location = new Point(214, 2);
             this.txtAutopotDelay.Size = new Size(50, 21);
 
-            this.label1.Font = new Font("Segoe UI", 8.2F, FontStyle.Regular);
+            this.label1.Font = FontManager.Regular(8.2F);
             this.label1.Location = new Point(268, 5);
 
             this.picBoxHP.Location = new Point(12, 27);

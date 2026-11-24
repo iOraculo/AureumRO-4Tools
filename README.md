@@ -79,17 +79,17 @@
 
 ## 🎨 Interface e Identidade Visual
 
-O **AureumTools** segue fielmente a estética oficial de [**aureumro.com**](https://aureumro.com/), com **botão Sol/Lua** no topo para alternar entre tema escuro e claro, seletor de idioma **`PT-BR` / `EN`** ao lado da versão, **Mini HUD flutuante** no bloco `LIGAR / DESLIGAR`, barras vitais de **HP/SP em tempo real** e ícones originais sem fundo branco.
+O **AureumTools** combina a estética moderna do **Antigravity Settings** (fundo escuro profundo, cards com cantos arredondados, pílulas suaves e tipografia oficial **Google Sans** embutida no executável) com o destaque **Ouro Real** do [**aureumro.com**](https://aureumro.com/) — além de **botão Sol/Lua** no topo, seletor de idioma **`PT-BR` / `EN`** ao lado da versão, **Mini HUD flutuante**, barras vitais arredondadas de **HP/SP em tempo real** e ícones originais sem fundo branco.
 
 | Tema | Paleta Principal | Destaque |
 | :--- | :--- | :--- |
-| **Obsidiana & Ouro Real** *(Padrão / Escuro)* | `#0B0701` • `#120C03` • `#1B1304` | `#F4D97A` • `#ECC861` • `#A67E1A` |
-| **Pergaminho & Ouro Antigo** *(Claro)* | `#F2E8CC` • `#FAF4E0` • `#FDF8E8` | `#D4C098` • `#A08123` • `#2A1E0E` |
+| **Antigravity Obsidian & Ouro Real** *(Padrão / Escuro)* | `#09090B` • `#0E0E11` • `#141418` | `#E8C35A` • `#282831` • `#F4F4F6` |
+| **Antigravity Claro & Ouro Antigo** *(Claro)* | `#F5F5F7` • `#FAFAFC` • `#FFFFFF` | `#9E7A19` • `#E4E4EA` • `#141418` |
 
-### 📸 Prévias da Interface (`v2.37.0`)
+### 📸 Prévias da Interface (`v2.38.0`)
 | Painel Principal & Autopot/Ygg Unificados | Auto-skill com Filtro por Classe | Novo Guia Visual Interativo |
 | :---: | :---: | :---: |
-| ![Dashboard](docs/previews/v2.37.0_dashboard_dark.png) | ![Auto-skill](docs/previews/v2.37.0_autoskill_class.png) | ![Guia](docs/previews/v2.37.0_guide_ludic.png) |
+| ![Dashboard](docs/previews/v2.38.0_dashboard_dark.png) | ![Auto-skill](docs/previews/v2.38.0_autoskill_class.png) | ![Guia](docs/previews/v2.38.0_guide_ludic.png) |
 
 ---
 

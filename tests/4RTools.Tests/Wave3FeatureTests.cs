@@ -2037,5 +2037,39 @@ namespace _4RTools.Tests
                 Assert.False(toggle.IsDarkMode);
             }
         }
+
+        [Fact]
+        public void V238_GoogleSansFontManagerCachesFontsAndUpgradesControlTree()
+        {
+            Assert.True(FontManager.IsGoogleSansLoaded);
+            Assert.Equal("Google Sans", FontManager.ActiveFamilyName);
+
+            System.Drawing.Font reg1 = FontManager.Regular(9F);
+            System.Drawing.Font reg2 = FontManager.Regular(9F);
+            System.Drawing.Font bold = FontManager.Bold(9F);
+
+            Assert.Same(reg1, reg2);
+            Assert.Equal("Google Sans", reg1.FontFamily.Name);
+            Assert.Equal("Google Sans", bold.FontFamily.Name);
+            Assert.True(bold.Bold);
+
+            using (System.Windows.Forms.Panel panel = new System.Windows.Forms.Panel())
+            using (System.Windows.Forms.Label lbl = new System.Windows.Forms.Label { Font = new System.Drawing.Font("Segoe UI", 8.5F) })
+            using (System.Windows.Forms.Label mono = new System.Windows.Forms.Label { Font = new System.Drawing.Font("Consolas", 9F) })
+            {
+                panel.Controls.Add(lbl);
+                panel.Controls.Add(mono);
+
+                FontManager.ApplyFontTree(panel);
+
+                Assert.Equal("Google Sans", lbl.Font.FontFamily.Name);
+                Assert.Equal("Consolas", mono.Font.FontFamily.Name);
+            }
+
+            using (ModernCardPanel card = new ModernCardPanel())
+            {
+                Assert.Equal(10, card.CornerRadius);
+            }
+        }
     }
 }

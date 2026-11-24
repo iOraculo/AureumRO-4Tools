@@ -240,9 +240,7 @@ namespace _4RTools.Forms
 
         private Font TrackFont(string familyName, float emSize, FontStyle style)
         {
-            Font font = new Font(familyName, emSize, style);
-            this.ownedFonts.Add(font);
-            return font;
+            return FontManager.Get(emSize, style);
         }
 
         private static Panel CreateDivider(Point location, Size size)
@@ -513,20 +511,20 @@ namespace _4RTools.Forms
 
                 this.autopotHostPanel = new Panel
                 {
-                    Location = new Point(8, 4),
+                    Location = new Point(8, 6),
                     Name = "autopotHostPanel",
-                    Size = new Size(308, 88)
+                    Size = new Size(308, 86)
                 };
 
                 this.autopotYggHostPanel = new Panel
                 {
                     Location = new Point(8, 99),
                     Name = "autopotYggHostPanel",
-                    Size = new Size(308, 88)
+                    Size = new Size(308, 85)
                 };
 
                 this.cardAutopot.Controls.Add(this.autopotHostPanel);
-                this.cardAutopot.Controls.Add(CreateDivider(new Point(12, 95), new Size(300, 1)));
+                this.cardAutopot.Controls.Add(CreateDivider(new Point(14, 95), new Size(296, 1)));
                 this.cardAutopot.Controls.Add(this.autopotYggHostPanel);
 
                 // 4. Dashboard Row - Card 2: ON/OFF & Live Vitals (552, 72, 258 x 190)
@@ -609,14 +607,14 @@ namespace _4RTools.Forms
 
                 this.sectionHostPanel = new Panel
                 {
-                    Location = new Point(4, 49),
+                    Location = new Point(6, 50),
                     Name = "sectionHostPanel",
-                    Size = new Size(584, 281)
+                    Size = new Size(580, 276)
                 };
 
                 this.cardSection.Controls.Add(this.lblSectionTitle);
                 this.cardSection.Controls.Add(this.lblSectionSubtitle);
-                this.cardSection.Controls.Add(CreateDivider(new Point(1, 47), new Size(590, 1)));
+                this.cardSection.Controls.Add(CreateDivider(new Point(14, 47), new Size(564, 1)));
                 this.cardSection.Controls.Add(this.sectionHostPanel);
 
                 // 6. Modern Footer (0, 616, 824 x 28)

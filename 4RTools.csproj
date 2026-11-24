@@ -383,6 +383,7 @@
     <Compile Include="Utils\EffectStatusIDs.cs" />
     <Compile Include="Utils\AppConfig.cs" />
     <Compile Include="Utils\Constants.cs" />
+    <Compile Include="Utils\FontManager.cs" />
     <Compile Include="Utils\FormUtils.cs" />
     <Compile Include="Utils\HttpClientProvider.cs" />
     <Compile Include="Utils\Interop.cs" />
@@ -465,6 +466,8 @@
       <LastGenOutput>ETCResource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\AureumCatalog.json" />
+    <EmbeddedResource Include="Resources\Fonts\GoogleSans-Regular.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\GoogleSans-Bold.ttf" />
     <None Include="app.manifest" />
     <None Include="packages.config" />
     <None Include="Properties\DataSources\_4RTools.Model.ClientDTO.datasource" />
