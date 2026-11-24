@@ -1,5 +1,9 @@
 # Changelogs
 
+## [v2.38.3] - 2026-11-24 — Espaçamento Fino das Teclas do `Spammer` com `Google Sans`
+### Fixed
+- **Aba `Spammer` (`Forms/AHKForm.cs`)**: ajustado o espaçamento vertical das fileiras de teclas (`F1..F9`, `1..9`, `Q..O`, `A..L`, `Z..M`) garantindo folga limpa acima do card `Configuração do Spammer`, além de migrar `priorityOrderFont` para o cache global do `FontManager`.
+
 ## [v2.38.2] - 2026-11-24 — Métricas GDI (`OS/2 winAscent/winDescent`) da Fonte `Google Sans` Normalizadas
 ### Fixed
 - **Alinhamento perfeito em Spammer, ComboBoxes, TextBoxes e Guia (`Resources/Fonts/GoogleSans-*.ttf`, `Utils/FontManager.cs`)**: normalizadas as métricas `OS/2 usWinAscent/usWinDescent` das fontes `Google Sans` embutidas para o padrão latino (`1020 / 300`, altura idêntica ao `Segoe UI` no GDI do Windows), eliminando ComboBoxes altos e qualquer sobreposição de checkboxes na aba `Spammer`.

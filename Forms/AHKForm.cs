@@ -27,7 +27,7 @@ namespace _4RTools.Forms
         {
             InitializeComponent();
             this.helpToolTip = FormUtils.CreateHelpToolTip(this.components);
-            this.priorityOrderFont = new Font("Segoe UI", 7.75F, FontStyle.Bold);
+            this.priorityOrderFont = FontManager.Bold(7.75F);
             InitializeClearAllButton();
             InitializePriorityControls();
             InitializeCheckAsThreeState();
@@ -37,6 +37,24 @@ namespace _4RTools.Forms
 
         private void InitializePriorityControls()
         {
+            // Compact key rows slightly so Z..M always maintains crisp breathing room above groupAhkConfig.
+            this.panel4.Location = new Point(14, 30);
+            this.panel2.Location = new Point(15, 61);
+            foreach (Control c in this.Controls)
+            {
+                CheckBox cb = c as CheckBox;
+                if (cb == null || cb.Tag != null)
+                {
+                    continue;
+                }
+
+                if (cb.Top == 12) cb.Top = 8;
+                else if (cb.Top == 45) cb.Top = 38;
+                else if (cb.Top == 81) cb.Top = 70;
+                else if (cb.Top == 104) cb.Top = 93;
+                else if (cb.Top == 127) cb.Top = 116;
+            }
+
             // Align Example card and Clear button flush with the bottom cards' right edge (x = 570).
             this.groupBox3.Location = new Point(426, 10);
             this.groupBox3.Size = new Size(144, 100);
@@ -603,12 +621,7 @@ namespace _4RTools.Forms
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            if (this.priorityOrderFont != null)
-            {
-                this.priorityOrderFont.Dispose();
-                this.priorityOrderFont = null;
-            }
-
+            this.priorityOrderFont = null;
             base.OnFormClosed(e);
         }
     }
