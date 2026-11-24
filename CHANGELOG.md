@@ -1,5 +1,9 @@
 # Changelogs
 
+## [v2.38.2] - 2026-11-24 — Métricas GDI (`OS/2 winAscent/winDescent`) da Fonte `Google Sans` Normalizadas
+### Fixed
+- **Alinhamento perfeito em Spammer, ComboBoxes, TextBoxes e Guia (`Resources/Fonts/GoogleSans-*.ttf`, `Utils/FontManager.cs`)**: normalizadas as métricas `OS/2 usWinAscent/usWinDescent` das fontes `Google Sans` embutidas para o padrão latino (`1020 / 300`, altura idêntica ao `Segoe UI` no GDI do Windows), eliminando ComboBoxes altos e qualquer sobreposição de checkboxes na aba `Spammer`.
+
 ## [v2.38.1] - 2026-11-24 — Correção de Escala de Layout WinForms (`AutoScaleMode.Font`) com Google Sans
 ### Fixed
 - **Layout 100% proporcional com Google Sans (`Utils/FontManager.cs`)**: desativado `AutoScaleMode.Font` nos containers WinForms antes de aplicar a tipografia `Google Sans`, impedindo o esticamento vertical automático que empurrava os cards para baixo, e ajustada a escala em caixas de texto/seletores para alinhamento perfeito.

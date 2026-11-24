@@ -231,10 +231,7 @@ namespace _4RTools.Utils
                 Font current = control.Font;
                 if (current != null && ShouldUpgradeFont(current.FontFamily.Name))
                 {
-                    float targetSize = control is TextBox || control is NumericUpDown || control is ComboBox
-                        ? Math.Max(7.5F, current.SizeInPoints * 0.92F)
-                        : current.SizeInPoints;
-                    Font upgraded = Get(targetSize, current.Style);
+                    Font upgraded = Get(current.SizeInPoints, current.Style);
                     if (!ReferenceEquals(current, upgraded))
                     {
                         control.Font = upgraded;
