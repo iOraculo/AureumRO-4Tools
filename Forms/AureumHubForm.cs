@@ -1260,17 +1260,17 @@ namespace _4RTools.Forms
                 this.catalog.CardCollections.Count);
 
             bool dark = ThemeManager.IsDarkMode;
-            Color cardBg = dark ? Color.FromArgb(22, 22, 27) : Color.FromArgb(255, 255, 255);
-            Color cardDoneBg = dark ? Color.FromArgb(18, 30, 22) : Color.FromArgb(238, 250, 240);
-            Color cardText = dark ? Color.FromArgb(244, 244, 246) : Color.FromArgb(20, 20, 24);
-            Color accentText = dark ? Color.FromArgb(232, 195, 90) : Color.FromArgb(158, 122, 25);
-            Color mutedText = dark ? Color.FromArgb(154, 154, 166) : Color.FromArgb(110, 110, 122);
-            Color chipIdleBg = dark ? Color.FromArgb(30, 30, 37) : Color.FromArgb(244, 244, 247);
-            Color chipIdleBorder = dark ? Color.FromArgb(52, 52, 64) : Color.FromArgb(212, 212, 220);
-            Color chipDoneBg = dark ? Color.FromArgb(22, 46, 30) : Color.FromArgb(222, 244, 226);
+            Color cardBg = dark ? Color.FromArgb(30, 21, 7) : Color.FromArgb(255, 252, 243);
+            Color cardDoneBg = dark ? Color.FromArgb(24, 34, 20) : Color.FromArgb(240, 250, 240);
+            Color cardText = dark ? Color.FromArgb(244, 234, 206) : Color.FromArgb(46, 33, 12);
+            Color accentText = dark ? Color.FromArgb(244, 217, 122) : Color.FromArgb(148, 102, 12);
+            Color mutedText = dark ? Color.FromArgb(182, 165, 128) : Color.FromArgb(115, 96, 68);
+            Color chipIdleBg = dark ? Color.FromArgb(46, 33, 11) : Color.FromArgb(248, 240, 218);
+            Color chipIdleBorder = dark ? Color.FromArgb(95, 70, 24) : Color.FromArgb(204, 182, 136);
+            Color chipDoneBg = dark ? Color.FromArgb(28, 52, 34) : Color.FromArgb(222, 244, 226);
             Color chipDoneFore = dark ? Color.FromArgb(132, 214, 152) : Color.FromArgb(36, 116, 62);
-            Color chipDoneBorder = dark ? Color.FromArgb(56, 128, 76) : Color.FromArgb(128, 194, 146);
-            Color miniBtnBg = dark ? Color.FromArgb(30, 30, 37) : Color.FromArgb(244, 244, 247);
+            Color chipDoneBorder = dark ? Color.FromArgb(62, 134, 82) : Color.FromArgb(128, 194, 146);
+            Color miniBtnBg = dark ? Color.FromArgb(52, 38, 14) : Color.FromArgb(246, 238, 216);
 
             int scrollPos = this.panelCardsList.VerticalScroll.Value;
             this.panelCardsList.SuspendLayout();
@@ -1588,14 +1588,14 @@ namespace _4RTools.Forms
             if (completed)
             {
                 row.DefaultCellStyle.Font = this.gridStrikeFont;
-                row.DefaultCellStyle.ForeColor = dark ? Color.FromArgb(132, 214, 152) : Color.FromArgb(36, 116, 62);
-                row.DefaultCellStyle.BackColor = dark ? Color.FromArgb(18, 30, 22) : Color.FromArgb(234, 248, 236);
+                row.DefaultCellStyle.ForeColor = dark ? Color.FromArgb(132, 214, 152) : Color.FromArgb(46, 124, 68);
+                row.DefaultCellStyle.BackColor = dark ? Color.FromArgb(24, 38, 26) : Color.FromArgb(234, 248, 236);
             }
             else
             {
                 row.DefaultCellStyle.Font = this.smallFont;
-                row.DefaultCellStyle.ForeColor = dark ? Color.FromArgb(236, 236, 242) : Color.FromArgb(20, 20, 24);
-                row.DefaultCellStyle.BackColor = dark ? Color.FromArgb(22, 22, 27) : Color.FromArgb(255, 255, 255);
+                row.DefaultCellStyle.ForeColor = dark ? Color.FromArgb(240, 230, 200) : Color.FromArgb(46, 33, 12);
+                row.DefaultCellStyle.BackColor = dark ? Color.FromArgb(26, 18, 6) : Color.FromArgb(255, 253, 246);
             }
         }
 
@@ -1804,12 +1804,12 @@ namespace _4RTools.Forms
 
             if (this.dgvMaps != null)
             {
-                Color bg = dark ? Color.FromArgb(22, 22, 27) : Color.FromArgb(255, 255, 255);
-                Color gridColor = dark ? Color.FromArgb(42, 42, 52) : Color.FromArgb(228, 228, 234);
-                Color headerBg = dark ? Color.FromArgb(28, 28, 34) : Color.FromArgb(245, 245, 248);
-                Color headerFore = dark ? Color.FromArgb(232, 195, 90) : Color.FromArgb(40, 40, 48);
-                Color selBg = dark ? Color.FromArgb(44, 38, 22) : Color.FromArgb(246, 238, 212);
-                Color selFore = dark ? Color.FromArgb(250, 246, 236) : Color.FromArgb(20, 20, 24);
+                Color bg = dark ? Color.FromArgb(26, 18, 6) : Color.FromArgb(255, 253, 246);
+                Color gridColor = dark ? Color.FromArgb(72, 52, 18) : Color.FromArgb(218, 200, 162);
+                Color headerBg = dark ? Color.FromArgb(46, 33, 10) : Color.FromArgb(242, 229, 194);
+                Color headerFore = dark ? Color.FromArgb(244, 217, 122) : Color.FromArgb(62, 44, 16);
+                Color selBg = dark ? Color.FromArgb(74, 54, 16) : Color.FromArgb(236, 216, 162);
+                Color selFore = dark ? Color.FromArgb(255, 246, 214) : Color.FromArgb(42, 28, 8);
 
                 this.dgvMaps.BackgroundColor = bg;
                 this.dgvMaps.GridColor = gridColor;
@@ -1829,8 +1829,8 @@ namespace _4RTools.Forms
 
             if (this.txtMapSelectedItems != null)
             {
-                this.txtMapSelectedItems.BackColor = dark ? Color.FromArgb(18, 18, 22) : Color.FromArgb(248, 248, 251);
-                this.txtMapSelectedItems.ForeColor = dark ? Color.FromArgb(226, 226, 234) : Color.FromArgb(30, 30, 38);
+                this.txtMapSelectedItems.BackColor = dark ? Color.FromArgb(24, 16, 5) : Color.FromArgb(252, 247, 234);
+                this.txtMapSelectedItems.ForeColor = dark ? Color.FromArgb(236, 224, 192) : Color.FromArgb(52, 38, 16);
             }
 
             if (this.activeMainSubTab == "collection" && this.activeCollectionSubTab == "cards")
@@ -1842,12 +1842,12 @@ namespace _4RTools.Forms
         private void ApplyVoteCardsTheme()
         {
             bool dark = ThemeManager.IsDarkMode;
-            Color cardBg = dark ? Color.FromArgb(22, 22, 27) : Color.FromArgb(255, 255, 255);
-            Color titleColor = dark ? Color.FromArgb(244, 244, 246) : Color.FromArgb(20, 20, 24);
-            Color subColor = dark ? Color.FromArgb(154, 154, 166) : Color.FromArgb(110, 110, 122);
-            Color btnBg = dark ? Color.FromArgb(30, 30, 37) : Color.FromArgb(244, 244, 247);
-            Color btnBorder = dark ? Color.FromArgb(54, 54, 66) : Color.FromArgb(212, 212, 220);
-            Color inputBg = dark ? Color.FromArgb(16, 16, 20) : Color.White;
+            Color cardBg = dark ? Color.FromArgb(30, 21, 7) : Color.FromArgb(255, 252, 243);
+            Color titleColor = dark ? Color.FromArgb(250, 240, 212) : Color.FromArgb(46, 33, 12);
+            Color subColor = dark ? Color.FromArgb(182, 165, 128) : Color.FromArgb(115, 96, 68);
+            Color btnBg = dark ? Color.FromArgb(52, 38, 14) : Color.FromArgb(248, 240, 218);
+            Color btnBorder = dark ? Color.FromArgb(112, 84, 28) : Color.FromArgb(196, 172, 124);
+            Color inputBg = dark ? Color.FromArgb(20, 14, 4) : Color.White;
 
             foreach (VoteSiteCardControls ctrl in this.voteCardControls)
             {

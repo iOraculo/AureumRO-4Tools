@@ -131,7 +131,7 @@ namespace _4RTools.Utils
             this.Text = label;
             this.IconKind = iconKind;
             this.Cursor = Cursors.Hand;
-            this.Size = new Size(184, 30);
+            this.Size = new Size(188, 32);
         }
 
         public void ApplyTheme(bool darkMode)
@@ -166,13 +166,13 @@ namespace _4RTools.Utils
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            Color idleBack = this.isDarkMode ? Color.FromArgb(14, 14, 17) : Color.FromArgb(250, 250, 252);
-            Color hoverBack = this.isDarkMode ? Color.FromArgb(26, 26, 33) : Color.FromArgb(240, 240, 245);
-            Color activeBack = this.isDarkMode ? Color.FromArgb(32, 28, 17) : Color.FromArgb(250, 245, 230);
-            Color activeBorder = this.isDarkMode ? Color.FromArgb(148, 118, 42) : Color.FromArgb(196, 162, 74);
-            Color accent = this.isDarkMode ? Color.FromArgb(232, 195, 90) : Color.FromArgb(158, 122, 25);
-            Color idleText = this.isDarkMode ? Color.FromArgb(198, 198, 210) : Color.FromArgb(62, 62, 72);
-            Color activeText = this.isDarkMode ? Color.FromArgb(248, 244, 232) : Color.FromArgb(30, 24, 10);
+            Color idleBack = this.isDarkMode ? Color.FromArgb(18, 12, 3) : Color.FromArgb(250, 244, 224);
+            Color hoverBack = this.isDarkMode ? Color.FromArgb(38, 26, 6) : Color.FromArgb(242, 229, 194);
+            Color activeBack = this.isDarkMode ? Color.FromArgb(54, 37, 9) : Color.FromArgb(237, 224, 182);
+            Color activeBorder = this.isDarkMode ? Color.FromArgb(148, 112, 34) : Color.FromArgb(180, 148, 86);
+            Color accent = this.isDarkMode ? Color.FromArgb(244, 217, 122) : Color.FromArgb(160, 129, 35);
+            Color idleText = this.isDarkMode ? Color.FromArgb(228, 216, 185) : Color.FromArgb(62, 44, 20);
+            Color activeText = this.isDarkMode ? Color.FromArgb(255, 244, 207) : Color.FromArgb(61, 48, 8);
 
             Color fill = this.isActive ? activeBack : (this.isHovered ? hoverBack : idleBack);
             using (SolidBrush outerBg = new SolidBrush(idleBack))
@@ -205,14 +205,14 @@ namespace _4RTools.Utils
                 }
             }
 
-            Color iconColor = this.isActive ? accent : (this.isDarkMode ? Color.FromArgb(142, 142, 156) : Color.FromArgb(110, 110, 124));
+            Color iconColor = this.isActive ? accent : (this.isDarkMode ? Color.FromArgb(179, 160, 121) : Color.FromArgb(113, 90, 59));
             DrawVectorIcon(g, this.IconKind, new Rectangle(13, (this.Height - 14) / 2, 14, 14), iconColor);
 
             Rectangle textBounds = new Rectangle(35, 0, this.Width - 41, this.Height);
             TextRenderer.DrawText(
                 g,
                 this.Text,
-                this.isActive ? FontManager.Bold(9F) : FontManager.Regular(9F),
+                this.isActive ? FontManager.Bold(9.5F) : FontManager.Regular(9.5F),
                 textBounds,
                 this.isActive ? activeText : idleText,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine);
@@ -438,15 +438,15 @@ namespace _4RTools.Utils
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             Color cardBack = this.Parent != null ? this.Parent.BackColor : ThemeManager.GetCardColor(this.isDarkMode);
-            Color idleFill = this.isDarkMode ? Color.FromArgb(24, 24, 30) : Color.FromArgb(244, 244, 247);
-            Color hoverFill = this.isDarkMode ? Color.FromArgb(34, 34, 42) : Color.FromArgb(234, 234, 240);
-            Color activeFill = this.isDarkMode ? Color.FromArgb(38, 32, 18) : Color.FromArgb(250, 243, 224);
+            Color idleFill = this.isDarkMode ? Color.FromArgb(42, 29, 8) : Color.FromArgb(242, 232, 204);
+            Color hoverFill = this.isDarkMode ? Color.FromArgb(62, 43, 12) : Color.FromArgb(234, 220, 182);
+            Color activeFill = this.isDarkMode ? Color.FromArgb(66, 48, 14) : Color.FromArgb(248, 236, 198);
             Color border = this.isActive
-                ? (this.isDarkMode ? Color.FromArgb(216, 178, 72) : Color.FromArgb(168, 130, 32))
-                : (this.isDarkMode ? Color.FromArgb(46, 46, 56) : Color.FromArgb(218, 218, 226));
+                ? (this.isDarkMode ? Color.FromArgb(228, 190, 82) : Color.FromArgb(166, 126, 26))
+                : (this.isDarkMode ? Color.FromArgb(108, 80, 26) : Color.FromArgb(196, 174, 128));
             Color textColor = this.isActive
-                ? (this.isDarkMode ? Color.FromArgb(248, 226, 152) : Color.FromArgb(92, 66, 10))
-                : (this.isDarkMode ? Color.FromArgb(196, 196, 208) : Color.FromArgb(72, 72, 84));
+                ? (this.isDarkMode ? Color.FromArgb(255, 240, 194) : Color.FromArgb(72, 50, 8))
+                : (this.isDarkMode ? Color.FromArgb(228, 216, 185) : Color.FromArgb(62, 44, 20));
 
             using (SolidBrush outer = new SolidBrush(cardBack))
             {
@@ -467,7 +467,7 @@ namespace _4RTools.Utils
             TextRenderer.DrawText(
                 g,
                 this.Text,
-                this.isActive ? FontManager.Bold(8.5F) : FontManager.Regular(8.5F),
+                this.isActive ? FontManager.Bold(9F) : FontManager.Regular(9F),
                 rect,
                 textColor,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
@@ -586,14 +586,14 @@ namespace _4RTools.Utils
 
             Color parentBg = this.Parent != null
                 ? this.Parent.BackColor
-                : (this.isDarkMode ? Color.FromArgb(14, 14, 17) : Color.FromArgb(250, 250, 252));
+                : (this.isDarkMode ? Color.FromArgb(27, 19, 4) : Color.FromArgb(248, 238, 209));
             Color fill = this.isDarkMode
-                ? (this.isHovered ? Color.FromArgb(40, 40, 50) : Color.FromArgb(26, 26, 32))
-                : (this.isHovered ? Color.FromArgb(234, 234, 240) : Color.FromArgb(244, 244, 247));
+                ? (this.isHovered ? Color.FromArgb(56, 39, 12) : Color.FromArgb(38, 26, 7))
+                : (this.isHovered ? Color.FromArgb(240, 226, 188) : Color.FromArgb(253, 248, 232));
             Color border = this.isDarkMode
-                ? (this.isHovered ? Color.FromArgb(232, 195, 90) : Color.FromArgb(52, 52, 64))
-                : (this.isHovered ? Color.FromArgb(158, 122, 25) : Color.FromArgb(212, 212, 220));
-            Color iconColor = this.isDarkMode ? Color.FromArgb(232, 195, 90) : Color.FromArgb(124, 94, 18);
+                ? (this.isHovered ? Color.FromArgb(244, 217, 122) : Color.FromArgb(128, 96, 30))
+                : (this.isHovered ? Color.FromArgb(160, 129, 35) : Color.FromArgb(204, 180, 132));
+            Color iconColor = this.isDarkMode ? Color.FromArgb(244, 217, 122) : Color.FromArgb(118, 86, 22);
 
             using (SolidBrush bgOuter = new SolidBrush(parentBg))
             {

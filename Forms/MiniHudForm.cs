@@ -259,7 +259,7 @@ namespace _4RTools.Forms
             }
 
             ThemeManager.ApplyTheme(this, darkMode);
-            this.borderColor = darkMode ? Color.FromArgb(52, 52, 64) : Color.FromArgb(212, 212, 220);
+            this.borderColor = darkMode ? Color.FromArgb(180, 138, 44) : Color.FromArgb(168, 145, 105);
             this.btnClose.FlatStyle = FlatStyle.Flat;
             this.btnClose.FlatAppearance.BorderSize = 0;
             this.btnClose.BackColor = this.BackColor;

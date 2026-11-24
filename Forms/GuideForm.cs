@@ -55,11 +55,11 @@ namespace _4RTools.Forms
         }
 
         private const int CARD_LEFT = 10;
-        private const int CARD_WIDTH = 548;
-        private const int HEADER_HEIGHT = 44;
+        private const int CARD_WIDTH = 576;
+        private const int HEADER_HEIGHT = 46;
         private const int CONTENT_LEFT = 16;
-        private const int CONTENT_WIDTH = 516;
-        private const int TOP_BAR_HEIGHT = 42;
+        private const int CONTENT_WIDTH = 544;
+        private const int TOP_BAR_HEIGHT = 44;
 
         private readonly List<GuideCardUi> cards = new List<GuideCardUi>();
         private Label lblSearch;
@@ -82,14 +82,14 @@ namespace _4RTools.Forms
             this.Text = "Guide / Help";
             this.AutoScroll = true;
             this.DoubleBuffered = true;
-            this.Size = new Size(584, 281);
+            this.Size = new Size(616, 289);
 
-            this.badgeFont = new Font("Segoe UI Symbol", 13F, FontStyle.Bold);
-            this.cardTitleFont = FontManager.Bold(9.5F);
-            this.cardTaglineFont = FontManager.Italic(8F);
-            this.stepHeadingFont = FontManager.Bold(8.5F);
-            this.stepBodyFont = FontManager.Regular(8.5F);
-            this.tipFont = FontManager.Regular(8.2F);
+            this.badgeFont = new Font("Segoe UI Symbol", 13.5F, FontStyle.Bold);
+            this.cardTitleFont = FontManager.Bold(10.25F);
+            this.cardTaglineFont = FontManager.Italic(8.75F);
+            this.stepHeadingFont = FontManager.Bold(9.25F);
+            this.stepBodyFont = FontManager.Regular(9F);
+            this.tipFont = FontManager.Regular(8.75F);
 
             this.guideToolTip = FormUtils.CreateHelpToolTip();
 
@@ -138,7 +138,7 @@ namespace _4RTools.Forms
                 {
                     Location = new Point(112, 11),
                     Name = "txtGuideSearch",
-                    Size = new Size(370, 20),
+                    Size = new Size(398, 22),
                     Tag = FormUtils.SKIP_RESET_TAG
                 };
                 this.txtSearch.TextChanged += (s, e) => ApplySearchFilter(this.txtSearch.Text);
@@ -146,9 +146,9 @@ namespace _4RTools.Forms
                 this.btnClearSearch = new Button
                 {
                     Cursor = Cursors.Hand,
-                    Location = new Point(490, 10),
+                    Location = new Point(518, 10),
                     Name = "btnClearGuideSearch",
-                    Size = new Size(68, 22),
+                    Size = new Size(68, 24),
                     Text = "Clear",
                     UseVisualStyleBackColor = true
                 };
@@ -335,8 +335,8 @@ namespace _4RTools.Forms
             g.SmoothingMode = SmoothingMode.AntiAlias;
             bool dark = ThemeManager.IsDarkMode;
             Color borderColor = dark
-                ? Color.FromArgb(44, 44, 54)
-                : Color.FromArgb(226, 226, 234);
+                ? Color.FromArgb(89, 66, 20)
+                : Color.FromArgb(212, 192, 152);
             using (GraphicsPath path = SidebarNavButton.CreateRoundedRect(new Rectangle(0, 0, panel.Width - 1, panel.Height - 1), 8))
             using (Pen pen = new Pen(borderColor, 1f))
             {
@@ -872,14 +872,14 @@ namespace _4RTools.Forms
         private void ApplyCustomThemeStyling()
         {
             bool dark = ThemeManager.IsDarkMode;
-            Color cardBg = dark ? Color.FromArgb(22, 22, 27) : Color.FromArgb(255, 255, 255);
-            Color headerBg = dark ? Color.FromArgb(28, 28, 34) : Color.FromArgb(248, 248, 251);
-            Color titleColor = dark ? Color.FromArgb(244, 244, 246) : Color.FromArgb(20, 20, 24);
-            Color taglineColor = dark ? Color.FromArgb(154, 154, 166) : Color.FromArgb(110, 110, 122);
-            Color headingColor = dark ? Color.FromArgb(232, 195, 90) : Color.FromArgb(158, 122, 25);
-            Color bodyColor = dark ? Color.FromArgb(214, 214, 224) : Color.FromArgb(46, 46, 56);
-            Color tipBg = dark ? Color.FromArgb(30, 27, 18) : Color.FromArgb(250, 246, 234);
-            Color tipFg = dark ? Color.FromArgb(242, 218, 138) : Color.FromArgb(112, 82, 14);
+            Color cardBg = dark ? Color.FromArgb(30, 21, 6) : Color.FromArgb(255, 253, 246);
+            Color headerBg = dark ? Color.FromArgb(44, 31, 10) : Color.FromArgb(247, 238, 212);
+            Color titleColor = dark ? Color.FromArgb(250, 240, 212) : Color.FromArgb(46, 33, 12);
+            Color taglineColor = dark ? Color.FromArgb(196, 178, 138) : Color.FromArgb(115, 96, 68);
+            Color headingColor = dark ? Color.FromArgb(244, 214, 118) : Color.FromArgb(138, 94, 14);
+            Color bodyColor = dark ? Color.FromArgb(236, 227, 202) : Color.FromArgb(52, 39, 18);
+            Color tipBg = dark ? Color.FromArgb(42, 32, 12) : Color.FromArgb(250, 243, 222);
+            Color tipFg = dark ? Color.FromArgb(248, 226, 152) : Color.FromArgb(108, 74, 14);
 
             foreach (GuideCardUi card in this.cards)
             {

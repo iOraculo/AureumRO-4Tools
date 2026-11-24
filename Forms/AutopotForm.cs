@@ -20,10 +20,10 @@ namespace _4RTools.Forms
         {
             InitializeComponent();
             this.isYgg = isYgg;
-            this.ClientSize = new Size(308, 86);
+            this.ClientSize = new Size(330, 90);
             this.helpToolTip = FormUtils.CreateHelpToolTip(this.components);
 
-            this.sectionFont = FontManager.Bold(8.5F);
+            this.sectionFont = FontManager.Bold(9.25F);
             this.lblSectionTitle = new Label
             {
                 AutoSize = true,
@@ -54,35 +54,43 @@ namespace _4RTools.Forms
 
             // Compact unified layout so Autopot and Yggdrasil sit stacked in a single dashboard card.
             this.label2.AutoSize = false;
-            this.label2.Font = FontManager.Regular(8.2F);
-            this.label2.Location = new Point(146, 4);
-            this.label2.Size = new Size(64, 18);
+            this.label2.Font = FontManager.Regular(8.75F);
+            this.label2.Location = new Point(160, 4);
+            this.label2.Size = new Size(68, 19);
             this.label2.TextAlign = ContentAlignment.MiddleRight;
 
-            this.txtAutopotDelay.Font = FontManager.Regular(8.5F);
-            this.txtAutopotDelay.Location = new Point(214, 2);
-            this.txtAutopotDelay.Size = new Size(50, 21);
+            this.txtAutopotDelay.Font = FontManager.Regular(8.75F);
+            this.txtAutopotDelay.Location = new Point(232, 2);
+            this.txtAutopotDelay.Size = new Size(54, 22);
 
-            this.label1.Font = FontManager.Regular(8.2F);
-            this.label1.Location = new Point(268, 5);
+            this.label1.Font = FontManager.Regular(8.75F);
+            this.label1.Location = new Point(290, 5);
 
-            this.picBoxHP.Location = new Point(12, 27);
+            this.picBoxHP.Location = new Point(12, 28);
             this.picBoxHP.Size = new Size(26, 26);
-            this.label3.Location = new Point(42, 33);
-            this.txtHpKey.Location = new Point(68, 29);
-            this.txtHpKey.Size = new Size(102, 23);
-            this.txtHPpct.Location = new Point(178, 29);
-            this.txtHPpct.Size = new Size(56, 23);
-            this.labelHP.Location = new Point(238, 33);
+            this.label3.Font = FontManager.Regular(9F);
+            this.label3.Location = new Point(44, 33);
+            this.txtHpKey.Font = FontManager.Regular(9F);
+            this.txtHpKey.Location = new Point(74, 29);
+            this.txtHpKey.Size = new Size(108, 24);
+            this.txtHPpct.Font = FontManager.Regular(9F);
+            this.txtHPpct.Location = new Point(190, 29);
+            this.txtHPpct.Size = new Size(60, 24);
+            this.labelHP.Font = FontManager.Regular(9F);
+            this.labelHP.Location = new Point(254, 33);
 
-            this.picBoxSP.Location = new Point(12, 56);
+            this.picBoxSP.Location = new Point(12, 58);
             this.picBoxSP.Size = new Size(26, 26);
-            this.label4.Location = new Point(42, 62);
-            this.txtSPKey.Location = new Point(68, 57);
-            this.txtSPKey.Size = new Size(102, 23);
-            this.txtSPpct.Location = new Point(178, 57);
-            this.txtSPpct.Size = new Size(56, 23);
-            this.labelSP.Location = new Point(238, 61);
+            this.label4.Font = FontManager.Regular(9F);
+            this.label4.Location = new Point(44, 63);
+            this.txtSPKey.Font = FontManager.Regular(9F);
+            this.txtSPKey.Location = new Point(74, 59);
+            this.txtSPKey.Size = new Size(108, 24);
+            this.txtSPpct.Font = FontManager.Regular(9F);
+            this.txtSPpct.Location = new Point(190, 59);
+            this.txtSPpct.Size = new Size(60, 24);
+            this.labelSP.Font = FontManager.Regular(9F);
+            this.labelSP.Location = new Point(254, 63);
 
             // Subscribe once in constructor to avoid stacking duplicate handlers on profile switch.
             this.txtHpKey.KeyDown += new System.Windows.Forms.KeyEventHandler(FormUtils.OnKeyDown);

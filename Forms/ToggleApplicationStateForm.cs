@@ -49,20 +49,20 @@ namespace _4RTools.Forms
             }
 
             // Layout: ON/OFF button & hotkey on the left; all 4 option checkboxes stacked cleanly on the right.
-            this.groupBox1.Size = new Size(230, 110);
-            this.btnStatusToggle.Location = new Point(12, 18);
-            this.btnStatusToggle.Size = new Size(100, 32);
-            this.txtStatusToggleKey.Location = new Point(12, 55);
-            this.txtStatusToggleKey.Size = new Size(100, 23);
+            this.groupBox1.Size = new Size(248, 114);
+            this.btnStatusToggle.Location = new Point(14, 18);
+            this.btnStatusToggle.Size = new Size(108, 34);
+            this.txtStatusToggleKey.Location = new Point(14, 57);
+            this.txtStatusToggleKey.Size = new Size(108, 24);
 
-            this.cbAudio.Location = new Point(128, 14);
+            this.cbAudio.Location = new Point(138, 15);
             this.cbAudio.Cursor = Cursors.Hand;
 
             // Center status prompt across the bottom of the groupbox so translated PT-BR strings never clip.
             this.lblStatusToggle.MaximumSize = Size.Empty;
             this.lblStatusToggle.AutoSize = false;
-            this.lblStatusToggle.Location = new Point(6, 87);
-            this.lblStatusToggle.Size = new Size(218, 17);
+            this.lblStatusToggle.Location = new Point(6, 91);
+            this.lblStatusToggle.Size = new Size(236, 18);
             this.lblStatusToggle.TextAlign = ContentAlignment.MiddleCenter;
 
             this.subject = subject;
@@ -142,7 +142,7 @@ namespace _4RTools.Forms
             {
                 AutoSize = true,
                 Cursor = Cursors.Hand,
-                Location = new Point(128, 32),
+                Location = new Point(138, 33),
                 Name = "cbFocusOnly",
                 Text = "Focus",
                 UseVisualStyleBackColor = true,
@@ -155,7 +155,7 @@ namespace _4RTools.Forms
             {
                 AutoSize = true,
                 Cursor = Cursors.Hand,
-                Location = new Point(128, 50),
+                Location = new Point(138, 51),
                 Name = "cbChatPause",
                 Text = "Chat",
                 UseVisualStyleBackColor = true,
@@ -168,7 +168,7 @@ namespace _4RTools.Forms
             {
                 AutoSize = true,
                 Cursor = Cursors.Hand,
-                Location = new Point(128, 68),
+                Location = new Point(138, 69),
                 Name = "cbMiniHud",
                 Text = "Mini HUD",
                 UseVisualStyleBackColor = true,

@@ -257,7 +257,7 @@ namespace _4RTools.Forms
             this.SuspendLayout();
             try
             {
-                this.ClientSize = new Size(824, 644);
+                this.ClientSize = new Size(868, 676);
                 this.headerToolTip = FormUtils.CreateHelpToolTip();
 
                 // Remove legacy Designer layout containers while keeping reusable Designer controls intact.
@@ -269,24 +269,24 @@ namespace _4RTools.Forms
                 HideLegacyControl(this.panelDiscImage);
                 HideLegacyControl(this.label1);
 
-                Font brandTitleFont = TrackFont("Segoe UI", 11F, FontStyle.Bold);
-                Font brandVersionFont = TrackFont("Segoe UI", 8F, FontStyle.Regular);
-                Font uiRegularFont = TrackFont("Segoe UI", 8.5F, FontStyle.Regular);
-                Font uiBoldFont = TrackFont("Segoe UI", 8F, FontStyle.Bold);
-                Font sidebarGroupFont = TrackFont("Segoe UI", 7.5F, FontStyle.Bold);
-                Font sectionTitleFont = TrackFont("Segoe UI", 10.5F, FontStyle.Bold);
-                Font sectionSubtitleFont = TrackFont("Segoe UI", 8F, FontStyle.Regular);
-                Font charNameFont = TrackFont("Segoe UI", 9F, FontStyle.Bold);
-                Font footerFont = TrackFont("Segoe UI", 7.5F, FontStyle.Regular);
+                Font brandTitleFont = TrackFont("Segoe UI", 12F, FontStyle.Bold);
+                Font brandVersionFont = TrackFont("Segoe UI", 8.5F, FontStyle.Regular);
+                Font uiRegularFont = TrackFont("Segoe UI", 9F, FontStyle.Regular);
+                Font uiBoldFont = TrackFont("Segoe UI", 8.5F, FontStyle.Bold);
+                Font sidebarGroupFont = TrackFont("Segoe UI", 8F, FontStyle.Bold);
+                Font sectionTitleFont = TrackFont("Segoe UI", 11.5F, FontStyle.Bold);
+                Font sectionSubtitleFont = TrackFont("Segoe UI", 8.75F, FontStyle.Regular);
+                Font charNameFont = TrackFont("Segoe UI", 9.5F, FontStyle.Bold);
+                Font footerFont = TrackFont("Segoe UI", 8.25F, FontStyle.Regular);
 
                 LoadBrandLogos();
 
-                // 1. Topbar (0, 0, 824 x 60)
+                // 1. Topbar (0, 0, 868 x 64)
                 this.panelTopBar = new Panel
                 {
                     Location = new Point(0, 0),
                     Name = "panelTopBar",
-                    Size = new Size(824, 60),
+                    Size = new Size(868, 64),
                     Tag = ThemeManager.TAG_TOPBAR
                 };
 
@@ -294,7 +294,7 @@ namespace _4RTools.Forms
                 {
                     BackColor = Color.Transparent,
                     Image = this.brandLogoOffBitmap,
-                    Location = new Point(12, 11),
+                    Location = new Point(12, 13),
                     Name = "pbBrandLogo",
                     Size = new Size(38, 38),
                     SizeMode = PictureBoxSizeMode.Zoom
@@ -304,7 +304,7 @@ namespace _4RTools.Forms
                 {
                     AutoSize = true,
                     Font = brandTitleFont,
-                    Location = new Point(54, 10),
+                    Location = new Point(56, 10),
                     Name = "lblBrandTitle",
                     Text = AppConfig.Name,
                     Tag = ThemeManager.TAG_ACCENT_TEXT
@@ -314,7 +314,7 @@ namespace _4RTools.Forms
                 {
                     AutoSize = true,
                     Font = brandVersionFont,
-                    Location = new Point(55, 34),
+                    Location = new Point(57, 37),
                     Name = "lblBrandVersion",
                     Text = AppConfig.Version,
                     Tag = ThemeManager.TAG_MUTED_TEXT
@@ -325,9 +325,9 @@ namespace _4RTools.Forms
                     DropDownStyle = ComboBoxStyle.DropDownList,
                     Font = uiRegularFont,
                     FormattingEnabled = true,
-                    Location = new Point(108, 30),
+                    Location = new Point(116, 33),
                     Name = "cbLanguage",
-                    Size = new Size(64, 21),
+                    Size = new Size(72, 23),
                     Tag = FormUtils.SKIP_RESET_TAG
                 };
                 this.cbLanguage.Items.Add("PT-BR");
@@ -336,26 +336,26 @@ namespace _4RTools.Forms
 
                 // Reparent client selector controls
                 this.lblProcessName.Font = uiBoldFont;
-                this.lblProcessName.Location = new Point(216, 7);
+                this.lblProcessName.Location = new Point(222, 7);
 
                 this.processCB.DropDownStyle = ComboBoxStyle.DropDownList;
                 this.processCB.Font = uiRegularFont;
-                this.processCB.Location = new Point(216, 25);
-                this.processCB.Size = new Size(188, 23);
+                this.processCB.Location = new Point(222, 27);
+                this.processCB.Size = new Size(194, 24);
 
                 this.btnRefresh.Cursor = Cursors.Hand;
                 this.btnRefresh.ImageAlign = ContentAlignment.MiddleCenter;
-                this.btnRefresh.Location = new Point(408, 24);
-                this.btnRefresh.Size = new Size(26, 24);
+                this.btnRefresh.Location = new Point(420, 26);
+                this.btnRefresh.Size = new Size(28, 25);
 
                 // Reparent profile selector controls
                 this.labelProfile.Font = uiBoldFont;
-                this.labelProfile.Location = new Point(446, 7);
+                this.labelProfile.Location = new Point(460, 7);
 
                 this.profileCB.DropDownStyle = ComboBoxStyle.DropDownList;
                 this.profileCB.Font = uiRegularFont;
-                this.profileCB.Location = new Point(446, 25);
-                this.profileCB.Size = new Size(164, 23);
+                this.profileCB.Location = new Point(460, 27);
+                this.profileCB.Size = new Size(172, 24);
 
                 // Compact preferences block
                 this.cbUseBuffsInTown = new CheckBox
@@ -364,7 +364,7 @@ namespace _4RTools.Forms
                     Checked = true,
                     Cursor = Cursors.Hand,
                     Font = uiRegularFont,
-                    Location = new Point(632, 28),
+                    Location = new Point(650, 30),
                     Name = "cbUseBuffsInTown",
                     Text = "Pause in towns",
                     UseVisualStyleBackColor = true,
@@ -374,9 +374,9 @@ namespace _4RTools.Forms
 
                 this.btnThemeToggle = new ThemeToggleButton
                 {
-                    Location = new Point(776, 21),
+                    Location = new Point(818, 22),
                     Name = "btnThemeToggle",
-                    Size = new Size(32, 30),
+                    Size = new Size(34, 32),
                     Tag = FormUtils.SKIP_RESET_TAG
                 };
                 this.btnThemeToggle.Click += OnThemeToggleClicked;
@@ -386,7 +386,7 @@ namespace _4RTools.Forms
                 this.panelTopBar.Controls.Add(this.lblBrandTitle);
                 this.panelTopBar.Controls.Add(this.lblBrandVersion);
                 this.panelTopBar.Controls.Add(this.cbLanguage);
-                this.panelTopBar.Controls.Add(CreateDivider(new Point(203, 10), new Size(1, 40)));
+                this.panelTopBar.Controls.Add(CreateDivider(new Point(207, 10), new Size(1, 44)));
                 this.panelTopBar.Controls.Add(this.lblProcessName);
                 this.panelTopBar.Controls.Add(this.processCB);
                 this.panelTopBar.Controls.Add(this.btnRefresh);
@@ -394,14 +394,14 @@ namespace _4RTools.Forms
                 this.panelTopBar.Controls.Add(this.profileCB);
                 this.panelTopBar.Controls.Add(this.cbUseBuffsInTown);
                 this.panelTopBar.Controls.Add(this.btnThemeToggle);
-                this.panelTopBar.Controls.Add(CreateDivider(new Point(0, 59), new Size(824, 1)));
+                this.panelTopBar.Controls.Add(CreateDivider(new Point(0, 63), new Size(868, 1)));
 
-                // 2. Left Sidebar (0, 60, 204 x 556)
+                // 2. Left Sidebar (0, 64, 208 x 582)
                 this.panelSidebar = new Panel
                 {
-                    Location = new Point(0, 60),
+                    Location = new Point(0, 64),
                     Name = "panelSidebar",
-                    Size = new Size(204, 556),
+                    Size = new Size(208, 582),
                     Tag = ThemeManager.TAG_SIDEBAR
                 };
 
@@ -426,20 +426,20 @@ namespace _4RTools.Forms
                 AddSidebarButton("mount", "Mount", SidebarIconKind.Mount, ref y);
                 AddSidebarButton("utilities", "Utilities", SidebarIconKind.Utilities, ref y);
 
-                this.panelSidebar.Controls.Add(CreateDivider(new Point(14, 302), new Size(176, 1)));
+                this.panelSidebar.Controls.Add(CreateDivider(new Point(14, 312), new Size(180, 1)));
 
                 Label lblGroupManagement = new Label
                 {
                     AutoSize = true,
                     Font = sidebarGroupFont,
-                    Location = new Point(14, 310),
+                    Location = new Point(14, 320),
                     Name = "lblGroupManagement",
                     Text = "MANAGEMENT",
                     Tag = ThemeManager.TAG_MUTED_TEXT
                 };
                 this.panelSidebar.Controls.Add(lblGroupManagement);
 
-                y = 328;
+                y = 339;
                 AddSidebarButton("aureum", "Aureum Hub", SidebarIconKind.AureumHub, ref y);
                 AddSidebarButton("profiles", "Profiles", SidebarIconKind.Profiles, ref y);
                 AddSidebarButton("guide", "Guide / Help", SidebarIconKind.Guide, ref y);
@@ -447,14 +447,14 @@ namespace _4RTools.Forms
                 // Live Session Summary Card anchored at the bottom of the sidebar
                 this.cardQuickStatus = new ModernCardPanel
                 {
-                    Location = new Point(10, 456),
+                    Location = new Point(10, 476),
                     Name = "cardQuickStatus",
-                    Size = new Size(184, 86)
+                    Size = new Size(188, 92)
                 };
 
                 this.sessionStatusDot = new StatusDot
                 {
-                    Location = new Point(11, 14),
+                    Location = new Point(11, 15),
                     Name = "sessionStatusDot"
                 };
 
@@ -463,9 +463,9 @@ namespace _4RTools.Forms
                     AutoEllipsis = true,
                     AutoSize = false,
                     Font = uiBoldFont,
-                    Location = new Point(26, 10),
+                    Location = new Point(26, 11),
                     Name = "lblSessionStatus",
-                    Size = new Size(148, 18),
+                    Size = new Size(152, 19),
                     Text = "Ready (OFF)"
                 };
 
@@ -474,9 +474,9 @@ namespace _4RTools.Forms
                     AutoEllipsis = true,
                     AutoSize = false,
                     Font = uiRegularFont,
-                    Location = new Point(10, 39),
+                    Location = new Point(10, 42),
                     Name = "lblSessionProfile",
-                    Size = new Size(164, 17),
+                    Size = new Size(168, 19),
                     Text = "Profile: Default"
                 };
 
@@ -485,103 +485,103 @@ namespace _4RTools.Forms
                     AutoEllipsis = true,
                     AutoSize = false,
                     Font = footerFont,
-                    Location = new Point(10, 59),
+                    Location = new Point(10, 64),
                     Name = "lblSessionClient",
-                    Size = new Size(164, 16),
+                    Size = new Size(168, 18),
                     Text = "Client: not selected",
                     Tag = ThemeManager.TAG_MUTED_TEXT
                 };
 
                 this.cardQuickStatus.Controls.Add(this.sessionStatusDot);
                 this.cardQuickStatus.Controls.Add(this.lblSessionStatus);
-                this.cardQuickStatus.Controls.Add(CreateDivider(new Point(10, 32), new Size(164, 1)));
+                this.cardQuickStatus.Controls.Add(CreateDivider(new Point(10, 34), new Size(168, 1)));
                 this.cardQuickStatus.Controls.Add(this.lblSessionProfile);
                 this.cardQuickStatus.Controls.Add(this.lblSessionClient);
 
                 this.panelSidebar.Controls.Add(this.cardQuickStatus);
-                this.panelSidebar.Controls.Add(CreateDivider(new Point(203, 0), new Size(1, 556)));
+                this.panelSidebar.Controls.Add(CreateDivider(new Point(207, 0), new Size(1, 582)));
 
-                // 3. Dashboard Row - Card 1: Unified Autopot & Yggdrasil (218, 72, 324 x 190)
+                // 3. Dashboard Row - Card 1: Unified Autopot & Yggdrasil (222, 76, 346 x 198)
                 this.cardAutopot = new ModernCardPanel
                 {
-                    Location = new Point(218, 72),
+                    Location = new Point(222, 76),
                     Name = "cardAutopot",
-                    Size = new Size(324, 190)
+                    Size = new Size(346, 198)
                 };
 
                 this.autopotHostPanel = new Panel
                 {
                     Location = new Point(8, 6),
                     Name = "autopotHostPanel",
-                    Size = new Size(308, 86)
+                    Size = new Size(330, 90)
                 };
 
                 this.autopotYggHostPanel = new Panel
                 {
-                    Location = new Point(8, 99),
+                    Location = new Point(8, 102),
                     Name = "autopotYggHostPanel",
-                    Size = new Size(308, 85)
+                    Size = new Size(330, 90)
                 };
 
                 this.cardAutopot.Controls.Add(this.autopotHostPanel);
-                this.cardAutopot.Controls.Add(CreateDivider(new Point(14, 95), new Size(296, 1)));
+                this.cardAutopot.Controls.Add(CreateDivider(new Point(14, 99), new Size(318, 1)));
                 this.cardAutopot.Controls.Add(this.autopotYggHostPanel);
 
-                // 4. Dashboard Row - Card 2: ON/OFF & Live Vitals (552, 72, 258 x 190)
+                // 4. Dashboard Row - Card 2: ON/OFF & Live Vitals (578, 76, 276 x 198)
                 this.cardStatus = new ModernCardPanel
                 {
-                    Location = new Point(552, 72),
+                    Location = new Point(578, 76),
                     Name = "cardStatus",
-                    Size = new Size(258, 190)
+                    Size = new Size(276, 198)
                 };
 
-                this.OnOffPanel.Location = new Point(12, 5);
-                this.OnOffPanel.Size = new Size(234, 112);
+                this.OnOffPanel.Location = new Point(12, 6);
+                this.OnOffPanel.Size = new Size(252, 116);
 
                 this.statusDot = new StatusDot
                 {
-                    Location = new Point(13, 130),
+                    Location = new Point(14, 136),
                     Name = "statusDot"
                 };
 
                 this.lblCharacterName.AutoSize = true;
                 this.lblCharacterName.Font = uiRegularFont;
-                this.lblCharacterName.Location = new Point(26, 126);
+                this.lblCharacterName.Location = new Point(28, 132);
 
                 this.characterName.AutoEllipsis = true;
                 this.characterName.AutoSize = false;
                 this.characterName.Font = charNameFont;
-                this.characterName.Location = new Point(102, 125);
-                this.characterName.Size = new Size(144, 18);
+                this.characterName.Location = new Point(110, 131);
+                this.characterName.Size = new Size(152, 19);
 
                 this.hpBar = new VitalBar("HP", Color.FromArgb(220, 76, 76))
                 {
-                    Location = new Point(12, 147),
+                    Location = new Point(14, 154),
                     Name = "hpBar",
-                    Size = new Size(234, 16)
+                    Size = new Size(248, 17)
                 };
 
                 this.spBar = new VitalBar("SP", Color.FromArgb(66, 135, 245))
                 {
-                    Location = new Point(12, 167),
+                    Location = new Point(14, 175),
                     Name = "spBar",
-                    Size = new Size(234, 16)
+                    Size = new Size(248, 17)
                 };
 
                 this.cardStatus.Controls.Add(this.OnOffPanel);
-                this.cardStatus.Controls.Add(CreateDivider(new Point(12, 121), new Size(234, 1)));
+                this.cardStatus.Controls.Add(CreateDivider(new Point(14, 126), new Size(248, 1)));
                 this.cardStatus.Controls.Add(this.statusDot);
                 this.cardStatus.Controls.Add(this.lblCharacterName);
                 this.cardStatus.Controls.Add(this.characterName);
                 this.cardStatus.Controls.Add(this.hpBar);
                 this.cardStatus.Controls.Add(this.spBar);
 
-                // 5. Active Section Card (218, 272, 592 x 334)
+                // 5. Active Section Card (222, 284, 632 x 352)
                 this.cardSection = new ModernCardPanel
                 {
-                    Location = new Point(218, 272),
+                    Location = new Point(222, 284),
                     Name = "cardSection",
-                    Size = new Size(592, 334)
+                    Size = new Size(632, 352)
                 };
 
                 this.lblSectionTitle = new Label
@@ -589,9 +589,9 @@ namespace _4RTools.Forms
                     AutoEllipsis = true,
                     AutoSize = false,
                     Font = sectionTitleFont,
-                    Location = new Point(14, 8),
+                    Location = new Point(14, 9),
                     Name = "lblSectionTitle",
-                    Size = new Size(564, 20)
+                    Size = new Size(604, 22)
                 };
 
                 this.lblSectionSubtitle = new Label
@@ -599,30 +599,30 @@ namespace _4RTools.Forms
                     AutoEllipsis = true,
                     AutoSize = false,
                     Font = sectionSubtitleFont,
-                    Location = new Point(14, 28),
+                    Location = new Point(14, 32),
                     Name = "lblSectionSubtitle",
-                    Size = new Size(564, 16),
+                    Size = new Size(604, 18),
                     Tag = ThemeManager.TAG_MUTED_TEXT
                 };
 
                 this.sectionHostPanel = new Panel
                 {
-                    Location = new Point(6, 50),
+                    Location = new Point(8, 55),
                     Name = "sectionHostPanel",
-                    Size = new Size(580, 276)
+                    Size = new Size(616, 289)
                 };
 
                 this.cardSection.Controls.Add(this.lblSectionTitle);
                 this.cardSection.Controls.Add(this.lblSectionSubtitle);
-                this.cardSection.Controls.Add(CreateDivider(new Point(14, 47), new Size(564, 1)));
+                this.cardSection.Controls.Add(CreateDivider(new Point(14, 52), new Size(604, 1)));
                 this.cardSection.Controls.Add(this.sectionHostPanel);
 
-                // 6. Modern Footer (0, 616, 824 x 28)
+                // 6. Modern Footer (0, 646, 868 x 30)
                 this.panelModernFooter = new Panel
                 {
-                    Location = new Point(0, 616),
+                    Location = new Point(0, 646),
                     Name = "panelModernFooter",
-                    Size = new Size(824, 28),
+                    Size = new Size(868, 30),
                     Tag = ThemeManager.TAG_FOOTER
                 };
 
@@ -636,7 +636,7 @@ namespace _4RTools.Forms
                     AutoSize = true,
                     Font = uiRegularFont,
                     LinkBehavior = LinkBehavior.HoverUnderline,
-                    Location = new Point(588, 7),
+                    Location = new Point(628, 7),
                     Name = "lblLinkWebsite",
                     Text = "Site"
                 };
@@ -647,7 +647,7 @@ namespace _4RTools.Forms
                     AutoSize = true,
                     Font = uiRegularFont,
                     LinkBehavior = LinkBehavior.HoverUnderline,
-                    Location = new Point(648, 7),
+                    Location = new Point(688, 7),
                     Name = "lblLinkWiki",
                     Text = "Wiki"
                 };
@@ -656,7 +656,7 @@ namespace _4RTools.Forms
                 this.lblLinkDiscord.AutoSize = true;
                 this.lblLinkDiscord.Font = uiRegularFont;
                 this.lblLinkDiscord.LinkBehavior = LinkBehavior.HoverUnderline;
-                this.lblLinkDiscord.Location = new Point(692, 7);
+                this.lblLinkDiscord.Location = new Point(734, 7);
                 this.lblLinkDiscord.Text = "Discord";
 
                 this.lblLinkGithub = new LinkLabel
@@ -664,13 +664,13 @@ namespace _4RTools.Forms
                     AutoSize = true,
                     Font = uiRegularFont,
                     LinkBehavior = LinkBehavior.HoverUnderline,
-                    Location = new Point(754, 7),
+                    Location = new Point(798, 7),
                     Name = "lblLinkGithub",
                     Text = "GitHub"
                 };
                 this.lblLinkGithub.LinkClicked += lblLinkGithub_LinkClicked;
 
-                this.panelModernFooter.Controls.Add(CreateDivider(new Point(0, 0), new Size(824, 1)));
+                this.panelModernFooter.Controls.Add(CreateDivider(new Point(0, 0), new Size(868, 1)));
                 this.panelModernFooter.Controls.Add(this.lbPowered);
                 this.panelModernFooter.Controls.Add(this.lblLinkWebsite);
                 this.panelModernFooter.Controls.Add(this.lblLinkWiki);
@@ -735,7 +735,7 @@ namespace _4RTools.Forms
 
             this.navButtons[sectionKey] = btn;
             this.panelSidebar.Controls.Add(btn);
-            y += 33;
+            y += 34;
         }
 
         private void SelectSection(string sectionKey)
@@ -796,9 +796,9 @@ namespace _4RTools.Forms
             }
 
             int startX = this.lblCharacterName.Right + 4;
-            int availableWidth = Math.Max(40, this.cardStatus.Width - 12 - startX);
-            this.characterName.Location = new Point(startX, 125);
-            this.characterName.Size = new Size(availableWidth, 18);
+            int availableWidth = Math.Max(40, this.cardStatus.Width - 14 - startX);
+            this.characterName.Location = new Point(startX, 131);
+            this.characterName.Size = new Size(availableWidth, 19);
         }
 
         private void UpdateSessionSummaryUi()

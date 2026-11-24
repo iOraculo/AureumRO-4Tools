@@ -231,7 +231,10 @@ namespace _4RTools.Utils
                 Font current = control.Font;
                 if (current != null && ShouldUpgradeFont(current.FontFamily.Name))
                 {
-                    Font upgraded = Get(current.SizeInPoints, current.Style);
+                    float boostedSize = current.SizeInPoints < 9.5F
+                        ? Math.Min(9.5F, current.SizeInPoints + 0.5F)
+                        : current.SizeInPoints;
+                    Font upgraded = Get(boostedSize, current.Style);
                     if (!ReferenceEquals(current, upgraded))
                     {
                         control.Font = upgraded;

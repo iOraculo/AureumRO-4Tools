@@ -15,14 +15,14 @@ namespace _4RTools.Forms
     public class MultiAccountShellForm : Form
     {
         public const int ACCOUNT_COUNT = 3;
-        private const int TAB_BAR_HEIGHT = 38;
+        private const int TAB_BAR_HEIGHT = 40;
 
         private sealed class AccountTabButton : Control
         {
             private bool isActive;
             private bool isHovered;
             private bool isDarkMode;
-            private Color dotColor = Color.FromArgb(140, 140, 152);
+            private Color dotColor = Color.FromArgb(158, 140, 102);
 
             public int SlotIndex { get; private set; }
 
@@ -58,7 +58,7 @@ namespace _4RTools.Forms
                 this.DoubleBuffered = true;
                 this.ResizeRedraw = true;
                 this.Cursor = Cursors.Hand;
-                this.Size = new Size(210, 30);
+                this.Size = new Size(220, 32);
             }
 
             public void ApplyTheme(bool darkMode)
@@ -93,17 +93,17 @@ namespace _4RTools.Forms
                 Graphics g = e.Graphics;
                 g.SmoothingMode = SmoothingMode.AntiAlias;
 
-                Color barBg = this.isDarkMode ? Color.FromArgb(14, 14, 17) : Color.FromArgb(250, 250, 252);
-                Color idleFill = this.isDarkMode ? Color.FromArgb(20, 20, 24) : Color.FromArgb(244, 244, 247);
-                Color hoverFill = this.isDarkMode ? Color.FromArgb(30, 30, 38) : Color.FromArgb(236, 236, 242);
-                Color activeFill = this.isDarkMode ? Color.FromArgb(34, 29, 17) : Color.FromArgb(255, 252, 242);
+                Color barBg = this.isDarkMode ? Color.FromArgb(27, 19, 4) : Color.FromArgb(248, 238, 209);
+                Color idleFill = this.isDarkMode ? Color.FromArgb(22, 15, 4) : Color.FromArgb(250, 244, 226);
+                Color hoverFill = this.isDarkMode ? Color.FromArgb(42, 29, 8) : Color.FromArgb(242, 229, 194);
+                Color activeFill = this.isDarkMode ? Color.FromArgb(56, 39, 10) : Color.FromArgb(255, 251, 238);
                 Color border = this.isActive
-                    ? (this.isDarkMode ? Color.FromArgb(216, 178, 72) : Color.FromArgb(166, 126, 24))
-                    : (this.isDarkMode ? Color.FromArgb(40, 40, 49) : Color.FromArgb(222, 222, 230));
-                Color accent = this.isDarkMode ? Color.FromArgb(232, 195, 90) : Color.FromArgb(158, 122, 25);
+                    ? (this.isDarkMode ? Color.FromArgb(212, 175, 55) : Color.FromArgb(166, 124, 0))
+                    : (this.isDarkMode ? Color.FromArgb(72, 52, 16) : Color.FromArgb(212, 192, 152));
+                Color accent = this.isDarkMode ? Color.FromArgb(244, 217, 122) : Color.FromArgb(160, 129, 35);
                 Color textColor = this.isActive
-                    ? (this.isDarkMode ? Color.FromArgb(250, 246, 236) : Color.FromArgb(28, 22, 8))
-                    : (this.isDarkMode ? Color.FromArgb(172, 172, 184) : Color.FromArgb(88, 88, 100));
+                    ? (this.isDarkMode ? Color.FromArgb(255, 244, 207) : Color.FromArgb(52, 36, 8))
+                    : (this.isDarkMode ? Color.FromArgb(206, 192, 158) : Color.FromArgb(88, 68, 36));
 
                 using (SolidBrush bgOuter = new SolidBrush(barBg))
                 {
@@ -132,11 +132,11 @@ namespace _4RTools.Forms
                     g.FillEllipse(dotBrush, 10, (this.Height - 8) / 2, 8, 8);
                 }
 
-                Rectangle textRect = new Rectangle(23, 0, this.Width - 29, this.Height - 1);
+                Rectangle textRect = new Rectangle(24, 0, this.Width - 30, this.Height - 1);
                 TextRenderer.DrawText(
                     g,
                     this.Text,
-                    this.isActive ? FontManager.Bold(8.5F) : FontManager.Regular(8.5F),
+                    this.isActive ? FontManager.Bold(9F) : FontManager.Regular(9F),
                     textRect,
                     textColor,
                     TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine);
@@ -190,7 +190,7 @@ namespace _4RTools.Forms
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.ClientSize = new Size(824, 644 + TAB_BAR_HEIGHT);
+            this.ClientSize = new Size(868, 676 + TAB_BAR_HEIGHT);
             this.DoubleBuffered = true;
             this.Tag = ThemeManager.TAG_CANVAS;
             this.Icon = Resources._4RTools.ETCResource.logo_4rtools_off;
@@ -212,7 +212,7 @@ namespace _4RTools.Forms
             {
                 Location = new Point(0, 0),
                 Name = "panelAccountTabBar",
-                Size = new Size(824, TAB_BAR_HEIGHT - 1),
+                Size = new Size(868, TAB_BAR_HEIGHT - 1),
                 Tag = ThemeManager.TAG_TOPBAR
             };
 
@@ -221,7 +221,7 @@ namespace _4RTools.Forms
                 int capturedIndex = i;
                 AccountTabButton btn = new AccountTabButton(i)
                 {
-                    Location = new Point(8 + (i * 216), 4),
+                    Location = new Point(8 + (i * 226), 4),
                     Name = "btnAccountTab" + (i + 1)
                 };
                 btn.Click += (s, e) => SelectAccountTab(capturedIndex);
@@ -232,10 +232,10 @@ namespace _4RTools.Forms
             this.btnStartAll = new Button
             {
                 Cursor = Cursors.Hand,
-                Font = FontManager.Bold(8F),
-                Location = new Point(658, 6),
+                Font = FontManager.Bold(8.5F),
+                Location = new Point(690, 6),
                 Name = "btnStartAllAccounts",
-                Size = new Size(76, 25),
+                Size = new Size(82, 27),
                 Text = "Start All",
                 UseVisualStyleBackColor = true
             };
@@ -244,10 +244,10 @@ namespace _4RTools.Forms
             this.btnStopAll = new Button
             {
                 Cursor = Cursors.Hand,
-                Font = FontManager.Bold(8F),
-                Location = new Point(740, 6),
+                Font = FontManager.Bold(8.5F),
+                Location = new Point(778, 6),
                 Name = "btnStopAllAccounts",
-                Size = new Size(76, 25),
+                Size = new Size(82, 27),
                 Text = "Stop All",
                 UseVisualStyleBackColor = true
             };
@@ -260,14 +260,14 @@ namespace _4RTools.Forms
             {
                 Location = new Point(0, TAB_BAR_HEIGHT - 1),
                 Name = "panelTabBarDivider",
-                Size = new Size(824, 1)
+                Size = new Size(868, 1)
             };
 
             this.panelHost = new Panel
             {
                 Location = new Point(0, TAB_BAR_HEIGHT),
                 Name = "panelAccountHost",
-                Size = new Size(824, 644)
+                Size = new Size(868, 676)
             };
 
             this.Controls.Add(this.panelTabBar);
@@ -288,7 +288,7 @@ namespace _4RTools.Forms
                     TopLevel = false,
                     FormBorderStyle = FormBorderStyle.None,
                     Location = new Point(0, 0),
-                    Size = new Size(824, 644),
+                    Size = new Size(868, 676),
                     Dock = DockStyle.Fill,
                     Name = "AccountContainer" + (slotIndex + 1)
                 };

@@ -21,15 +21,15 @@ namespace _4RTools.Utils
             this.ResizeRedraw = true;
             this.labelPrefix = prefix ?? string.Empty;
             this.fillColor = barColor;
-            this.Font = FontManager.Bold(7.5F);
+            this.Font = FontManager.Bold(8F);
             ApplyTheme(false);
         }
 
         public void ApplyTheme(bool darkMode)
         {
-            this.trackColor = darkMode ? Color.FromArgb(26, 26, 32) : Color.FromArgb(238, 238, 243);
-            this.borderColor = darkMode ? Color.FromArgb(46, 46, 56) : Color.FromArgb(212, 212, 220);
-            this.textColor = darkMode ? Color.FromArgb(232, 232, 238) : Color.FromArgb(24, 24, 30);
+            this.trackColor = darkMode ? Color.FromArgb(42, 29, 8) : Color.FromArgb(234, 224, 194);
+            this.borderColor = darkMode ? Color.FromArgb(110, 83, 26) : Color.FromArgb(200, 178, 132);
+            this.textColor = darkMode ? Color.FromArgb(243, 234, 208) : Color.FromArgb(42, 30, 14);
             Invalidate();
         }
 
@@ -110,7 +110,7 @@ namespace _4RTools.Utils
                 TextRenderer.DrawText(
                     g,
                     text,
-                    FontManager.Bold(7.5F),
+                    FontManager.Bold(8F),
                     bounds,
                     renderedTextColor,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);

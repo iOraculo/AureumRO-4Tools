@@ -1,5 +1,14 @@
 # Changelogs
 
+## [v2.39.0] - 2026-11-24 — Cores Clássicas **Obsidiana & Ouro Real** Restauradas, Layout Ampliado com Fonte `Google Sans` Maior e Rodapé `Desenvolvido por Oráculo`
+### Changed
+- **Paleta Clássica **Obsidiana & Ouro Real** Restaurada (`Utils/ThemeManager.cs`, `Utils/ModernControls.cs`, `Utils/VitalBar.cs`, `Forms/MultiAccountShellForm.cs`, `Forms/GuideForm.cs`, `Forms/AureumHubForm.cs`, `Forms/MiniHudForm.cs`)**:
+  - Mantido o visual moderno estilo **Antigravity Settings** (cards arredondados `10px`, pílulas suaves, barras vitais arredondadas e fonte **Google Sans** embutida), restaurando as cores quentes oficiais do AureumRO tanto no **Modo Escuro** (`#0B0701` / `#120C03` / `#1E1506` / `#594214` / `#F4D97A`) quanto no **Modo Claro** (`#F2E8CC` / `#FAF4E0` / `#FDF8E8` / `#A08123`).
+- **Layout Ampliado & Tipografia `Google Sans` Maior (`Forms/Container.cs`, `Forms/MultiAccountShellForm.cs`, `Forms/AutopotForm.cs`, `Forms/ToggleApplicationStateForm.cs`, `Forms/GuideForm.cs`, `Utils/FontManager.cs`)**:
+  - Janela principal ampliada de `824×644` para **`868×676`** (shell `868×716`) com cards mais espaçosos (`Autopot` `346×198`, `Status` `276×198`, `Seção` `632×352`) e fonte **Google Sans** maior e ainda mais legível em todas as abas (`+0.5pt` automático nos controles internos, títulos até `12pt`).
+- **Crédito no Rodapé Restaurado (`Utils/LocalizationManager.cs`)**:
+  - Topo sob o logo permanece limpo (`v2.39.0` + seletor `PT-BR`), enquanto o rodapé inferior volta a exibir **`✦ AureumTools · Desenvolvido por Oráculo  •  Minimize para enviar à bandeja`**.
+
 ## [v2.38.3] - 2026-11-24 — Espaçamento Fino das Teclas do `Spammer` com `Google Sans`
 ### Fixed
 - **Aba `Spammer` (`Forms/AHKForm.cs`)**: ajustado o espaçamento vertical das fileiras de teclas (`F1..F9`, `1..9`, `Q..O`, `A..L`, `Z..M`) garantindo folga limpa acima do card `Configuração do Spammer`, além de migrar `priorityOrderFont` para o cache global do `FontManager`.
