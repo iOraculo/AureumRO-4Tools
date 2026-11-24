@@ -77,6 +77,7 @@ namespace _4RTools.Forms
         private string activeSectionKey = "spammer";
         private string currentProfile;
         private string lastDetectedCharacter = string.Empty;
+        private bool lastPausedForTown;
         private bool isAutomationOn;
         private bool isApplyingSettings;
         private bool isShuttingDown;
@@ -1248,6 +1249,13 @@ namespace _4RTools.Forms
 
                 if (client.HasMemorySupport)
                 {
+                    bool pausedForTownNow = this.isAutomationOn && client.ShouldPauseForTown();
+                    if (pausedForTownNow != this.lastPausedForTown)
+                    {
+                        this.lastPausedForTown = pausedForTownNow;
+                        UpdateSessionSummaryUi();
+                    }
+
                     string detected = client.ReadCharacterName();
                     string normalized = string.IsNullOrWhiteSpace(detected) ? string.Empty : detected.Trim();
                     if (!string.Equals(normalized, this.lastDetectedCharacter, StringComparison.Ordinal))
