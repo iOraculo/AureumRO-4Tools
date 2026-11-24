@@ -175,7 +175,7 @@ namespace _4RTools.Forms
             {
                 AutoSize = false,
                 Font = this.priorityOrderFont,
-                Location = new Point(12, 39),
+                Location = new Point(12, 38),
                 Name = "lblPriorityOrder",
                 Size = new Size(564, 19),
                 Tag = ThemeManager.TAG_ACCENT_TEXT,
