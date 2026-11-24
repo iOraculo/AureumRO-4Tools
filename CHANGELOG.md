@@ -1,5 +1,14 @@
 # Changelogs
 
+## [v2.36.2] - 2026-11-23 — Horário Manual da Última Votação e Painel Completo de Itens/Drops na Coleção de Mapas
+### Changed
+- **Hora da Votação (`Forms/AureumHubForm.cs`, `Utils/AureumProgressStore.cs`)**:
+  - Adicionado campo **`Últ. voto (HH:mm)` + botão `Definir`** em cada topsite: basta digitar o horário em que você votou (ex.: `14:30`, inclusive se foi ontem à noite) para o 4Tools calcular automaticamente o tempo restante e o próximo horário liberado!
+  - Removido o botão `/navi Loja de Votos` da barra superior.
+- **Coleção de Mapas (`Forms/AureumHubForm.cs`)**:
+  - Removido o botão desnecessário **`Copiar código`**.
+  - Expandido o painel inferior de detalhes para largura total (`572px`) com caixa multilinha rolável (`txtMapSelectedItems`), exibindo **todos os itens necessários, monstros e porcentagens de drop sem cortar nenhum texto**.
+
 ## [v2.36.1] - 2026-11-23 — Coleção de Mapas com Orientação por Setas (`← ↑ ↓ →`) e Código Limpo (sem `@warp`)
 ### Changed
 - **Coleção de Mapas no `Aureum Hub` (`Forms/AureumHubForm.cs`, `Model/AureumCatalog.cs`, `Resources/AureumCatalog.json`)**:

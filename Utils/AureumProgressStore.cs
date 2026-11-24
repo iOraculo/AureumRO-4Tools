@@ -329,6 +329,85 @@ namespace _4RTools.Utils
             Save(data);
         }
 
+        public static DateTime? GetLastVoteLocalTime(AureumProgressData data, string siteCode)
+        {
+            if (data == null || string.IsNullOrWhiteSpace(siteCode) || data.LastVoteUtcBySite == null)
+            {
+                return null;
+            }
+
+            DateTime lastVoteUtc;
+            if (!data.LastVoteUtcBySite.TryGetValue(siteCode.Trim(), out lastVoteUtc))
+            {
+                return null;
+            }
+
+            return DateTime.SpecifyKind(lastVoteUtc, DateTimeKind.Utc).ToLocalTime();
+        }
+
+        /// <summary>
+        /// Parses a user-entered local time ("HH:mm", "H:mm", or "HHmm") for the last vote.
+        /// If the time today is still in the future, it resolves to yesterday at that time.
+        /// </summary>
+        public static bool TryParseLastVoteLocalTime(string input, DateTime localNow, out DateTime resolvedUtc)
+        {
+            resolvedUtc = DateTime.MinValue;
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return false;
+            }
+
+            string clean = input.Trim();
+            int hour;
+            int minute;
+
+            if (clean.Contains(":"))
+            {
+                string[] parts = clean.Split(':');
+                if (parts.Length != 2
+                    || !int.TryParse(parts[0].Trim(), out hour)
+                    || !int.TryParse(parts[1].Trim(), out minute))
+                {
+                    return false;
+                }
+            }
+            else if (clean.Length == 4)
+            {
+                if (!int.TryParse(clean.Substring(0, 2), out hour)
+                    || !int.TryParse(clean.Substring(2, 2), out minute))
+                {
+                    return false;
+                }
+            }
+            else if (clean.Length == 3)
+            {
+                if (!int.TryParse(clean.Substring(0, 1), out hour)
+                    || !int.TryParse(clean.Substring(1, 2), out minute))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            if (hour < 0 || hour > 23 || minute < 0 || minute > 59)
+            {
+                return false;
+            }
+
+            DateTime normalizedNow = DateTime.SpecifyKind(localNow, DateTimeKind.Local);
+            DateTime candidateLocal = new DateTime(normalizedNow.Year, normalizedNow.Month, normalizedNow.Day, hour, minute, 0, DateTimeKind.Local);
+            if (candidateLocal > normalizedNow)
+            {
+                candidateLocal = candidateLocal.AddDays(-1);
+            }
+
+            resolvedUtc = candidateLocal.ToUniversalTime();
+            return true;
+        }
+
         /// <summary>
         /// Returns sites whose cooldown has just expired after a recorded vote and have not yet
         /// triggered a ready notification for that vote cycle.

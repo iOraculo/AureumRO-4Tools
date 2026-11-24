@@ -50,7 +50,6 @@ namespace _4RTools.Forms
         // Voting controls
         private Button btnOpenVotePage;
         private Button btnMarkAllVoted;
-        private Button btnCopyVoteShopNavi;
         private Button btnRefreshTopsites;
         private Panel panelTopsitesList;
         private CheckBox chkVoteReminder;
@@ -79,8 +78,8 @@ namespace _4RTools.Forms
         private Button btnMarkVisibleMaps;
         private Button btnClearVisibleMaps;
         private DataGridView dgvMaps;
-        private Label lblMapSelectedDetails;
-        private Button btnCopyMapWarp;
+        private Label lblMapSelectedHeader;
+        private TextBox txtMapSelectedItems;
         private List<AureumMapEntry> currentlyVisibleMaps = new List<AureumMapEntry>();
 
         private string activeMainSubTab = "vote"; // "vote" | "collection"
@@ -105,6 +104,9 @@ namespace _4RTools.Forms
             public Label CountdownLabel;
             public Button VoteButton;
             public Button ResetButton;
+            public Label LastVoteLabel;
+            public TextBox LastVoteTimeBox;
+            public Button ApplyTimeButton;
         }
 
         public AureumHubForm(Subject subject, bool enableVoteAlertDispatch = true)
@@ -221,7 +223,7 @@ namespace _4RTools.Forms
                 Font = this.smallBoldFont,
                 Location = new Point(6, 4),
                 Name = "btnOpenVotePage",
-                Size = new Size(176, 25),
+                Size = new Size(216, 25),
                 Text = "Abrir aureumro.com/votar",
                 UseMnemonic = false,
                 UseVisualStyleBackColor = true
@@ -232,35 +234,22 @@ namespace _4RTools.Forms
             {
                 Cursor = Cursors.Hand,
                 Font = this.smallBoldFont,
-                Location = new Point(188, 4),
+                Location = new Point(228, 4),
                 Name = "btnMarkAllVoted",
-                Size = new Size(138, 25),
+                Size = new Size(192, 25),
                 Text = "Marcar Todos (12h)",
                 UseMnemonic = false,
                 UseVisualStyleBackColor = true
             };
             this.btnMarkAllVoted.Click += (s, e) => MarkAllSitesVoted();
 
-            this.btnCopyVoteShopNavi = new Button
-            {
-                Cursor = Cursors.Hand,
-                Font = this.smallFont,
-                Location = new Point(332, 4),
-                Name = "btnCopyVoteShopNavi",
-                Size = new Size(146, 25),
-                Text = "/navi Loja de Votos",
-                UseMnemonic = false,
-                UseVisualStyleBackColor = true
-            };
-            this.btnCopyVoteShopNavi.Click += (s, e) => CopyToClipboardWithFeedback(this.catalog.VoteShopNavi, this.btnCopyVoteShopNavi);
-
             this.btnRefreshTopsites = new Button
             {
                 Cursor = Cursors.Hand,
                 Font = this.smallFont,
-                Location = new Point(484, 4),
+                Location = new Point(426, 4),
                 Name = "btnRefreshTopsites",
-                Size = new Size(94, 25),
+                Size = new Size(152, 25),
                 Text = "Sincronizar",
                 UseMnemonic = false,
                 UseVisualStyleBackColor = true
@@ -272,7 +261,7 @@ namespace _4RTools.Forms
                 AutoScroll = true,
                 Location = new Point(6, 36),
                 Name = "panelTopsitesList",
-                Size = new Size(572, 146)
+                Size = new Size(572, 148)
             };
 
             this.chkVoteReminder = new CheckBox
@@ -281,7 +270,7 @@ namespace _4RTools.Forms
                 Checked = this.progress.VoteReminderEnabled,
                 Cursor = Cursors.Hand,
                 Font = this.regularFont,
-                Location = new Point(8, 189),
+                Location = new Point(8, 190),
                 Name = "chkVoteReminder",
                 Text = "Avisar quando liberar voto",
                 UseMnemonic = false,
@@ -295,7 +284,7 @@ namespace _4RTools.Forms
                 Checked = this.progress.VoteReminderSound,
                 Cursor = Cursors.Hand,
                 Font = this.regularFont,
-                Location = new Point(236, 189),
+                Location = new Point(236, 190),
                 Name = "chkVoteSound",
                 Text = "Tocar som no lembrete",
                 UseMnemonic = false,
@@ -307,7 +296,7 @@ namespace _4RTools.Forms
             {
                 AutoSize = false,
                 Font = this.smallFont,
-                Location = new Point(8, 212),
+                Location = new Point(8, 213),
                 Name = "lblVoteStatusInfo",
                 Size = new Size(568, 30),
                 Tag = ThemeManager.TAG_MUTED_TEXT,
@@ -316,7 +305,6 @@ namespace _4RTools.Forms
 
             this.panelVote.Controls.Add(this.btnOpenVotePage);
             this.panelVote.Controls.Add(this.btnMarkAllVoted);
-            this.panelVote.Controls.Add(this.btnCopyVoteShopNavi);
             this.panelVote.Controls.Add(this.btnRefreshTopsites);
             this.panelVote.Controls.Add(this.panelTopsitesList);
             this.panelVote.Controls.Add(this.chkVoteReminder);
@@ -579,7 +567,7 @@ namespace _4RTools.Forms
                 ReadOnly = true,
                 RowHeadersVisible = false,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                Size = new Size(572, 148),
+                Size = new Size(572, 118),
                 Tag = ThemeManager.PRESERVE_COLORS_TAG
             };
             EnableDoubleBuffering(this.dgvMaps);
@@ -629,33 +617,33 @@ namespace _4RTools.Forms
             });
 
             this.dgvMaps.CellClick += OnMapGridCellClick;
-            this.dgvMaps.CellDoubleClick += OnMapGridCellDoubleClick;
             this.dgvMaps.SelectionChanged += (s, e) => UpdateSelectedMapDetailBar();
 
-            this.lblMapSelectedDetails = new Label
+            this.lblMapSelectedHeader = new Label
             {
                 AutoEllipsis = true,
                 AutoSize = false,
-                Font = this.smallFont,
-                Location = new Point(8, 206),
-                Name = "lblMapSelectedDetails",
-                Size = new Size(446, 36),
-                Tag = ThemeManager.TAG_MUTED_TEXT,
+                Font = this.smallBoldFont,
+                Location = new Point(8, 175),
+                Name = "lblMapSelectedHeader",
+                Size = new Size(568, 17),
                 UseMnemonic = false
             };
 
-            this.btnCopyMapWarp = new Button
+            this.txtMapSelectedItems = new TextBox
             {
-                Cursor = Cursors.Hand,
-                Font = this.smallBoldFont,
-                Location = new Point(460, 210),
-                Name = "btnCopyMapWarp",
-                Size = new Size(118, 26),
-                Text = "Copiar @warp",
-                UseMnemonic = false,
-                UseVisualStyleBackColor = true
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = this.smallFont,
+                Location = new Point(6, 194),
+                Multiline = true,
+                Name = "txtMapSelectedItems",
+                ReadOnly = true,
+                ScrollBars = ScrollBars.Vertical,
+                Size = new Size(572, 50),
+                TabStop = false,
+                WordWrap = true,
+                Tag = ThemeManager.PRESERVE_COLORS_TAG
             };
-            this.btnCopyMapWarp.Click += OnCopySelectedMapWarpClick;
 
             this.panelMaps.Controls.Add(this.cbMapGroupMode);
             this.panelMaps.Controls.Add(this.cbMapGroupFilter);
@@ -665,8 +653,8 @@ namespace _4RTools.Forms
             this.panelMaps.Controls.Add(this.btnMarkVisibleMaps);
             this.panelMaps.Controls.Add(this.btnClearVisibleMaps);
             this.panelMaps.Controls.Add(this.dgvMaps);
-            this.panelMaps.Controls.Add(this.lblMapSelectedDetails);
-            this.panelMaps.Controls.Add(this.btnCopyMapWarp);
+            this.panelMaps.Controls.Add(this.lblMapSelectedHeader);
+            this.panelMaps.Controls.Add(this.txtMapSelectedItems);
             this.Controls.Add(this.panelMaps);
         }
 
@@ -812,13 +800,13 @@ namespace _4RTools.Forms
                         BorderStyle = BorderStyle.FixedSingle,
                         Location = new Point(2, y),
                         Name = "cardVoteSite_" + site.Code,
-                        Size = new Size(cardWidth, 62),
+                        Size = new Size(cardWidth, 64),
                         Tag = ThemeManager.PRESERVE_COLORS_TAG
                     };
 
                     StatusDot dot = new StatusDot
                     {
-                        Location = new Point(12, 17),
+                        Location = new Point(11, 14),
                         Name = "dotVote_" + site.Code
                     };
 
@@ -826,18 +814,19 @@ namespace _4RTools.Forms
                     {
                         AutoSize = false,
                         Font = this.boldFont,
-                        Location = new Point(28, 10),
-                        Size = new Size(215, 19),
+                        Location = new Point(26, 8),
+                        Size = new Size(204, 18),
                         Text = site.Name,
                         UseMnemonic = false
                     };
 
                     Label lblSub = new Label
                     {
+                        AutoEllipsis = true,
                         AutoSize = false,
                         Font = this.smallFont,
-                        Location = new Point(28, 31),
-                        Size = new Size(230, 18),
+                        Location = new Point(26, 30),
+                        Size = new Size(208, 28),
                         Text = LocalizationManager.T("aureum.vote_site_meta", site.Points, site.CooldownHours),
                         UseMnemonic = false
                     };
@@ -846,8 +835,8 @@ namespace _4RTools.Forms
                     {
                         AutoSize = false,
                         Font = this.boldFont,
-                        Location = new Point(256, 18),
-                        Size = new Size(134, 24),
+                        Location = new Point(236, 18),
+                        Size = new Size(118, 26),
                         TextAlign = ContentAlignment.MiddleCenter,
                         UseMnemonic = false,
                         Tag = ThemeManager.PRESERVE_COLORS_TAG
@@ -858,9 +847,9 @@ namespace _4RTools.Forms
                     {
                         Cursor = Cursors.Hand,
                         Font = this.smallBoldFont,
-                        Location = new Point(cardWidth - 166, 16),
+                        Location = new Point(cardWidth - 196, 6),
                         Name = "btnVoteSite_" + site.Code,
-                        Size = new Size(102, 28),
+                        Size = new Size(124, 24),
                         Text = LocalizationManager.T("aureum.vote_now", site.CooldownHours),
                         UseMnemonic = false,
                         UseVisualStyleBackColor = true
@@ -871,9 +860,9 @@ namespace _4RTools.Forms
                     {
                         Cursor = Cursors.Hand,
                         Font = this.smallFont,
-                        Location = new Point(cardWidth - 58, 16),
+                        Location = new Point(cardWidth - 66, 6),
                         Name = "btnResetVote_" + site.Code,
-                        Size = new Size(50, 28),
+                        Size = new Size(58, 24),
                         Text = LocalizationManager.T("aureum.vote_reset"),
                         UseMnemonic = false,
                         UseVisualStyleBackColor = true
@@ -884,15 +873,46 @@ namespace _4RTools.Forms
                         RefreshVoteCountdowns(false);
                     };
 
-                    card.Controls.Add(dot);
-                    card.Controls.Add(lblTitle);
-                    card.Controls.Add(lblSub);
-                    card.Controls.Add(lblCountdown);
-                    card.Controls.Add(btnVote);
-                    card.Controls.Add(btnReset);
-                    this.panelTopsitesList.Controls.Add(card);
+                    Label lblLastVote = new Label
+                    {
+                        AutoSize = false,
+                        Font = this.smallFont,
+                        Location = new Point(cardWidth - 196, 37),
+                        Size = new Size(80, 18),
+                        Text = LocalizationManager.T("aureum.vote_last_time"),
+                        TextAlign = ContentAlignment.MiddleRight,
+                        UseMnemonic = false
+                    };
 
-                    this.voteCardControls.Add(new VoteSiteCardControls
+                    DateTime? savedLocal = AureumProgressStore.GetLastVoteLocalTime(this.progress, site.Code);
+                    TextBox txtLastVote = new TextBox
+                    {
+                        BorderStyle = BorderStyle.FixedSingle,
+                        Font = this.smallFont,
+                        Location = new Point(cardWidth - 112, 35),
+                        MaxLength = 5,
+                        Name = "txtLastVote_" + site.Code,
+                        Size = new Size(46, 20),
+                        Text = savedLocal.HasValue ? savedLocal.Value.ToString("HH:mm") : string.Empty,
+                        TextAlign = HorizontalAlignment.Center,
+                        Tag = ThemeManager.PRESERVE_COLORS_TAG
+                    };
+                    this.hubToolTip.SetToolTip(txtLastVote, LocalizationManager.T("aureum.vote_last_time_tip"));
+
+                    Button btnApplyTime = new Button
+                    {
+                        Cursor = Cursors.Hand,
+                        Font = this.smallFont,
+                        Location = new Point(cardWidth - 62, 34),
+                        Name = "btnApplyVoteTime_" + site.Code,
+                        Size = new Size(54, 22),
+                        Text = LocalizationManager.T("aureum.vote_apply_time"),
+                        UseMnemonic = false,
+                        UseVisualStyleBackColor = true
+                    };
+                    this.hubToolTip.SetToolTip(btnApplyTime, LocalizationManager.T("aureum.vote_last_time_tip"));
+
+                    VoteSiteCardControls cardRef = new VoteSiteCardControls
                     {
                         Site = site,
                         CardPanel = card,
@@ -901,10 +921,36 @@ namespace _4RTools.Forms
                         SubLabel = lblSub,
                         CountdownLabel = lblCountdown,
                         VoteButton = btnVote,
-                        ResetButton = btnReset
-                    });
+                        ResetButton = btnReset,
+                        LastVoteLabel = lblLastVote,
+                        LastVoteTimeBox = txtLastVote,
+                        ApplyTimeButton = btnApplyTime
+                    };
 
-                    y += 68;
+                    btnApplyTime.Click += (s, e) => ApplyManualLastVoteTime(cardRef);
+                    txtLastVote.KeyDown += (s, e) =>
+                    {
+                        if (e.KeyCode == Keys.Enter)
+                        {
+                            e.SuppressKeyPress = true;
+                            ApplyManualLastVoteTime(cardRef);
+                        }
+                    };
+
+                    card.Controls.Add(dot);
+                    card.Controls.Add(lblTitle);
+                    card.Controls.Add(lblSub);
+                    card.Controls.Add(lblCountdown);
+                    card.Controls.Add(btnVote);
+                    card.Controls.Add(btnReset);
+                    card.Controls.Add(lblLastVote);
+                    card.Controls.Add(txtLastVote);
+                    card.Controls.Add(btnApplyTime);
+                    this.panelTopsitesList.Controls.Add(card);
+
+                    this.voteCardControls.Add(cardRef);
+
+                    y += 70;
                 }
             }
             finally
@@ -913,6 +959,28 @@ namespace _4RTools.Forms
             }
 
             ApplyVoteCardsTheme();
+            RefreshVoteCountdowns(false);
+        }
+
+        private void ApplyManualLastVoteTime(VoteSiteCardControls card)
+        {
+            if (card == null || card.Site == null || card.LastVoteTimeBox == null) return;
+
+            DateTime resolvedUtc;
+            if (!AureumProgressStore.TryParseLastVoteLocalTime(card.LastVoteTimeBox.Text, DateTime.Now, out resolvedUtc))
+            {
+                MessageBox.Show(
+                    LocalizationManager.T("aureum.vote_invalid_time"),
+                    LocalizationManager.T("title.warning"),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                card.LastVoteTimeBox.Focus();
+                card.LastVoteTimeBox.SelectAll();
+                return;
+            }
+
+            AureumProgressStore.RecordVote(this.progress, card.Site.Code, resolvedUtc);
+            card.LastVoteTimeBox.Text = resolvedUtc.ToLocalTime().ToString("HH:mm");
             RefreshVoteCountdowns(false);
         }
 
@@ -955,11 +1023,23 @@ namespace _4RTools.Forms
             {
                 VoteSiteCardControls ctrl = this.voteCardControls[i];
                 TimeSpan rem = AureumProgressStore.GetRemainingVoteCooldown(this.progress, ctrl.Site, now);
+                DateTime? lastLocal = AureumProgressStore.GetLastVoteLocalTime(this.progress, ctrl.Site.Code);
+
+                if (ctrl.LastVoteTimeBox != null && !ctrl.LastVoteTimeBox.Focused)
+                {
+                    string expectedText = lastLocal.HasValue ? lastLocal.Value.ToString("HH:mm") : string.Empty;
+                    if (!string.Equals(ctrl.LastVoteTimeBox.Text, expectedText, StringComparison.Ordinal))
+                    {
+                        ctrl.LastVoteTimeBox.Text = expectedText;
+                    }
+                }
+
                 if (rem <= TimeSpan.Zero)
                 {
                     ctrl.Dot.CustomColor = readyColor;
                     ctrl.CountdownLabel.Text = LocalizationManager.T("aureum.vote_ready");
                     ctrl.CountdownLabel.ForeColor = readyColor;
+                    ctrl.SubLabel.Text = LocalizationManager.T("aureum.vote_site_meta", ctrl.Site.Points, ctrl.Site.CooldownHours);
                 }
                 else
                 {
@@ -967,6 +1047,15 @@ namespace _4RTools.Forms
                     int totalHours = (int)rem.TotalHours;
                     ctrl.CountdownLabel.Text = string.Format("{0:00}h {1:00}m {2:00}s", totalHours, rem.Minutes, rem.Seconds);
                     ctrl.CountdownLabel.ForeColor = waitColor;
+                    if (lastLocal.HasValue)
+                    {
+                        int cdHours = ctrl.Site.CooldownHours > 0 ? ctrl.Site.CooldownHours : 12;
+                        DateTime nextLocal = lastLocal.Value.AddHours(cdHours);
+                        ctrl.SubLabel.Text = LocalizationManager.T(
+                            "aureum.vote_site_schedule",
+                            lastLocal.Value.ToString("HH:mm"),
+                            nextLocal.ToString("HH:mm"));
+                    }
                 }
             }
 
@@ -1526,22 +1615,6 @@ namespace _4RTools.Forms
                 ApplyMapRowVisualStyle(row, nowDone);
                 UpdateMapProgressLabelOnly();
             }
-            else if (e.ColumnIndex == 3)
-            {
-                CopyToClipboardWithFeedback(entry.MapCode, this.btnCopyMapWarp);
-            }
-        }
-
-        private void OnMapGridCellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0 || e.RowIndex >= this.dgvMaps.Rows.Count) return;
-            AureumMapEntry entry = this.dgvMaps.Rows[e.RowIndex].Tag as AureumMapEntry;
-            if (entry == null) return;
-
-            if (e.ColumnIndex != 0)
-            {
-                CopyToClipboardWithFeedback(entry.MapCode, this.btnCopyMapWarp);
-            }
         }
 
         private void UpdateMapProgressLabelOnly()
@@ -1575,23 +1648,28 @@ namespace _4RTools.Forms
             AureumMapEntry entry = GetSelectedMapEntry();
             if (entry == null)
             {
-                this.lblMapSelectedDetails.Text = LocalizationManager.T("aureum.map_select_hint");
-                this.btnCopyMapWarp.Enabled = false;
+                this.lblMapSelectedHeader.Text = LocalizationManager.T("aureum.map_select_hint");
+                this.txtMapSelectedItems.Text = string.Empty;
                 return;
             }
 
-            this.btnCopyMapWarp.Enabled = !string.IsNullOrWhiteSpace(entry.MapCode);
-            string itemsInline = entry.Items != null && entry.Items.Count > 0
-                ? string.Join(" · ", entry.Items.Select(it => string.IsNullOrWhiteSpace(it.Drops) ? it.Name : string.Format("{0} ({1})", it.Name, it.Drops)))
+            this.lblMapSelectedHeader.Text = string.Format(
+                "{0} ({1}) · Ref: {2} ({3})  |  {4}",
+                entry.Name,
+                entry.MapCode,
+                entry.ReferenceCity,
+                entry.Directions ?? "-",
+                entry.Bonus);
+
+            string itemsMultiline = entry.Items != null && entry.Items.Count > 0
+                ? string.Join(
+                    Environment.NewLine,
+                    entry.Items.Select(it => string.IsNullOrWhiteSpace(it.Drops)
+                        ? ("• " + it.Name)
+                        : string.Format("• {0}: {1}", it.Name, it.Drops)))
                 : "-";
 
-            this.lblMapSelectedDetails.Text = string.Format(
-                "Ref: {0} ({1}) · {2}  |  {3}\n@mc: {4}",
-                entry.ReferenceCity,
-                entry.MapCode,
-                entry.Directions ?? "-",
-                entry.Bonus,
-                itemsInline);
+            this.txtMapSelectedItems.Text = itemsMultiline;
 
             string routeLine = !string.IsNullOrWhiteSpace(entry.RoutePath)
                 ? string.Format("{0}: {1}  ({2})", entry.ReferenceCity, entry.Directions, entry.RoutePath)
@@ -1603,20 +1681,10 @@ namespace _4RTools.Forms
                 entry.MapCode,
                 routeLine,
                 entry.Bonus,
-                entry.Items != null && entry.Items.Count > 0
-                    ? string.Join("\n", entry.Items.Select(it => "• " + it.Name + (string.IsNullOrWhiteSpace(it.Drops) ? string.Empty : ": " + it.Drops)))
-                    : string.Empty);
+                itemsMultiline);
 
-            this.hubToolTip.SetToolTip(this.lblMapSelectedDetails, tooltipText);
-        }
-
-        private void OnCopySelectedMapWarpClick(object sender, EventArgs e)
-        {
-            AureumMapEntry entry = GetSelectedMapEntry();
-            if (entry != null && !string.IsNullOrWhiteSpace(entry.MapCode))
-            {
-                CopyToClipboardWithFeedback(entry.MapCode, this.btnCopyMapWarp);
-            }
+            this.hubToolTip.SetToolTip(this.lblMapSelectedHeader, tooltipText);
+            this.hubToolTip.SetToolTip(this.txtMapSelectedItems, tooltipText);
         }
 
         private void CopyToClipboardWithFeedback(string text, Button button)
@@ -1761,6 +1829,12 @@ namespace _4RTools.Forms
                 }
             }
 
+            if (this.txtMapSelectedItems != null)
+            {
+                this.txtMapSelectedItems.BackColor = dark ? Color.FromArgb(24, 16, 5) : Color.FromArgb(252, 247, 234);
+                this.txtMapSelectedItems.ForeColor = dark ? Color.FromArgb(236, 224, 192) : Color.FromArgb(52, 38, 16);
+            }
+
             if (this.activeMainSubTab == "collection" && this.activeCollectionSubTab == "cards")
             {
                 RebuildCardCollectionList();
@@ -1775,6 +1849,7 @@ namespace _4RTools.Forms
             Color subColor = dark ? Color.FromArgb(182, 165, 128) : Color.FromArgb(115, 96, 68);
             Color btnBg = dark ? Color.FromArgb(52, 38, 14) : Color.FromArgb(248, 240, 218);
             Color btnBorder = dark ? Color.FromArgb(112, 84, 28) : Color.FromArgb(196, 172, 124);
+            Color inputBg = dark ? Color.FromArgb(20, 14, 4) : Color.White;
 
             foreach (VoteSiteCardControls ctrl in this.voteCardControls)
             {
@@ -1791,6 +1866,23 @@ namespace _4RTools.Forms
                 ctrl.ResetButton.BackColor = btnBg;
                 ctrl.ResetButton.ForeColor = subColor;
                 ctrl.ResetButton.FlatAppearance.BorderColor = btnBorder;
+
+                if (ctrl.LastVoteLabel != null)
+                {
+                    ctrl.LastVoteLabel.ForeColor = subColor;
+                }
+                if (ctrl.LastVoteTimeBox != null)
+                {
+                    ctrl.LastVoteTimeBox.BackColor = inputBg;
+                    ctrl.LastVoteTimeBox.ForeColor = titleColor;
+                }
+                if (ctrl.ApplyTimeButton != null)
+                {
+                    ctrl.ApplyTimeButton.FlatStyle = FlatStyle.Flat;
+                    ctrl.ApplyTimeButton.BackColor = btnBg;
+                    ctrl.ApplyTimeButton.ForeColor = titleColor;
+                    ctrl.ApplyTimeButton.FlatAppearance.BorderColor = btnBorder;
+                }
             }
         }
 
@@ -1803,7 +1895,6 @@ namespace _4RTools.Forms
 
             this.btnOpenVotePage.Text = LocalizationManager.T("aureum.open_vote_page");
             this.btnMarkAllVoted.Text = LocalizationManager.T("aureum.mark_all_voted");
-            this.btnCopyVoteShopNavi.Text = LocalizationManager.T("aureum.copy_vote_shop");
             this.btnRefreshTopsites.Text = LocalizationManager.T("aureum.sync_topsites");
             this.chkVoteReminder.Text = LocalizationManager.T("aureum.vote_reminder");
             this.chkVoteSound.Text = LocalizationManager.T("aureum.vote_sound");
@@ -1816,7 +1907,6 @@ namespace _4RTools.Forms
 
             this.btnMarkVisibleMaps.Text = LocalizationManager.T("aureum.mark_visible");
             this.btnClearVisibleMaps.Text = LocalizationManager.T("aureum.clear_visible");
-            this.btnCopyMapWarp.Text = LocalizationManager.T("aureum.copy_warp");
 
             if (this.dgvMaps != null)
             {
@@ -1829,7 +1919,6 @@ namespace _4RTools.Forms
 
             this.hubToolTip.SetToolTip(this.txtCardSearch, LocalizationManager.T("aureum.cards_search_tip"));
             this.hubToolTip.SetToolTip(this.txtMapSearch, LocalizationManager.T("aureum.maps_search_tip"));
-            this.hubToolTip.SetToolTip(this.btnCopyVoteShopNavi, this.catalog.VoteShopNavi);
             this.hubToolTip.SetToolTip(this.btnCopyCardNpc, this.catalog.CardNpcNavi);
 
             PopulateCardFilters();

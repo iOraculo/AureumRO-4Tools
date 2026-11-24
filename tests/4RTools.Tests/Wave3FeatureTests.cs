@@ -1861,6 +1861,23 @@ namespace _4RTools.Tests
             // Must not duplicate alert for the same vote cycle.
             Assert.Empty(AureumProgressStore.CheckNewlyReadyVoteSites(progress, catalog.Topsites, t0.AddHours(13)));
 
+            // Manual last-vote time parsing (HH:mm): same day when earlier, yesterday when later than current time.
+            DateTime localNow = new DateTime(2026, 11, 23, 22, 0, 0, DateTimeKind.Local);
+            DateTime parsedSameDayUtc;
+            Assert.True(AureumProgressStore.TryParseLastVoteLocalTime("14:30", localNow, out parsedSameDayUtc));
+            Assert.Equal(new DateTime(2026, 11, 23, 14, 30, 0, DateTimeKind.Local).ToUniversalTime(), parsedSameDayUtc);
+            AureumProgressStore.RecordVote(progress, site.Code, parsedSameDayUtc);
+            Assert.Equal(TimeSpan.FromHours(4.5), AureumProgressStore.GetRemainingVoteCooldown(progress, site, localNow.ToUniversalTime()));
+
+            DateTime parsedYesterdayUtc;
+            DateTime earlyMorningLocal = new DateTime(2026, 11, 24, 2, 0, 0, DateTimeKind.Local);
+            Assert.True(AureumProgressStore.TryParseLastVoteLocalTime("20:30", earlyMorningLocal, out parsedYesterdayUtc));
+            Assert.Equal(new DateTime(2026, 11, 23, 20, 30, 0, DateTimeKind.Local).ToUniversalTime(), parsedYesterdayUtc);
+
+            DateTime dummyUtc;
+            Assert.False(AureumProgressStore.TryParseLastVoteLocalTime("25:99", localNow, out dummyUtc));
+            Assert.False(AureumProgressStore.TryParseLastVoteLocalTime("abc", localNow, out dummyUtc));
+
             // Persists cleanly across reload.
             AureumProgressData reloaded = AureumProgressStore.Load();
             Assert.True(AureumProgressStore.IsCardCollected(reloaded, 21, 4440));
@@ -1908,6 +1925,15 @@ namespace _4RTools.Tests
                 hub.SetMapGroupMode(false);
                 hub.SetMapGroupFilter("Alberta");
                 Assert.Equal(4, hub.VisibleMapCount);
+
+                // Removed buttons must not exist, and full multiline items box must show all items & drop rates.
+                Assert.Empty(hub.Controls.Find("btnCopyVoteShopNavi", true));
+                Assert.Empty(hub.Controls.Find("btnCopyMapWarp", true));
+                System.Windows.Forms.Control[] itemsBoxes = hub.Controls.Find("txtMapSelectedItems", true);
+                Assert.Single(itemsBoxes);
+                Assert.Contains("Peridoto", itemsBoxes[0].Text);
+                Assert.Contains("0,05%", itemsBoxes[0].Text);
+                Assert.Contains("Erva Branca", itemsBoxes[0].Text);
 
                 hub.SetMapGroupMode(true);
                 hub.SetMapGroupFilter("Velocidade de Movimento");
