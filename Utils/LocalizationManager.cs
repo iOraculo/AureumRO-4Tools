@@ -326,7 +326,7 @@ namespace _4RTools.Utils
             { "section.profiles.title", "Perfis, Backup e Diagnóstico" },
             { "section.profiles.subtitle", "Gerencie perfis, vínculo automático por personagem, backup .zip e conflitos de tecla." },
             { "section.guide.title", "Guia Completo do AureumTools" },
-            { "section.guide.subtitle", "Entenda todas as abas, modos de macro e dicas — passe o mouse sobre qualquer campo do app para ver o popup." },
+            { "section.guide.subtitle", "Entenda todas as abas, modos de macro e dicas — passe o mouse nos campos para ver pop-ups." },
             { "section.servers.title", "Servidores Suportados" },
             { "section.servers.subtitle", "Adicione, edite e teste endereços de memória HP/Nome de servidores customizados." },
             { "tooltip.process_select", "Selecione a janela aberta do AureumRO.exe que receberá as automações (seleciona sozinho quando há apenas 1 janela)." },

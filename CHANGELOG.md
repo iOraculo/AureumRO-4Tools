@@ -1,5 +1,10 @@
 # Changelogs
 
+## [v2.39.1] - 2026-11-24 — Alinhamento Determinístico da Grade de Teclas do `Spammer` no Layout Ampliado
+### Fixed
+- **Aba `Spammer` (`Forms/AHKForm.cs`)**: posicionamento determinístico das 9 colunas de teclas (`F1..F9`, `1..9`, `Q..O`, `A..L`, `Z..M`) e expansão dos blocos `Legenda`, `Limpar Teclas`, `Configuração do Spammer` e `Prioridade de Ações` para aproveitar a nova largura (`616px`), eliminando qualquer encosto da coluna `F9 / 9 / O / L` na caixa `Legenda` com a fonte `Google Sans` ampliada.
+- **Subtítulo da aba `Guia / Ajuda` (`Utils/LocalizationManager.cs`)**: ajustado para caber completo em uma única linha sem reticências.
+
 ## [v2.39.0] - 2026-11-24 — Cores Clássicas **Obsidiana & Ouro Real** Restauradas, Layout Ampliado com Fonte `Google Sans` Maior e Rodapé `Desenvolvido por Oráculo`
 ### Changed
 - **Paleta Clássica **Obsidiana & Ouro Real** Restaurada (`Utils/ThemeManager.cs`, `Utils/ModernControls.cs`, `Utils/VitalBar.cs`, `Forms/MultiAccountShellForm.cs`, `Forms/GuideForm.cs`, `Forms/AureumHubForm.cs`, `Forms/MiniHudForm.cs`)**:

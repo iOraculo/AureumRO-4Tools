@@ -86,10 +86,10 @@ O **AureumTools** combina o visual limpo de cards arredondados e pílulas suaves
 | **Obsidiana & Ouro Real** *(Padrão / Escuro)* | `#0B0701` • `#120C03` • `#1E1506` | `#F4D97A` • `#594214` • `#F3EAD0` |
 | **Pergaminho & Ouro Antigo** *(Claro)* | `#F2E8CC` • `#FAF4E0` • `#FDF8E8` | `#A08123` • `#D4C098` • `#2A1E0E` |
 
-### 📸 Prévias da Interface (`v2.39.0`)
+### 📸 Prévias da Interface (`v2.39.1`)
 | Painel Principal & Autopot/Ygg Unificados | Auto-skill com Filtro por Classe | Novo Guia Visual Interativo |
 | :---: | :---: | :---: |
-| ![Dashboard](docs/previews/v2.39.0_dashboard_dark.png) | ![Auto-skill](docs/previews/v2.39.0_autoskill_class.png) | ![Guia](docs/previews/v2.39.0_guide_ludic.png) |
+| ![Dashboard](docs/previews/v2.39.1_dashboard_dark.png) | ![Auto-skill](docs/previews/v2.39.1_autoskill_class.png) | ![Guia](docs/previews/v2.39.1_guide_ludic.png) |
 
 ---
 
