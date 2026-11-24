@@ -187,8 +187,8 @@ namespace _4RTools.Tests
 
                 ThemeManager.ApplyTheme(form, true);
                 Assert.True(ThemeManager.IsDarkMode);
-                Assert.Equal(Color.FromArgb(30, 21, 6), form.BackColor);
-                Assert.Equal(Color.FromArgb(42, 29, 8), input.BackColor);
+                Assert.Equal(Color.FromArgb(20, 20, 24), form.BackColor);
+                Assert.Equal(Color.FromArgb(26, 26, 32), input.BackColor);
                 Assert.Equal(Color.Green, statusButton.BackColor);
                 Assert.Equal(Color.White, statusButton.ForeColor);
 
@@ -197,8 +197,8 @@ namespace _4RTools.Tests
 
                 ThemeManager.ApplyTheme(form, false);
                 Assert.False(ThemeManager.IsDarkMode);
-                Assert.Equal(Color.FromArgb(253, 248, 232), form.BackColor);
-                Assert.Equal(Color.FromArgb(255, 251, 237), input.BackColor);
+                Assert.Equal(Color.FromArgb(255, 255, 255), form.BackColor);
+                Assert.Equal(Color.FromArgb(244, 244, 247), input.BackColor);
                 Assert.Equal(Color.Green, statusButton.BackColor);
             }
         }

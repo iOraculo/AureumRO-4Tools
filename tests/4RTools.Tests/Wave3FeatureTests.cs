@@ -343,16 +343,16 @@ namespace _4RTools.Tests
                 shell.Controls.Add(card);
 
                 ThemeManager.ApplyTheme(shell, true);
-                Assert.Equal(System.Drawing.Color.FromArgb(11, 7, 1), shell.BackColor);
-                Assert.Equal(System.Drawing.Color.FromArgb(18, 12, 3), sidebar.BackColor);
-                Assert.Equal(System.Drawing.Color.FromArgb(30, 21, 6), card.BackColor);
-                Assert.Equal(System.Drawing.Color.FromArgb(89, 66, 20), card.BorderColor);
+                Assert.Equal(System.Drawing.Color.FromArgb(9, 9, 11), shell.BackColor);
+                Assert.Equal(System.Drawing.Color.FromArgb(14, 14, 17), sidebar.BackColor);
+                Assert.Equal(System.Drawing.Color.FromArgb(20, 20, 24), card.BackColor);
+                Assert.Equal(System.Drawing.Color.FromArgb(40, 40, 49), card.BorderColor);
 
                 ThemeManager.ApplyTheme(shell, false);
-                Assert.Equal(System.Drawing.Color.FromArgb(242, 232, 204), shell.BackColor);
-                Assert.Equal(System.Drawing.Color.FromArgb(250, 244, 224), sidebar.BackColor);
-                Assert.Equal(System.Drawing.Color.FromArgb(253, 248, 232), card.BackColor);
-                Assert.Equal(System.Drawing.Color.FromArgb(212, 192, 152), card.BorderColor);
+                Assert.Equal(System.Drawing.Color.FromArgb(245, 245, 247), shell.BackColor);
+                Assert.Equal(System.Drawing.Color.FromArgb(250, 250, 252), sidebar.BackColor);
+                Assert.Equal(System.Drawing.Color.FromArgb(255, 255, 255), card.BackColor);
+                Assert.Equal(System.Drawing.Color.FromArgb(228, 228, 234), card.BorderColor);
 
                 LocalizationManager.SetLanguage(LocalizationManager.LANG_PT_BR);
                 LocalizationManager.ApplyToControlTree(shell);
